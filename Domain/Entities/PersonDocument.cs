@@ -1,0 +1,14 @@
+using Domain.Common;
+
+namespace Domain.Entities;
+
+public class PersonDocument : BaseEntity
+{
+    public int PersonId { get; set; }
+    public int DocumentTypeId { get; set; }
+    public string Number { get; set;} = string.Empty;
+    public DateOnly? IssueDate { get; set; }
+    public Person Person { get; set; } = null!;
+    public DocumentType DocumentType { get; set; } = null!; 
+
+}
