@@ -4,11 +4,10 @@ namespace Domain.Entities;
 
 public class Vehicle : BaseEntity
 {
-    public int VehicleModelId { get; set; }
-    public string LicensePlate { get; set; } = string.Empty;
-    public string? Vin { get; set; }
+    public int ModelId { get; set; }
+    public string Vin { get; set; } = string.Empty;
     public int Year { get; set; }
-    public string? Color { get; set; }
+    public int Mileage { get; set; }
 
     public VehicleModel VehicleModel { get; set; } = null!;
     public ICollection<VehicleOwnerHistory> OwnerHistory { get; set; } = new List<VehicleOwnerHistory>();

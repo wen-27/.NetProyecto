@@ -6,9 +6,9 @@ public class PersonDocument : BaseEntity
 {
     public int PersonId { get; set; }
     public int DocumentTypeId { get; set; }
-    public string Number { get; set;} = string.Empty;
-    public DateOnly? IssueDate { get; set; }
+    public string DocumentNumber { get; set; } = string.Empty;
+    public bool IsPrimary { get; set; }
+
     public Person Person { get; set; } = null!;
     public DocumentType DocumentType { get; set; } = null!; 
-
 }

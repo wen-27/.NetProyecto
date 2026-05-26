@@ -4,14 +4,12 @@ namespace Domain.Entities;
 
 public class Audit : BaseEntity
 {
+    public int UserId { get; set; }
     public int AuditActionTypeId { get; set; }
-    public int? UserId { get; set; }
+    public string AffectedEntity { get; set; } = string.Empty;
+    public int AffectedRecordId { get; set; }
+    public string? Description { get; set; }
 
-    public string Entity { get; set; } = string.Empty;
-    public int? EntityId { get; set; }
-    public string Description { get; set; } = string.Empty;
-    public string? IpAddress { get; set; }
-
+    public User User { get; set; } = null!;
     public AuditActionType AuditActionType { get; set; } = null!;
-    public User? User { get; set; }
 }
