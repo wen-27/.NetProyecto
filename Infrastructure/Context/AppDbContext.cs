@@ -13,29 +13,45 @@ public class AppDbContext : DbContext
 
     public DbSet<Audit> Audits => Set<Audit>();
     public DbSet<AuditActionType> AuditActionTypes => Set<AuditActionType>();
+    public DbSet<CardType> CardTypes => Set<CardType>();
+    public DbSet<City> Cities => Set<City>();
     public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<Department> Departments => Set<Department>();
     public DbSet<DocumentType> DocumentTypes => Set<DocumentType>();
     public DbSet<EmailDomain> EmailDomains => Set<EmailDomain>();
     public DbSet<Invoice> Invoices => Set<Invoice>();
     public DbSet<InvoiceDetail> InvoiceDetails => Set<InvoiceDetail>();
+    public DbSet<InvoiceStatus> InvoiceStatuses => Set<InvoiceStatus>();
     public DbSet<OrderPartDetail> OrderPartDetails => Set<OrderPartDetail>();
     public DbSet<OrderStatus> OrderStatuses => Set<OrderStatus>();
+    public DbSet<OrderStatusHistory> OrderStatusHistory => Set<OrderStatusHistory>();
+    public DbSet<PartBrand> PartBrands => Set<PartBrand>();
     public DbSet<Part> Parts => Set<Part>();
     public DbSet<PartCategory> PartCategories => Set<PartCategory>();
+    public DbSet<PartPurchase> PartPurchases => Set<PartPurchase>();
+    public DbSet<PartPurchaseDetail> PartPurchaseDetails => Set<PartPurchaseDetail>();
+    public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<PaymentCard> PaymentCards => Set<PaymentCard>();
+    public DbSet<PaymentMethod> PaymentMethods => Set<PaymentMethod>();
+    public DbSet<PaymentStatus> PaymentStatuses => Set<PaymentStatus>();
     public DbSet<Person> Persons => Set<Person>();
+    public DbSet<PersonAddress> PersonAddresses => Set<PersonAddress>();
     public DbSet<PersonDocument> PersonDocuments => Set<PersonDocument>();
     public DbSet<PersonEmail> PersonEmails => Set<PersonEmail>();
     public DbSet<PersonPhone> PersonPhones => Set<PersonPhone>();
     public DbSet<PhoneCode> PhoneCodes => Set<PhoneCode>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<ServiceOrder> ServiceOrders => Set<ServiceOrder>();
+    public DbSet<ServiceOrderService> ServiceOrderServices => Set<ServiceOrderService>();
     public DbSet<ServiceType> ServiceTypes => Set<ServiceType>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<User> Users => Set<User>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
     public DbSet<VehicleBrand> VehicleBrands => Set<VehicleBrand>();
     public DbSet<VehicleModel> VehicleModels => Set<VehicleModel>();
     public DbSet<VehicleOwnerHistory> VehicleOwnerHistory => Set<VehicleOwnerHistory>();
+    public DbSet<VehicleType> VehicleTypes => Set<VehicleType>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

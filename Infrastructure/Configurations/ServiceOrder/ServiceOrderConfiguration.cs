@@ -17,16 +17,6 @@ public class ServiceOrderConfiguration : IEntityTypeConfiguration<Domain.Entitie
             .HasForeignKey(x => x.VehicleId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        entity.HasOne(x => x.ServiceType)
-            .WithMany(x => x.ServiceOrders)
-            .HasForeignKey(x => x.ServiceTypeId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        entity.HasOne(x => x.Mechanic)
-            .WithMany(x => x.OrdersAsMechanic)
-            .HasForeignKey(x => x.MechanicId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         entity.HasOne(x => x.OrderStatus)
             .WithMany(x => x.ServiceOrders)
             .HasForeignKey(x => x.OrderStatusId)

@@ -20,6 +20,11 @@ public class InvoiceConfiguration : IEntityTypeConfiguration<Domain.Entities.Inv
             .HasForeignKey<Domain.Entities.Invoice>(x => x.ServiceOrderId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        entity.HasOne(x => x.InvoiceStatus)
+            .WithMany(x => x.Invoices)
+            .HasForeignKey(x => x.InvoiceStatusId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         entity.Ignore(x => x.CreatedAt);
         entity.Ignore(x => x.UpdatedAt);
         entity.Ignore(x => x.IsActive);

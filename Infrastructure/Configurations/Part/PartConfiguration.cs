@@ -23,6 +23,11 @@ public class PartConfiguration : IEntityTypeConfiguration<Domain.Entities.Part>
             .HasForeignKey(x => x.PartCategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        entity.HasOne(x => x.PartBrand)
+            .WithMany(x => x.Parts)
+            .HasForeignKey(x => x.PartBrandId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         entity.Ignore(x => x.CreatedAt);
         entity.Ignore(x => x.UpdatedAt);
     }

@@ -20,6 +20,11 @@ public class VehicleConfiguration : IEntityTypeConfiguration<Domain.Entities.Veh
             .HasForeignKey(x => x.ModelId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        entity.HasOne(x => x.VehicleType)
+            .WithMany(x => x.Vehicles)
+            .HasForeignKey(x => x.VehicleTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         entity.Ignore(x => x.CreatedAt);
         entity.Ignore(x => x.UpdatedAt);
         entity.Ignore(x => x.IsActive);

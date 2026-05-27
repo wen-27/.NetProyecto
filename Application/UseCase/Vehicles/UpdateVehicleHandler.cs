@@ -21,11 +21,13 @@ public sealed class UpdateVehicleHandler : IRequestHandler<UpdateVehicle>
             ?? throw new KeyNotFoundException("No se encontró el vehículo.");
 
         var modelId = new VehicleModelId(request.ModelId);
+        var vehicleTypeId = new VehicleTypeId(request.VehicleTypeId);
         var vin = new VehicleVin(request.Vin);
         var year = new VehicleYear(request.Year);
         var mileage = new VehicleMileage(request.Mileage);
 
         vehicle.ModelId = modelId.Value;
+        vehicle.VehicleTypeId = vehicleTypeId.Value;
         vehicle.Vin = vin.Value;
         vehicle.Year = year.Value;
         vehicle.Mileage = mileage.Value;

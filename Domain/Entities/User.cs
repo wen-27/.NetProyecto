@@ -10,6 +10,7 @@ public class User : BaseEntity
 
     public Person Person { get; set; } = null!;
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
-    public ICollection<ServiceOrder> OrdersAsMechanic { get; set; } = new List<ServiceOrder>();
+    public ICollection<ServiceOrderService> ServiceOrderServicesAsMechanic { get; set; } = new List<ServiceOrderService>();
+    public ICollection<OrderStatusHistory> OrderStatusHistory { get; set; } = new List<OrderStatusHistory>();
     public ICollection<Audit> Audits { get; set; } = new List<Audit>();
 }

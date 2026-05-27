@@ -12,6 +12,9 @@ public sealed class UpdateVehicleValidator : AbstractValidator<UpdateVehicle>
         RuleFor(x => x.ModelId)
             .GreaterThan(0).WithMessage("El identificador del modelo debe ser mayor que cero.");
 
+        RuleFor(x => x.VehicleTypeId)
+            .GreaterThan(0).WithMessage("El identificador del tipo de vehículo debe ser mayor que cero.");
+
         RuleFor(x => x.Vin)
             .NotEmpty().WithMessage("El VIN es obligatorio.")
             .Length(17).WithMessage("El VIN debe tener exactamente 17 caracteres.");

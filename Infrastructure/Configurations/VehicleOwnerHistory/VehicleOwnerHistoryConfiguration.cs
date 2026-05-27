@@ -10,7 +10,8 @@ public class VehicleOwnerHistoryConfiguration : IEntityTypeConfiguration<Domain.
         entity.ToTable("VehicleOwnerHistory");
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("VehicleOwnerHistoryId");
-        entity.Property(x => x.StartDate).IsRequired();
+        entity.Property(x => x.StartDate).HasColumnType("date").IsRequired();
+        entity.Property(x => x.EndDate).HasColumnType("date");
 
         entity.HasOne(x => x.Vehicle)
             .WithMany(x => x.OwnerHistory)

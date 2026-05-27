@@ -19,6 +19,7 @@ public sealed class CreateVehicleHandler : IRequestHandler<CreateVehicle, int>
     public async Task<int> Handle(CreateVehicle request, CancellationToken ct)
     {
         var modelId = new VehicleModelId(request.ModelId);
+        var vehicleTypeId = new VehicleTypeId(request.VehicleTypeId);
         var vin = new VehicleVin(request.Vin);
         var year = new VehicleYear(request.Year);
         var mileage = new VehicleMileage(request.Mileage);
@@ -31,6 +32,7 @@ public sealed class CreateVehicleHandler : IRequestHandler<CreateVehicle, int>
         var vehicle = new Vehicle
         {
             ModelId = modelId.Value,
+            VehicleTypeId = vehicleTypeId.Value,
             Vin = vin.Value,
             Year = year.Value,
             Mileage = mileage.Value
