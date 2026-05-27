@@ -2,6 +2,7 @@ using Api.Extensions;
 using Api.Middleware;
 using Application;
 using Infrastructure;
+using Infrastructure.Seeders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    await app.Services.SeedDevelopmentDataAsync(builder.Configuration);
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
