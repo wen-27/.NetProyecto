@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.PhoneCodes;
 using Application.UseCase.PhoneCodes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class PhoneCodesController : BaseApiController
         await Sender.Send(new UpdatePhoneCode(id, request.Code, request.Country), ct);
         return NoContent();
     }
-
-    public sealed record UpdatePhoneCodeRequest(string Code, string Country);
 }

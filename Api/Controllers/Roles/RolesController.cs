@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.Roles;
 using Application.UseCase.Roles;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class RolesController : BaseApiController
         await Sender.Send(new UpdateRole(id, request.RoleName), ct);
         return NoContent();
     }
-
-    public sealed record UpdateRoleRequest(string RoleName);
 }

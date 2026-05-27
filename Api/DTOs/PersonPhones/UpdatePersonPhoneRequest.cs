@@ -1,3 +1,6 @@
 namespace Api.DTOs.PersonPhones;
 
-public sealed record UpdatePersonPhoneRequest(int PhoneCodeId, string PhoneNumber, bool IsPrimary);
+public sealed record UpdatePersonPhoneRequest(int CountryId, string PhoneNumber, bool IsPrimary)
+{
+    public int PhoneCodeId => CountryId;
+}

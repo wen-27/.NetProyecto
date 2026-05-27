@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.VehicleModels;
 using Application.UseCase.VehicleModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class VehicleModelsController : BaseApiController
         await Sender.Send(new UpdateVehicleModel(id, request.BrandId, request.ModelName), ct);
         return NoContent();
     }
-
-    public sealed record UpdateVehicleModelRequest(int BrandId, string ModelName);
 }

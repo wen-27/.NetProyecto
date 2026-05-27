@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.ServiceOrderServices;
 using Application.UseCase.ServiceOrderServices;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -45,6 +46,4 @@ public sealed class ServiceOrderServicesController : BaseApiController
         await Sender.Send(new RemoveServiceFromOrder(id), ct);
         return NoContent();
     }
-
-    public sealed record UpdateServiceOrderServiceRequest(int ServiceTypeId, int MechanicId, string? Description, decimal LaborCost);
 }

@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.PartCategories;
 using Application.UseCase.PartCategories;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class PartCategoriesController : BaseApiController
         await Sender.Send(new UpdatePartCategory(id, request.Name), ct);
         return NoContent();
     }
-
-    public sealed record UpdatePartCategoryRequest(string Name);
 }

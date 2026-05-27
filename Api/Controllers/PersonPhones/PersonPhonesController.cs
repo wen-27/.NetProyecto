@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.PersonPhones;
 using Application.UseCase.PersonPhones;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class PersonPhonesController : BaseApiController
         await Sender.Send(new UpdatePersonPhone(id, request.PhoneCodeId, request.PhoneNumber, request.IsPrimary), ct);
         return NoContent();
     }
-
-    public sealed record UpdatePersonPhoneRequest(int PhoneCodeId, string PhoneNumber, bool IsPrimary);
 }

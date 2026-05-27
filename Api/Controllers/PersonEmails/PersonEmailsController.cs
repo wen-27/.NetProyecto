@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.PersonEmails;
 using Application.UseCase.PersonEmails;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class PersonEmailsController : BaseApiController
         await Sender.Send(new UpdatePersonEmail(id, request.EmailDomainId, request.EmailUser, request.IsPrimary), ct);
         return NoContent();
     }
-
-    public sealed record UpdatePersonEmailRequest(int EmailDomainId, string EmailUser, bool IsPrimary);
 }

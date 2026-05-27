@@ -8,7 +8,7 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
     public AppDbContext CreateDbContext(string[] args)
     {
         const string connectionString =
-            "server=localhost;port=3306;database=AutoWorkshopManager;user=root;password=27072008_wen;";
+            "server=localhost;port=3306;database=AutoTallerManager;user=root;password=27072008_wen;";
 
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 

@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.PersonDocuments;
 using Application.UseCase.PersonDocuments;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class PersonDocumentsController : BaseApiController
         await Sender.Send(new UpdatePersonDocument(id, request.DocumentTypeId, request.DocumentNumber, request.IsPrimary), ct);
         return NoContent();
     }
-
-    public sealed record UpdatePersonDocumentRequest(int DocumentTypeId, string DocumentNumber, bool IsPrimary);
 }

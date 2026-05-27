@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.Users;
 using Application.UseCase.Users;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class UsersController : BaseApiController
         await Sender.Send(new ChangeUserStatus(id, request.Status), ct);
         return NoContent();
     }
-
-    public sealed record ChangeUserStatusRequest(bool Status);
 }

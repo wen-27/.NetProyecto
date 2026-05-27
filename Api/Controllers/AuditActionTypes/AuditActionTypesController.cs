@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.AuditActionTypes;
 using Application.UseCase.AuditActionTypes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class AuditActionTypesController : BaseApiController
         await Sender.Send(new UpdateAuditActionType(id, request.Name), ct);
         return NoContent();
     }
-
-    public sealed record UpdateAuditActionTypeRequest(string Name);
 }

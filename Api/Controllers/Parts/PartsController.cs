@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.Parts;
 using Application.UseCase.Parts;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -48,14 +49,4 @@ public sealed class PartsController : BaseApiController
 
         return NoContent();
     }
-
-    public sealed record UpdatePartRequest(
-        int PartCategoryId,
-        int? PartBrandId,
-        string Code,
-        string Description,
-        int Stock,
-        int MinimumStock,
-        decimal UnitPrice,
-        bool IsActive);
 }

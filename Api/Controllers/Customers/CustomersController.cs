@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.Customers;
 using Application.UseCase.Customers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class CustomersController : BaseApiController
         await Sender.Send(new UpdateCustomer(id, request.Status), ct);
         return NoContent();
     }
-
-    public sealed record UpdateCustomerStatusRequest(bool Status);
 }

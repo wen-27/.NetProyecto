@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.ServiceOrders;
 using Application.UseCase.ServiceOrders;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -45,8 +46,4 @@ public sealed class ServiceOrdersController : BaseApiController
         await Sender.Send(new ChangeServiceOrderStatus(id, request.OrderStatusId, request.UserId, request.Observation), ct);
         return NoContent();
     }
-
-    public sealed record RecordServiceOrderWorkRequest(string WorkPerformed);
-
-    public sealed record ChangeServiceOrderStatusRequest(int OrderStatusId, int UserId, string? Observation);
 }

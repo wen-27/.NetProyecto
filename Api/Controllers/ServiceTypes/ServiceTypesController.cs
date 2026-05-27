@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.ServiceTypes;
 using Application.UseCase.ServiceTypes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class ServiceTypesController : BaseApiController
         await Sender.Send(new UpdateServiceType(id, request.Name), ct);
         return NoContent();
     }
-
-    public sealed record UpdateServiceTypeRequest(string Name);
 }

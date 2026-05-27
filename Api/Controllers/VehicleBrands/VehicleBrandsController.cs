@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.VehicleBrands;
 using Application.UseCase.VehicleBrands;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class VehicleBrandsController : BaseApiController
         await Sender.Send(new UpdateVehicleBrand(id, request.BrandName), ct);
         return NoContent();
     }
-
-    public sealed record UpdateVehicleBrandRequest(string BrandName);
 }

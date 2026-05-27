@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.Persons;
 using Application.UseCase.Persons;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class PersonsController : BaseApiController
         await Sender.Send(new UpdatePerson(id, request.FirstNames, request.LastNames), ct);
         return NoContent();
     }
-
-    public sealed record UpdatePersonRequest(string FirstNames, string LastNames);
 }

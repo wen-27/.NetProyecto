@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.DocumentTypes;
 using Application.UseCase.DocumentTypes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class DocumentTypesController : BaseApiController
         await Sender.Send(new UpdateDocumentType(id, request.Code, request.Name), ct);
         return NoContent();
     }
-
-    public sealed record UpdateDocumentTypeRequest(string Code, string Name);
 }

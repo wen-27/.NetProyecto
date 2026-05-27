@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.VehicleOwnerHistory;
 using Application.UseCase.VehicleOwnerHistory;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class VehicleOwnerHistoryController : BaseApiController
         await Sender.Send(new EndVehicleOwnership(vehicleId, request.EndDate), ct);
         return NoContent();
     }
-
-    public sealed record EndVehicleOwnershipRequest(DateTime EndDate);
 }

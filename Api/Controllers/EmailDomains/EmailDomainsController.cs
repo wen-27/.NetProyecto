@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.EmailDomains;
 using Application.UseCase.EmailDomains;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class EmailDomainsController : BaseApiController
         await Sender.Send(new UpdateEmailDomain(id, request.Domain), ct);
         return NoContent();
     }
-
-    public sealed record UpdateEmailDomainRequest(string Domain);
 }

@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.OrderStatuses;
 using Application.UseCase.OrderStatuses;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,4 @@ public sealed class OrderStatusesController : BaseApiController
         await Sender.Send(new UpdateOrderStatus(id, request.Name), ct);
         return NoContent();
     }
-
-    public sealed record UpdateOrderStatusRequest(string Name);
 }

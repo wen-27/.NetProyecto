@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Api.DTOs.OrderPartDetails;
 using Application.UseCase.OrderPartDetails;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -45,6 +46,4 @@ public sealed class OrderPartDetailsController : BaseApiController
         await Sender.Send(new RemovePartFromServiceOrder(id), ct);
         return NoContent();
     }
-
-    public sealed record UpdateServiceOrderPartRequest(int Quantity, decimal AppliedUnitPrice);
 }
