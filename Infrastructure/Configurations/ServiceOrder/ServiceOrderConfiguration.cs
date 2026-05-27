@@ -31,8 +31,6 @@ public class ServiceOrderConfiguration : IEntityTypeConfiguration<Domain.Entitie
             .HasForeignKey(x => x.ServiceOrderId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        entity.Ignore(x => x.Services);
-        entity.Ignore(x => x.PartDetails);
         entity.Ignore(x => x.WorkPerformed);
         entity.Ignore(x => x.UpdatedAt);
         entity.Ignore(x => x.IsActive);

@@ -23,7 +23,6 @@ public class UserConfiguration : IEntityTypeConfiguration<Domain.Entities.User>
             .OnDelete(DeleteBehavior.Restrict);
 
         entity.Ignore(x => x.Status);
-        entity.Ignore(x => x.ServiceOrderServicesAsMechanic);
         entity.Ignore(x => x.UpdatedAt);
     }
 }

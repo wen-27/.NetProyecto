@@ -8,7 +8,16 @@ namespace Application.UseCase.ServiceOrders;
 
 public sealed record GetServiceOrderById(int Id) : IRequest<ServiceOrderDto>;
 
-public sealed record GetServiceOrdersPaged(int Page = 1, int PageSize = 10, string? Search = null) : IRequest<PagedResult<ServiceOrderDto>>;
+public sealed record GetServiceOrdersPaged(
+    int Page = 1,
+    int PageSize = 10,
+    string? Search = null,
+    int? ClientPersonId = null,
+    string? Vin = null,
+    DateTime? FromDate = null,
+    DateTime? ToDate = null,
+    int? StatusId = null,
+    int? MechanicPersonId = null) : IRequest<PagedResult<ServiceOrderDto>>;
 
 public sealed class GetServiceOrderByIdHandler : IRequestHandler<GetServiceOrderById, ServiceOrderDto>
 {
@@ -32,8 +41,26 @@ public sealed class GetServiceOrdersPagedHandler : IRequestHandler<GetServiceOrd
     public async Task<PagedResult<ServiceOrderDto>> Handle(GetServiceOrdersPaged request, CancellationToken ct)
     {
         var pagination = new PaginationRequest(request.Page, request.PageSize, request.Search);
-        var items = await _repository.GetPagedAsync(pagination.Page, pagination.PageSize, pagination.Search, ct);
-        var total = await _repository.CountAsync(pagination.Search, ct);
+        var items = await _repository.GetFilteredAsync(
+            pagination.Page,
+            pagination.PageSize,
+            pagination.Search,
+            request.ClientPersonId,
+            request.Vin,
+            request.FromDate,
+            request.ToDate,
+            request.StatusId,
+            request.MechanicPersonId,
+            ct);
+        var total = await _repository.CountFilteredAsync(
+            pagination.Search,
+            request.ClientPersonId,
+            request.Vin,
+            request.FromDate,
+            request.ToDate,
+            request.StatusId,
+            request.MechanicPersonId,
+            ct);
         return new PagedResult<ServiceOrderDto>(items.Select(x => x.ToDto()).ToArray(), total, pagination.Page, pagination.PageSize);
     }
 }

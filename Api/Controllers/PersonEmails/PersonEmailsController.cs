@@ -2,6 +2,7 @@ using Api.Controllers;
 using Api.DTOs.PersonEmails;
 using Application.UseCase.PersonEmails;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.PersonEmails;
@@ -26,6 +27,7 @@ public sealed class PersonEmailsController : BaseApiController
         return Ok(await Sender.Send(new GetPersonEmailById(id), ct));
     }
 
+    [Authorize(Policy = "ReceptionistOrAdmin")]
     [HttpPost]
     public async Task<IActionResult> Add(AddPersonEmail command, CancellationToken ct)
     {
@@ -33,6 +35,7 @@ public sealed class PersonEmailsController : BaseApiController
         return Created($"/api/personemails/{id}", new { id });
     }
 
+    [Authorize(Policy = "ReceptionistOrAdmin")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdatePersonEmailRequest request, CancellationToken ct)
     {

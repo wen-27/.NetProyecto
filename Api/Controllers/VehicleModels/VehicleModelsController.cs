@@ -2,6 +2,7 @@ using Api.Controllers;
 using Api.DTOs.VehicleModels;
 using Application.UseCase.VehicleModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.VehicleModels;
@@ -26,6 +27,7 @@ public sealed class VehicleModelsController : BaseApiController
         return Ok(await Sender.Send(new GetVehicleModelById(id), ct));
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateVehicleModel command, CancellationToken ct)
     {
@@ -33,6 +35,7 @@ public sealed class VehicleModelsController : BaseApiController
         return Created($"/api/vehiclemodels/{id}", new { id });
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateVehicleModelRequest request, CancellationToken ct)
     {

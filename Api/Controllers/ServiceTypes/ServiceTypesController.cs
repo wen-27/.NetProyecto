@@ -2,6 +2,7 @@ using Api.Controllers;
 using Api.DTOs.ServiceTypes;
 using Application.UseCase.ServiceTypes;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.ServiceTypes;
@@ -26,6 +27,7 @@ public sealed class ServiceTypesController : BaseApiController
         return Ok(await Sender.Send(new GetServiceTypeById(id), ct));
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateServiceType command, CancellationToken ct)
     {
@@ -33,6 +35,7 @@ public sealed class ServiceTypesController : BaseApiController
         return Created($"/api/servicetypes/{id}", new { id });
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateServiceTypeRequest request, CancellationToken ct)
     {

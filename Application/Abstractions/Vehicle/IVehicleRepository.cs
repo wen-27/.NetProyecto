@@ -11,6 +11,18 @@ public interface IVehicleRepository
     Task<IReadOnlyList<Vehicle>> GetAllAsync(CancellationToken ct = default);
     Task<IReadOnlyList<Vehicle>> GetPagedAsync(int page, int pageSize, string? search = null, CancellationToken ct = default);
     Task<int> CountAsync(string? search = null, CancellationToken ct = default);
+    Task<IReadOnlyList<Vehicle>> GetFilteredAsync(
+        int page,
+        int pageSize,
+        string? search = null,
+        string? vin = null,
+        int? clientPersonId = null,
+        CancellationToken ct = default);
+    Task<int> CountFilteredAsync(
+        string? search = null,
+        string? vin = null,
+        int? clientPersonId = null,
+        CancellationToken ct = default);
     Task AddAsync(Vehicle vehicle, CancellationToken ct = default);
     Task UpdateAsync(Vehicle vehicle, CancellationToken ct = default);
     Task RemoveAsync(Vehicle vehicle, CancellationToken ct = default);

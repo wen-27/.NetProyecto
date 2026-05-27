@@ -2,6 +2,7 @@ using Api.Controllers;
 using Api.DTOs.EmailDomains;
 using Application.UseCase.EmailDomains;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.EmailDomains;
@@ -26,6 +27,7 @@ public sealed class EmailDomainsController : BaseApiController
         return Ok(await Sender.Send(new GetEmailDomainById(id), ct));
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateEmailDomain command, CancellationToken ct)
     {
@@ -33,6 +35,7 @@ public sealed class EmailDomainsController : BaseApiController
         return Created($"/api/emaildomains/{id}", new { id });
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateEmailDomainRequest request, CancellationToken ct)
     {

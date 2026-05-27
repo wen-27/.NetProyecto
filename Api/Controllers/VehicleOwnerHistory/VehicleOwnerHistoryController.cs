@@ -2,6 +2,7 @@ using Api.Controllers;
 using Api.DTOs.VehicleOwnerHistory;
 using Application.UseCase.VehicleOwnerHistory;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.VehicleOwnerHistory;
@@ -26,6 +27,7 @@ public sealed class VehicleOwnerHistoryController : BaseApiController
         return Ok(await Sender.Send(new GetVehicleOwnerHistoryById(id), ct));
     }
 
+    [Authorize(Policy = "ReceptionistOrAdmin")]
     [HttpPost]
     public async Task<IActionResult> Register(RegisterVehicleOwner command, CancellationToken ct)
     {
@@ -33,6 +35,7 @@ public sealed class VehicleOwnerHistoryController : BaseApiController
         return Created($"/api/vehicleownerhistory/{id}", new { id });
     }
 
+    [Authorize(Policy = "ReceptionistOrAdmin")]
     [HttpPatch("{vehicleId:int}/end")]
     public async Task<IActionResult> End(int vehicleId, EndVehicleOwnershipRequest request, CancellationToken ct)
     {

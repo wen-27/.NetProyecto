@@ -2,6 +2,7 @@ using Api.Controllers;
 using Api.DTOs.DocumentTypes;
 using Application.UseCase.DocumentTypes;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.DocumentTypes;
@@ -26,6 +27,7 @@ public sealed class DocumentTypesController : BaseApiController
         return Ok(await Sender.Send(new GetDocumentTypeById(id), ct));
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateDocumentType command, CancellationToken ct)
     {
@@ -33,6 +35,7 @@ public sealed class DocumentTypesController : BaseApiController
         return Created($"/api/documenttypes/{id}", new { id });
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateDocumentTypeRequest request, CancellationToken ct)
     {

@@ -1,10 +1,12 @@
 using Api.Controllers;
 using Application.UseCase.Audits;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.Audits;
 
+[Authorize(Policy = "AdminOnly")]
 public sealed class AuditsController : BaseApiController
 {
     public AuditsController(ISender sender) : base(sender)

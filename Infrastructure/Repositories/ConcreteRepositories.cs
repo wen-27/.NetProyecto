@@ -2,19 +2,15 @@ using Application.Abstractions;
 using Domain.Entities;
 using Domain.ValueObjects.Audit;
 using Domain.ValueObjects.AuditActionType;
-using Domain.ValueObjects.Customer;
 using Domain.ValueObjects.DocumentType;
 using Domain.ValueObjects.EmailDomain;
 using Domain.ValueObjects.Invoice;
 using Domain.ValueObjects.InvoiceDetail;
-using Domain.ValueObjects.OrderPartDetail;
 using Domain.ValueObjects.OrderStatus;
 using Domain.ValueObjects.Part;
 using Domain.ValueObjects.PartCategory;
-using Domain.ValueObjects.PersonDocument;
 using Domain.ValueObjects.PersonEmail;
 using Domain.ValueObjects.PersonPhone;
-using Domain.ValueObjects.PhoneCode;
 using Domain.ValueObjects.Role;
 using Domain.ValueObjects.ServiceOrder;
 using Domain.ValueObjects.ServiceType;
@@ -53,8 +49,35 @@ public sealed class PaymentRepository : GenericRepository<Payment>, IPaymentRepo
 public sealed class PaymentCardRepository : GenericRepository<PaymentCard>, IPaymentCardRepository { public PaymentCardRepository(AppDbContext context) : base(context) { } }
 public sealed class PaymentMethodRepository : GenericRepository<PaymentMethod>, IPaymentMethodRepository { public PaymentMethodRepository(AppDbContext context) : base(context) { } }
 public sealed class PaymentStatusRepository : GenericRepository<PaymentStatus>, IPaymentStatusRepository { public PaymentStatusRepository(AppDbContext context) : base(context) { } }
-public sealed class PersonRepository : GenericRepository<Person>, IPersonRepository { public PersonRepository(AppDbContext context) : base(context) { } }
-public sealed class PersonAddressRepository : GenericRepository<PersonAddress>, IPersonAddressRepository { public PersonAddressRepository(AppDbContext context) : base(context) { } }
+public sealed class PersonRepository : GenericRepository<Person>, IPersonRepository
+{
+    public PersonRepository(AppDbContext context) : base(context) { }
+
+    public Task<bool> HasActiveServiceOrdersAsCurrentOwnerAsync(int personId, CancellationToken ct = default)
+    {
+        return Context.VehicleOwnerHistory
+            .AsNoTracking()
+            .Where(owner => owner.PersonId == personId && owner.EndDate == null)
+            .AnyAsync(owner => Context.ServiceOrders
+                .Any(order => order.VehicleId == owner.VehicleId &&
+                    order.OrderStatus.Name != "Completed" &&
+                    order.OrderStatus.Name != "Cancelled" &&
+                    order.OrderStatus.Name != "Voided"), ct);
+    }
+
+    public Task<bool> HasActiveServiceOrdersAsMechanicAsync(int personId, CancellationToken ct = default)
+    {
+        return Context.MechanicAssignments
+            .AsNoTracking()
+            .Include(assignment => assignment.OrderService)
+            .ThenInclude(orderService => orderService.ServiceOrder)
+            .ThenInclude(order => order.OrderStatus)
+            .AnyAsync(assignment => assignment.MechanicPersonId == personId &&
+                assignment.OrderService.ServiceOrder.OrderStatus.Name != "Completed" &&
+                assignment.OrderService.ServiceOrder.OrderStatus.Name != "Cancelled" &&
+                assignment.OrderService.ServiceOrder.OrderStatus.Name != "Voided", ct);
+    }
+}
 public sealed class SupplierRepository : GenericRepository<Supplier>, ISupplierRepository { public SupplierRepository(AppDbContext context) : base(context) { } }
 public sealed class VehicleTypeRepository : GenericRepository<VehicleType>, IVehicleTypeRepository { public VehicleTypeRepository(AppDbContext context) : base(context) { } }
 
@@ -88,13 +111,6 @@ public sealed class MechanicAssignmentRepository : GenericRepository<MechanicAss
     }
 }
 
-public sealed class CustomerRepository : GenericRepository<Customer>, ICustomerRepository
-{
-    public CustomerRepository(AppDbContext context) : base(context) { }
-    public Task<Customer?> GetByPersonIdAsync(CustomerPersonId personId, CancellationToken ct = default) => FirstByAsync(nameof(Customer.PersonId), personId, ct);
-    public Task<bool> ExistsPersonIdAsync(CustomerPersonId personId, CancellationToken ct = default) => ExistsByAsync(nameof(Customer.PersonId), personId, ct);
-}
-
 public sealed class DocumentTypeRepository : GenericRepository<DocumentType>, IDocumentTypeRepository
 {
     public DocumentTypeRepository(AppDbContext context) : base(context) { }
@@ -122,14 +138,6 @@ public sealed class InvoiceDetailRepository : GenericRepository<InvoiceDetail>, 
 {
     public InvoiceDetailRepository(AppDbContext context) : base(context) { }
     public Task<IReadOnlyList<InvoiceDetail>> GetByInvoiceIdAsync(InvoiceDetailInvoiceId invoiceId, CancellationToken ct = default) => ListByAsync(nameof(InvoiceDetail.InvoiceId), invoiceId, ct);
-}
-
-public sealed class OrderPartDetailRepository : GenericRepository<OrderPartDetail>, IOrderPartDetailRepository
-{
-    public OrderPartDetailRepository(AppDbContext context) : base(context) { }
-    public Task<OrderPartDetail?> GetByServiceOrderAndPartAsync(OrderPartDetailServiceOrderId serviceOrderId, OrderPartDetailPartId partId, CancellationToken ct = default) => FirstByAsync(nameof(OrderPartDetail.ServiceOrderId), serviceOrderId, nameof(OrderPartDetail.PartId), partId, ct);
-    public Task<IReadOnlyList<OrderPartDetail>> GetByServiceOrderIdAsync(OrderPartDetailServiceOrderId serviceOrderId, CancellationToken ct = default) => ListByAsync(nameof(OrderPartDetail.ServiceOrderId), serviceOrderId, ct);
-    public Task<bool> ExistsServiceOrderAndPartAsync(OrderPartDetailServiceOrderId serviceOrderId, OrderPartDetailPartId partId, CancellationToken ct = default) => ExistsByAsync(nameof(OrderPartDetail.ServiceOrderId), serviceOrderId, nameof(OrderPartDetail.PartId), partId, ct);
 }
 
 public sealed class OrderServiceRepository : GenericRepository<OrderService>, IOrderServiceRepository
@@ -169,14 +177,6 @@ public sealed class PartCategoryRepository : GenericRepository<PartCategory>, IP
     public Task<bool> ExistsNameAsync(PartCategoryName name, CancellationToken ct = default) => ExistsByAsync(nameof(PartCategory.Name), name, ct);
 }
 
-public sealed class PersonDocumentRepository : GenericRepository<PersonDocument>, IPersonDocumentRepository
-{
-    public PersonDocumentRepository(AppDbContext context) : base(context) { }
-    public Task<PersonDocument?> GetByDocumentAsync(PersonDocumentDocumentTypeId documentTypeId, PersonDocumentNumber documentNumber, CancellationToken ct = default) => FirstByAsync(nameof(PersonDocument.DocumentTypeId), documentTypeId, nameof(PersonDocument.DocumentNumber), documentNumber, ct);
-    public Task<IReadOnlyList<PersonDocument>> GetByPersonIdAsync(PersonDocumentPersonId personId, CancellationToken ct = default) => ListByAsync(nameof(PersonDocument.PersonId), personId, ct);
-    public Task<bool> ExistsDocumentAsync(PersonDocumentDocumentTypeId documentTypeId, PersonDocumentNumber documentNumber, CancellationToken ct = default) => ExistsByAsync(nameof(PersonDocument.DocumentTypeId), documentTypeId, nameof(PersonDocument.DocumentNumber), documentNumber, ct);
-}
-
 public sealed class PersonEmailRepository : GenericRepository<PersonEmail>, IPersonEmailRepository
 {
     public PersonEmailRepository(AppDbContext context) : base(context) { }
@@ -188,16 +188,9 @@ public sealed class PersonEmailRepository : GenericRepository<PersonEmail>, IPer
 public sealed class PersonPhoneRepository : GenericRepository<PersonPhone>, IPersonPhoneRepository
 {
     public PersonPhoneRepository(AppDbContext context) : base(context) { }
-    public Task<PersonPhone?> GetByPhoneAsync(PersonPhoneCodeId phoneCodeId, PersonPhoneNumber phoneNumber, CancellationToken ct = default) => FirstByAsync(nameof(PersonPhone.CountryId), phoneCodeId, nameof(PersonPhone.PhoneNumber), phoneNumber, ct);
+    public Task<PersonPhone?> GetByPhoneAsync(PersonPhoneCountryId countryId, PersonPhoneNumber phoneNumber, CancellationToken ct = default) => FirstByAsync(nameof(PersonPhone.CountryId), countryId, nameof(PersonPhone.PhoneNumber), phoneNumber, ct);
     public Task<IReadOnlyList<PersonPhone>> GetByPersonIdAsync(PersonPhonePersonId personId, CancellationToken ct = default) => ListByAsync(nameof(PersonPhone.PersonId), personId, ct);
-    public Task<bool> ExistsPhoneAsync(PersonPhoneCodeId phoneCodeId, PersonPhoneNumber phoneNumber, CancellationToken ct = default) => ExistsByAsync(nameof(PersonPhone.CountryId), phoneCodeId, nameof(PersonPhone.PhoneNumber), phoneNumber, ct);
-}
-
-public sealed class PhoneCodeRepository : GenericRepository<PhoneCode>, IPhoneCodeRepository
-{
-    public PhoneCodeRepository(AppDbContext context) : base(context) { }
-    public Task<PhoneCode?> GetByCodeAsync(PhoneCodeCode code, CancellationToken ct = default) => FirstByAsync(nameof(PhoneCode.Code), code, ct);
-    public Task<bool> ExistsCodeAsync(PhoneCodeCode code, CancellationToken ct = default) => ExistsByAsync(nameof(PhoneCode.Code), code, ct);
+    public Task<bool> ExistsPhoneAsync(PersonPhoneCountryId countryId, PersonPhoneNumber phoneNumber, CancellationToken ct = default) => ExistsByAsync(nameof(PersonPhone.CountryId), countryId, nameof(PersonPhone.PhoneNumber), phoneNumber, ct);
 }
 
 public sealed class RoleRepository : GenericRepository<Role>, IRoleRepository
@@ -217,15 +210,106 @@ public sealed class ServiceOrderRepository : GenericRepository<ServiceOrder>, IS
         var id = (int)ValueOf(vehicleId);
         return Context.ServiceOrders.Include(x => x.OrderStatus).AnyAsync(x => x.VehicleId == id && x.OrderStatus.Name != "Completed" && x.OrderStatus.Name != "Cancelled" && x.OrderStatus.Name != "Voided", ct);
     }
-}
 
-public sealed class ServiceOrderServiceRepository : GenericRepository<ServiceOrderService>, IServiceOrderServiceRepository
-{
-    public ServiceOrderServiceRepository(AppDbContext context) : base(context) { }
-    public Task<ServiceOrderService?> GetByServiceOrderAndServiceTypeAsync(int serviceOrderId, int serviceTypeId, CancellationToken ct = default) => FirstByAsync(nameof(ServiceOrderService.ServiceOrderId), serviceOrderId, nameof(ServiceOrderService.ServiceTypeId), serviceTypeId, ct);
-    public Task<IReadOnlyList<ServiceOrderService>> GetByServiceOrderIdAsync(int serviceOrderId, CancellationToken ct = default) => ListByAsync(nameof(ServiceOrderService.ServiceOrderId), serviceOrderId, ct);
-    public Task<IReadOnlyList<ServiceOrderService>> GetByMechanicIdAsync(int mechanicId, CancellationToken ct = default) => ListByAsync(nameof(ServiceOrderService.MechanicId), mechanicId, ct);
-    public Task<bool> ExistsServiceOrderAndServiceTypeAsync(int serviceOrderId, int serviceTypeId, CancellationToken ct = default) => ExistsByAsync(nameof(ServiceOrderService.ServiceOrderId), serviceOrderId, nameof(ServiceOrderService.ServiceTypeId), serviceTypeId, ct);
+    public async Task<IReadOnlyList<ServiceOrder>> GetFilteredAsync(
+        int page,
+        int pageSize,
+        string? search = null,
+        int? clientPersonId = null,
+        string? vin = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        int? statusId = null,
+        int? mechanicPersonId = null,
+        CancellationToken ct = default)
+    {
+        return await ApplyFilters(search, clientPersonId, vin, fromDate, toDate, statusId, mechanicPersonId)
+            .OrderByDescending(x => x.EntryDate)
+            .ThenByDescending(x => x.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+    }
+
+    public Task<int> CountFilteredAsync(
+        string? search = null,
+        int? clientPersonId = null,
+        string? vin = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        int? statusId = null,
+        int? mechanicPersonId = null,
+        CancellationToken ct = default)
+    {
+        return ApplyFilters(search, clientPersonId, vin, fromDate, toDate, statusId, mechanicPersonId).CountAsync(ct);
+    }
+
+    private IQueryable<ServiceOrder> ApplyFilters(
+        string? search,
+        int? clientPersonId,
+        string? vin,
+        DateTime? fromDate,
+        DateTime? toDate,
+        int? statusId,
+        int? mechanicPersonId)
+    {
+        var query = Context.ServiceOrders
+            .AsNoTracking()
+            .Include(x => x.Vehicle)
+            .ThenInclude(x => x.OwnerHistory)
+            .Include(x => x.OrderStatus)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(x =>
+                (x.GeneralDescription != null && x.GeneralDescription.Contains(term)) ||
+                (x.CancellationReason != null && x.CancellationReason.Contains(term)) ||
+                x.Vehicle.Vin.Contains(term) ||
+                x.OrderStatus.Name.Contains(term));
+        }
+
+        if (clientPersonId.HasValue)
+        {
+            query = query.Where(x => x.Vehicle.OwnerHistory.Any(owner =>
+                owner.PersonId == clientPersonId.Value &&
+                owner.EndDate == null));
+        }
+
+        if (!string.IsNullOrWhiteSpace(vin))
+        {
+            var vinTerm = vin.Trim();
+            query = query.Where(x => x.Vehicle.Vin.Contains(vinTerm));
+        }
+
+        if (fromDate.HasValue)
+        {
+            query = query.Where(x => x.EntryDate >= fromDate.Value.Date);
+        }
+
+        if (toDate.HasValue)
+        {
+            var exclusiveTo = toDate.Value.Date.AddDays(1);
+            query = query.Where(x => x.EntryDate < exclusiveTo);
+        }
+
+        if (statusId.HasValue)
+        {
+            query = query.Where(x => x.OrderStatusId == statusId.Value);
+        }
+
+        if (mechanicPersonId.HasValue)
+        {
+            query = query.Where(x => Context.OrderServices
+                .Where(orderService => orderService.ServiceOrderId == x.Id)
+                .Any(orderService => Context.MechanicAssignments.Any(assignment =>
+                    assignment.OrderServiceId == orderService.Id &&
+                    assignment.MechanicPersonId == mechanicPersonId.Value)));
+        }
+
+        return query;
+    }
 }
 
 public sealed class ServiceTypeRepository : GenericRepository<ServiceType>, IServiceTypeRepository

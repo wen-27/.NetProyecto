@@ -2,10 +2,12 @@ using Api.Controllers;
 using Api.DTOs.AuditActionTypes;
 using Application.UseCase.AuditActionTypes;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.AuditActionTypes;
 
+[Authorize(Policy = "AdminOnly")]
 public sealed class AuditActionTypesController : BaseApiController
 {
     public AuditActionTypesController(ISender sender) : base(sender)

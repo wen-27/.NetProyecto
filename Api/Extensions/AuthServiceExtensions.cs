@@ -32,8 +32,11 @@ public static class AuthServiceExtensions
             options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
             options.AddPolicy("MechanicOnly", policy => policy.RequireRole("Mechanic"));
             options.AddPolicy("ReceptionistOnly", policy => policy.RequireRole("Receptionist"));
+            options.AddPolicy("ClientOnly", policy => policy.RequireRole("Client"));
+            options.AddPolicy("InternalStaff", policy => policy.RequireRole("Admin", "Mechanic", "Receptionist"));
             options.AddPolicy("MechanicOrAdmin", policy => policy.RequireRole("Mechanic", "Admin"));
             options.AddPolicy("ReceptionistOrAdmin", policy => policy.RequireRole("Receptionist", "Admin"));
+            options.AddPolicy("ReceptionistMechanicOrAdmin", policy => policy.RequireRole("Receptionist", "Mechanic", "Admin"));
         });
 
         services.AddScoped<JwtTokenService>();

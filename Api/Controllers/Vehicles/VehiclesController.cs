@@ -14,9 +14,15 @@ public sealed class VehiclesController : BaseApiController
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetPaged([FromQuery(Name = "pageNumber")] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null, CancellationToken ct = default)
+    public async Task<IActionResult> GetPaged(
+        [FromQuery(Name = "pageNumber")] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? search = null,
+        [FromQuery] string? vin = null,
+        [FromQuery] int? clientPersonId = null,
+        CancellationToken ct = default)
     {
-        var result = await Sender.Send(new GetVehiclesPaged(pageNumber, pageSize, search), ct);
+        var result = await Sender.Send(new GetVehiclesPaged(pageNumber, pageSize, search, vin, clientPersonId), ct);
         Response.Headers["X-Total-Count"] = result.TotalCount.ToString();
         return Ok(result);
     }

@@ -54,6 +54,30 @@ public sealed class VehicleRepository : IVehicleRepository
         return ApplySearch(_context.Vehicles, search).CountAsync(ct);
     }
 
+    public async Task<IReadOnlyList<Vehicle>> GetFilteredAsync(
+        int page,
+        int pageSize,
+        string? search = null,
+        string? vin = null,
+        int? clientPersonId = null,
+        CancellationToken ct = default)
+    {
+        return await ApplyFilters(_context.Vehicles.AsNoTracking(), search, vin, clientPersonId)
+            .OrderBy(x => x.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+    }
+
+    public Task<int> CountFilteredAsync(
+        string? search = null,
+        string? vin = null,
+        int? clientPersonId = null,
+        CancellationToken ct = default)
+    {
+        return ApplyFilters(_context.Vehicles.AsNoTracking(), search, vin, clientPersonId).CountAsync(ct);
+    }
+
     public async Task AddAsync(Vehicle vehicle, CancellationToken ct = default)
     {
         await _context.Vehicles.AddAsync(vehicle, ct);
@@ -85,5 +109,25 @@ public sealed class VehicleRepository : IVehicleRepository
 
         var term = search.Trim();
         return query.Where(x => x.Vin.Contains(term) || (x.Color != null && x.Color.Contains(term)));
+    }
+
+    private static IQueryable<Vehicle> ApplyFilters(IQueryable<Vehicle> query, string? search, string? vin, int? clientPersonId)
+    {
+        query = ApplySearch(query, search);
+
+        if (!string.IsNullOrWhiteSpace(vin))
+        {
+            var vinTerm = vin.Trim();
+            query = query.Where(x => x.Vin.Contains(vinTerm));
+        }
+
+        if (clientPersonId.HasValue)
+        {
+            query = query.Where(x => x.OwnerHistory.Any(owner =>
+                owner.PersonId == clientPersonId.Value &&
+                owner.EndDate == null));
+        }
+
+        return query;
     }
 }

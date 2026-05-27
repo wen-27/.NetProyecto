@@ -20,7 +20,7 @@ public sealed class UpdatePersonPhoneHandler : IRequestHandler<UpdatePersonPhone
         var personPhone = await _personPhones.GetByIdAsync(request.Id, ct)
             ?? throw new KeyNotFoundException("No se encontró el teléfono de la persona.");
 
-        var countryId = new PersonPhoneCodeId(request.CountryId);
+        var countryId = new PersonPhoneCountryId(request.CountryId);
         var phoneNumber = new PersonPhoneNumber(request.PhoneNumber);
         var isPrimary = new PersonPhoneIsPrimary(request.IsPrimary);
 

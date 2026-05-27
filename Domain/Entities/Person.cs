@@ -35,13 +35,10 @@ public class Person : BaseEntity
     public DocumentType DocumentType { get; set; } = null!;
     public Gender? Gender { get; set; }
     public Address? Address { get; set; }
-    public ICollection<PersonAddress> Addresses { get; set; } = new List<PersonAddress>();
-    public ICollection<PersonDocument> Documents { get; set; } = new List<PersonDocument>();
     public ICollection<PersonEmail> Emails { get; set; } = new List<PersonEmail>();
     public ICollection<PersonPhone> Phones { get; set; } = new List<PersonPhone>();
     public ICollection<PersonRole> PersonRoles { get; set; } = new List<PersonRole>();
     public ICollection<VehicleOwnerHistory> VehicleHistory { get; set; } = new List<VehicleOwnerHistory>();
 
-    public Customer? Customer { get; set; }
     public User? User { get; set; }
 }

@@ -24,8 +24,6 @@ public class PersonPhoneConfiguration : IEntityTypeConfiguration<Domain.Entities
             .HasForeignKey(x => x.CountryId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        entity.Ignore(x => x.PhoneCodeId);
-        entity.Ignore(x => x.PhoneCode);
         entity.Ignore(x => x.CreatedAt);
         entity.Ignore(x => x.UpdatedAt);
         entity.Ignore(x => x.IsActive);

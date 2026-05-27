@@ -2,6 +2,7 @@ using Api.Controllers;
 using Api.DTOs.PersonPhones;
 using Application.UseCase.PersonPhones;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.PersonPhones;
@@ -26,6 +27,7 @@ public sealed class PersonPhonesController : BaseApiController
         return Ok(await Sender.Send(new GetPersonPhoneById(id), ct));
     }
 
+    [Authorize(Policy = "ReceptionistOrAdmin")]
     [HttpPost]
     public async Task<IActionResult> Add(AddPersonPhone command, CancellationToken ct)
     {
@@ -33,6 +35,7 @@ public sealed class PersonPhonesController : BaseApiController
         return Created($"/api/personphones/{id}", new { id });
     }
 
+    [Authorize(Policy = "ReceptionistOrAdmin")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdatePersonPhoneRequest request, CancellationToken ct)
     {

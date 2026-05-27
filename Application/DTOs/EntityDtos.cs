@@ -10,8 +10,6 @@ public sealed record CardTypeDto(int Id, string Name);
 
 public sealed record CityDto(int Id, int DepartmentId, string Name);
 
-public sealed record CustomerDto(int Id, int PersonId, bool Status);
-
 public sealed record DepartmentDto(int Id, string Name);
 
 public sealed record DocumentTypeDto(int Id, string Code, string Name);
@@ -23,8 +21,6 @@ public sealed record InvoiceDto(int Id, int ServiceOrderId, int InvoiceStatusId,
 public sealed record InvoiceDetailDto(int Id, int InvoiceId, string Concept, int Quantity, decimal UnitPrice);
 
 public sealed record InvoiceStatusDto(int Id, string Name);
-
-public sealed record OrderPartDetailDto(int Id, int ServiceOrderId, int PartId, int Quantity, decimal AppliedUnitPrice);
 
 public sealed record OrderStatusDto(int Id, string Name);
 
@@ -48,17 +44,11 @@ public sealed record PaymentMethodDto(int Id, string Name);
 
 public sealed record PaymentStatusDto(int Id, string Name);
 
-public sealed record PersonAddressDto(int Id, int PersonId, int CityId, string Address, bool IsPrimary);
-
-public sealed record PersonDocumentDto(int Id, int PersonId, int DocumentTypeId, string DocumentNumber, bool IsPrimary);
-
 public sealed record PersonDto(int Id, string FirstNames, string LastNames, DateTime RegistrationDate);
 
 public sealed record PersonEmailDto(int Id, int PersonId, int EmailDomainId, string EmailUser, bool IsPrimary);
 
 public sealed record PersonPhoneDto(int Id, int PersonId, int CountryId, string PhoneNumber, bool IsPrimary);
-
-public sealed record PhoneCodeDto(int Id, string Code, string Country);
 
 public sealed record RoleDto(int Id, string RoleName);
 
@@ -69,8 +59,6 @@ public sealed record ServiceOrderDto(
     DateTime EntryDate,
     DateTime? EstimatedDeliveryDate,
     string? WorkPerformed);
-
-public sealed record ServiceOrderServiceDto(int Id, int ServiceOrderId, int ServiceTypeId, int MechanicId, string? Description, decimal LaborCost);
 
 public sealed record ServiceTypeDto(int Id, string Name, int EstimatedDays);
 
@@ -100,8 +88,6 @@ public static class EntityDtoMapper
 
     public static CityDto ToDto(this City entity) => new(entity.Id, entity.DepartmentId, entity.Name);
 
-    public static CustomerDto ToDto(this Customer entity) => new(entity.Id, entity.PersonId, entity.Status);
-
     public static DepartmentDto ToDto(this Department entity) => new(entity.Id, entity.Name);
 
     public static DocumentTypeDto ToDto(this DocumentType entity) => new(entity.Id, entity.Code, entity.Name);
@@ -113,8 +99,6 @@ public static class EntityDtoMapper
     public static InvoiceDetailDto ToDto(this InvoiceDetail entity) => new(entity.Id, entity.InvoiceId, entity.Concept, entity.Quantity, entity.UnitPrice);
 
     public static InvoiceStatusDto ToDto(this InvoiceStatus entity) => new(entity.Id, entity.Name);
-
-    public static OrderPartDetailDto ToDto(this OrderPartDetail entity) => new(entity.Id, entity.ServiceOrderId, entity.PartId, entity.Quantity, entity.AppliedUnitPrice);
 
     public static OrderStatusDto ToDto(this OrderStatus entity) => new(entity.Id, entity.Name);
 
@@ -138,23 +122,15 @@ public static class EntityDtoMapper
 
     public static PaymentStatusDto ToDto(this PaymentStatus entity) => new(entity.Id, entity.Name);
 
-    public static PersonAddressDto ToDto(this PersonAddress entity) => new(entity.Id, entity.PersonId, entity.CityId, entity.Address, entity.IsPrimary);
-
-    public static PersonDocumentDto ToDto(this PersonDocument entity) => new(entity.Id, entity.PersonId, entity.DocumentTypeId, entity.DocumentNumber, entity.IsPrimary);
-
     public static PersonDto ToDto(this Person entity) => new(entity.Id, entity.FirstNames, entity.LastNames, entity.RegistrationDate);
 
     public static PersonEmailDto ToDto(this PersonEmail entity) => new(entity.Id, entity.PersonId, entity.EmailDomainId, entity.EmailUser, entity.IsPrimary);
 
     public static PersonPhoneDto ToDto(this PersonPhone entity) => new(entity.Id, entity.PersonId, entity.CountryId, entity.PhoneNumber, entity.IsPrimary);
 
-    public static PhoneCodeDto ToDto(this PhoneCode entity) => new(entity.Id, entity.Code, entity.Country);
-
     public static RoleDto ToDto(this Role entity) => new(entity.Id, entity.RoleName);
 
     public static ServiceOrderDto ToDto(this ServiceOrder entity) => new(entity.Id, entity.VehicleId, entity.OrderStatusId, entity.EntryDate, entity.EstimatedDeliveryDate, entity.WorkPerformed);
-
-    public static ServiceOrderServiceDto ToDto(this ServiceOrderService entity) => new(entity.Id, entity.ServiceOrderId, entity.ServiceTypeId, entity.MechanicId, entity.Description, entity.LaborCost);
 
     public static ServiceTypeDto ToDto(this ServiceType entity) => new(entity.Id, entity.Name, entity.EstimatedDays);
 

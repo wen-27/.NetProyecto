@@ -2,6 +2,7 @@ using Api.Controllers;
 using Api.DTOs.Persons;
 using Application.UseCase.Persons;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.Persons;
@@ -26,6 +27,7 @@ public sealed class PersonsController : BaseApiController
         return Ok(await Sender.Send(new GetPersonById(id), ct));
     }
 
+    [Authorize(Policy = "ReceptionistOrAdmin")]
     [HttpPost]
     public async Task<IActionResult> Create(CreatePerson command, CancellationToken ct)
     {
@@ -33,10 +35,19 @@ public sealed class PersonsController : BaseApiController
         return Created($"/api/persons/{id}", new { id });
     }
 
+    [Authorize(Policy = "ReceptionistOrAdmin")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdatePersonRequest request, CancellationToken ct)
     {
         await Sender.Send(new UpdatePerson(id, request.FirstNames, request.LastNames), ct);
+        return NoContent();
+    }
+
+    [Authorize(Policy = "AdminOnly")]
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+    {
+        await Sender.Send(new DeletePerson(id), ct);
         return NoContent();
     }
 }

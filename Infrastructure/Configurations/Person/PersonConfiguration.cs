@@ -20,7 +20,7 @@ public class PersonConfiguration : IEntityTypeConfiguration<Domain.Entities.Pers
         entity.HasIndex(x => x.DocumentNumber).IsUnique();
 
         entity.HasOne(x => x.DocumentType)
-            .WithMany()
+            .WithMany(x => x.Persons)
             .HasForeignKey(x => x.DocumentTypeId)
             .OnDelete(DeleteBehavior.Restrict);
 
@@ -37,9 +37,6 @@ public class PersonConfiguration : IEntityTypeConfiguration<Domain.Entities.Pers
         entity.Ignore(x => x.FirstNames);
         entity.Ignore(x => x.LastNames);
         entity.Ignore(x => x.RegistrationDate);
-        entity.Ignore(x => x.Addresses);
-        entity.Ignore(x => x.Documents);
-        entity.Ignore(x => x.Customer);
         entity.Ignore(x => x.UpdatedAt);
         entity.Ignore(x => x.IsActive);
     }

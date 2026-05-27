@@ -19,7 +19,7 @@ public sealed class AddPersonPhoneHandler : IRequestHandler<AddPersonPhone, int>
     public async Task<int> Handle(AddPersonPhone request, CancellationToken ct)
     {
         var personId = new PersonPhonePersonId(request.PersonId);
-        var countryId = new PersonPhoneCodeId(request.CountryId);
+        var countryId = new PersonPhoneCountryId(request.CountryId);
         var phoneNumber = new PersonPhoneNumber(request.PhoneNumber);
         var isPrimary = new PersonPhoneIsPrimary(request.IsPrimary);
 

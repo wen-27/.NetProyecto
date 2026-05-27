@@ -8,5 +8,5 @@ public class City : BaseEntity
     public string Name { get; set; } = string.Empty;
 
     public Department Department { get; set; } = null!;
-    public ICollection<PersonAddress> PersonAddresses { get; set; } = new List<PersonAddress>();
+    public ICollection<Neighborhood> Neighborhoods { get; set; } = new List<Neighborhood>();
 }

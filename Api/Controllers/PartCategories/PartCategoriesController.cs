@@ -2,6 +2,7 @@ using Api.Controllers;
 using Api.DTOs.PartCategories;
 using Application.UseCase.PartCategories;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.PartCategories;
@@ -26,6 +27,7 @@ public sealed class PartCategoriesController : BaseApiController
         return Ok(await Sender.Send(new GetPartCategoryById(id), ct));
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<IActionResult> Create(CreatePartCategory command, CancellationToken ct)
     {
@@ -33,6 +35,7 @@ public sealed class PartCategoriesController : BaseApiController
         return Created($"/api/partcategories/{id}", new { id });
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdatePartCategoryRequest request, CancellationToken ct)
     {

@@ -12,6 +12,26 @@ public interface IServiceOrderRepository
     Task<IReadOnlyList<ServiceOrder>> GetAllAsync(CancellationToken ct = default);
     Task<IReadOnlyList<ServiceOrder>> GetPagedAsync(int page, int pageSize, string? search = null, CancellationToken ct = default);
     Task<int> CountAsync(string? search = null, CancellationToken ct = default);
+    Task<IReadOnlyList<ServiceOrder>> GetFilteredAsync(
+        int page,
+        int pageSize,
+        string? search = null,
+        int? clientPersonId = null,
+        string? vin = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        int? statusId = null,
+        int? mechanicPersonId = null,
+        CancellationToken ct = default);
+    Task<int> CountFilteredAsync(
+        string? search = null,
+        int? clientPersonId = null,
+        string? vin = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        int? statusId = null,
+        int? mechanicPersonId = null,
+        CancellationToken ct = default);
     Task AddAsync(ServiceOrder serviceOrder, CancellationToken ct = default);
     Task UpdateAsync(ServiceOrder serviceOrder, CancellationToken ct = default);
     Task RemoveAsync(ServiceOrder serviceOrder, CancellationToken ct = default);

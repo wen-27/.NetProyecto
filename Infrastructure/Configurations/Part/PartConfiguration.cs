@@ -33,7 +33,6 @@ public class PartConfiguration : IEntityTypeConfiguration<Domain.Entities.Part>
             .HasForeignKey(x => x.PartId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        entity.Ignore(x => x.OrderDetails);
         entity.Ignore(x => x.CreatedAt);
         entity.Ignore(x => x.UpdatedAt);
     }
