@@ -35,9 +35,9 @@ public sealed class VehiclesController : BaseApiController
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateVehicleRequest request, CancellationToken ct)
     {
-        await Sender.Send(new UpdateVehicle(id, request.ModelId, request.VehicleTypeId, request.Vin, request.Year, request.Mileage), ct);
+        await Sender.Send(new UpdateVehicle(id, request.ModelId, request.VehicleTypeId, request.Vin, request.Year, request.Color, request.Mileage, request.IsActive), ct);
         return NoContent();
     }
 
-    public sealed record UpdateVehicleRequest(int ModelId, int VehicleTypeId, string Vin, int Year, int Mileage);
+    public sealed record UpdateVehicleRequest(int ModelId, int VehicleTypeId, string Vin, int Year, string? Color, int Mileage, bool IsActive = true);
 }

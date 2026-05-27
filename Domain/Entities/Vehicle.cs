@@ -8,6 +8,7 @@ public class Vehicle : BaseEntity
     public int VehicleTypeId { get; set; }
     public string Vin { get; set; } = string.Empty;
     public int Year { get; set; }
+    public string? Color { get; set; }
     public int Mileage { get; set; }
 
     public VehicleModel VehicleModel { get; set; } = null!;

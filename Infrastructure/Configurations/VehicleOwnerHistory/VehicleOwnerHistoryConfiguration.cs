@@ -18,9 +18,9 @@ public class VehicleOwnerHistoryConfiguration : IEntityTypeConfiguration<Domain.
             .HasForeignKey(x => x.VehicleId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        entity.HasOne(x => x.Customer)
+        entity.HasOne(x => x.Person)
             .WithMany(x => x.VehicleHistory)
-            .HasForeignKey(x => x.CustomerId)
+            .HasForeignKey(x => x.PersonId)
             .OnDelete(DeleteBehavior.Restrict);
 
         entity.Ignore(x => x.CreatedAt);

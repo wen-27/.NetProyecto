@@ -22,6 +22,7 @@ public sealed class CreateVehicleHandler : IRequestHandler<CreateVehicle, int>
         var vehicleTypeId = new VehicleTypeId(request.VehicleTypeId);
         var vin = new VehicleVin(request.Vin);
         var year = new VehicleYear(request.Year);
+        var color = new VehicleColor(request.Color);
         var mileage = new VehicleMileage(request.Mileage);
 
         if (await _vehicles.ExistsVinAsync(vin, ct))
@@ -35,7 +36,9 @@ public sealed class CreateVehicleHandler : IRequestHandler<CreateVehicle, int>
             VehicleTypeId = vehicleTypeId.Value,
             Vin = vin.Value,
             Year = year.Value,
-            Mileage = mileage.Value
+            Color = color.Value,
+            Mileage = mileage.Value,
+            IsActive = request.IsActive
         };
 
         await _vehicles.AddAsync(vehicle, ct);

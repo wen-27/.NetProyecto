@@ -19,7 +19,7 @@ public sealed class RegisterVehicleOwnerHandler : IRequestHandler<RegisterVehicl
     public async Task<int> Handle(RegisterVehicleOwner request, CancellationToken ct)
     {
         var vehicleId = new VehicleOwnerHistoryVehicleId(request.VehicleId);
-        var customerId = new VehicleOwnerHistoryCustomerId(request.CustomerId);
+        var personId = new VehicleOwnerHistoryPersonId(request.PersonId);
         var startDate = new VehicleOwnerHistoryStartDate(request.StartDate);
 
         var currentOwner = await _vehicleOwnerHistory.GetCurrentByVehicleIdAsync(vehicleId, ct);
@@ -32,7 +32,7 @@ public sealed class RegisterVehicleOwnerHandler : IRequestHandler<RegisterVehicl
         var ownerHistory = new Domain.Entities.VehicleOwnerHistory
         {
             VehicleId = vehicleId.Value,
-            CustomerId = customerId.Value,
+            PersonId = personId.Value,
             StartDate = startDate.Value
         };
 

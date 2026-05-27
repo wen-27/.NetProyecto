@@ -1,5 +1,7 @@
 using Application.Abstractions;
 using Infrastructure.Context;
+using Infrastructure.Repositories.VehicleOwnerHistory;
+using Infrastructure.Repositories.Vehicles;
 using Infrastructure.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -26,6 +28,8 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+        services.AddScoped<IVehicleRepository, VehicleRepository>();
+        services.AddScoped<IVehicleOwnerHistoryRepository, VehicleOwnerHistoryRepository>();
 
         return services;
     }

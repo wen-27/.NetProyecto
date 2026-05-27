@@ -24,13 +24,16 @@ public sealed class UpdateVehicleHandler : IRequestHandler<UpdateVehicle>
         var vehicleTypeId = new VehicleTypeId(request.VehicleTypeId);
         var vin = new VehicleVin(request.Vin);
         var year = new VehicleYear(request.Year);
+        var color = new VehicleColor(request.Color);
         var mileage = new VehicleMileage(request.Mileage);
 
         vehicle.ModelId = modelId.Value;
         vehicle.VehicleTypeId = vehicleTypeId.Value;
         vehicle.Vin = vin.Value;
         vehicle.Year = year.Value;
+        vehicle.Color = color.Value;
         vehicle.Mileage = mileage.Value;
+        vehicle.IsActive = request.IsActive;
 
         await _vehicles.UpdateAsync(vehicle, ct);
         await _unitOfWork.CommitAsync(ct);

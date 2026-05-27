@@ -7,7 +7,7 @@ public interface IVehicleOwnerHistoryRepository
 {
     Task<VehicleOwnerHistory?> GetByIdAsync(int id, CancellationToken ct = default);
     Task<IReadOnlyList<VehicleOwnerHistory>> GetByVehicleIdAsync(VehicleOwnerHistoryVehicleId vehicleId, CancellationToken ct = default);
-    Task<IReadOnlyList<VehicleOwnerHistory>> GetByCustomerIdAsync(VehicleOwnerHistoryCustomerId customerId, CancellationToken ct = default);
+    Task<IReadOnlyList<VehicleOwnerHistory>> GetByPersonIdAsync(VehicleOwnerHistoryPersonId personId, CancellationToken ct = default);
     Task<VehicleOwnerHistory?> GetCurrentByVehicleIdAsync(VehicleOwnerHistoryVehicleId vehicleId, CancellationToken ct = default);
     Task<IReadOnlyList<VehicleOwnerHistory>> GetAllAsync(CancellationToken ct = default);
     Task<IReadOnlyList<VehicleOwnerHistory>> GetPagedAsync(int page, int pageSize, string? search = null, CancellationToken ct = default);

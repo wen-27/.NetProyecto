@@ -1,0 +1,89 @@
+using Application.Abstractions;
+using Domain.Entities;
+using Domain.ValueObjects.Vehicle;
+using Infrastructure.Context;
+using Microsoft.EntityFrameworkCore;
+
+namespace Infrastructure.Repositories.Vehicles;
+
+public sealed class VehicleRepository : IVehicleRepository
+{
+    private readonly AppDbContext _context;
+
+    public VehicleRepository(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public Task<Vehicle?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        return _context.Vehicles.FirstOrDefaultAsync(x => x.Id == id, ct);
+    }
+
+    public Task<Vehicle?> GetByVinAsync(VehicleVin vin, CancellationToken ct = default)
+    {
+        return _context.Vehicles.FirstOrDefaultAsync(x => x.Vin == vin.Value, ct);
+    }
+
+    public async Task<IReadOnlyList<Vehicle>> GetByModelIdAsync(VehicleModelId modelId, CancellationToken ct = default)
+    {
+        return await _context.Vehicles
+            .Where(x => x.ModelId == modelId.Value)
+            .OrderBy(x => x.Id)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<Vehicle>> GetAllAsync(CancellationToken ct = default)
+    {
+        return await _context.Vehicles
+            .OrderBy(x => x.Id)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<Vehicle>> GetPagedAsync(int page, int pageSize, string? search = null, CancellationToken ct = default)
+    {
+        return await ApplySearch(_context.Vehicles, search)
+            .OrderBy(x => x.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+    }
+
+    public Task<int> CountAsync(string? search = null, CancellationToken ct = default)
+    {
+        return ApplySearch(_context.Vehicles, search).CountAsync(ct);
+    }
+
+    public async Task AddAsync(Vehicle vehicle, CancellationToken ct = default)
+    {
+        await _context.Vehicles.AddAsync(vehicle, ct);
+    }
+
+    public Task UpdateAsync(Vehicle vehicle, CancellationToken ct = default)
+    {
+        _context.Vehicles.Update(vehicle);
+        return Task.CompletedTask;
+    }
+
+    public Task RemoveAsync(Vehicle vehicle, CancellationToken ct = default)
+    {
+        _context.Vehicles.Remove(vehicle);
+        return Task.CompletedTask;
+    }
+
+    public Task<bool> ExistsVinAsync(VehicleVin vin, CancellationToken ct = default)
+    {
+        return _context.Vehicles.AnyAsync(x => x.Vin == vin.Value, ct);
+    }
+
+    private static IQueryable<Vehicle> ApplySearch(IQueryable<Vehicle> query, string? search)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            return query;
+        }
+
+        var term = search.Trim();
+        return query.Where(x => x.Vin.Contains(term) || (x.Color != null && x.Color.Contains(term)));
+    }
+}

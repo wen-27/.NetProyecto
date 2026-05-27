@@ -22,6 +22,9 @@ public sealed class UpdateVehicleValidator : AbstractValidator<UpdateVehicle>
         RuleFor(x => x.Year)
             .InclusiveBetween(1886, DateTime.UtcNow.Year + 1).WithMessage("El año del vehículo está fuera del rango válido.");
 
+        RuleFor(x => x.Color)
+            .MaximumLength(30).WithMessage("El color no puede superar 30 caracteres.");
+
         RuleFor(x => x.Mileage)
             .GreaterThanOrEqualTo(0).WithMessage("El kilometraje no puede ser negativo.");
     }

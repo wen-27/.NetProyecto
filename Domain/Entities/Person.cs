@@ -12,6 +12,7 @@ public class Person : BaseEntity
     public ICollection<PersonDocument> Documents { get; set; } = new List<PersonDocument>();
     public ICollection<PersonEmail> Emails { get; set; } = new List<PersonEmail>();
     public ICollection<PersonPhone> Phones { get; set; } = new List<PersonPhone>();
+    public ICollection<VehicleOwnerHistory> VehicleHistory { get; set; } = new List<VehicleOwnerHistory>();
 
     public Customer? Customer { get; set; }
     public User? User { get; set; }

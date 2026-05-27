@@ -12,7 +12,9 @@ public class VehicleConfiguration : IEntityTypeConfiguration<Domain.Entities.Veh
         entity.Property(x => x.Id).HasColumnName("VehicleId");
         entity.Property(x => x.Vin).HasColumnName("VIN").HasMaxLength(17).IsRequired();
         entity.Property(x => x.Year).IsRequired();
+        entity.Property(x => x.Color).HasMaxLength(30);
         entity.Property(x => x.Mileage).IsRequired();
+        entity.Property(x => x.IsActive).IsRequired();
         entity.HasIndex(x => x.Vin).IsUnique();
 
         entity.HasOne(x => x.VehicleModel)
@@ -27,6 +29,5 @@ public class VehicleConfiguration : IEntityTypeConfiguration<Domain.Entities.Veh
 
         entity.Ignore(x => x.CreatedAt);
         entity.Ignore(x => x.UpdatedAt);
-        entity.Ignore(x => x.IsActive);
     }
 }
