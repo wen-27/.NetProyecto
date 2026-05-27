@@ -2,6 +2,7 @@ using Api.Controllers;
 using Api.DTOs.Vehicles;
 using Application.UseCase.Vehicles;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.Vehicles;
@@ -26,6 +27,7 @@ public sealed class VehiclesController : BaseApiController
         return Ok(await Sender.Send(new GetVehicleById(id), ct));
     }
 
+    [Authorize(Policy = "ReceptionistOrAdmin")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateVehicle command, CancellationToken ct)
     {
@@ -33,10 +35,19 @@ public sealed class VehiclesController : BaseApiController
         return Created($"/api/vehicles/{id}", new { id });
     }
 
+    [Authorize(Policy = "ReceptionistOrAdmin")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateVehicleRequest request, CancellationToken ct)
     {
         await Sender.Send(new UpdateVehicle(id, request.ModelId, request.VehicleTypeId, request.Vin, request.Year, request.Color, request.Mileage, request.IsActive), ct);
+        return NoContent();
+    }
+
+    [Authorize(Policy = "AdminOnly")]
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+    {
+        await Sender.Send(new DeleteVehicle(id), ct);
         return NoContent();
     }
 }

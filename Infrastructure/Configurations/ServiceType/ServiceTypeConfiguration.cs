@@ -11,6 +11,7 @@ public class ServiceTypeConfiguration : IEntityTypeConfiguration<Domain.Entities
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("ServiceTypeId");
         entity.Property(x => x.Name).HasMaxLength(80).IsRequired();
+        entity.Property(x => x.EstimatedDays).IsRequired().HasDefaultValue(1);
         entity.HasIndex(x => x.Name).IsUnique();
         entity.Ignore(x => x.CreatedAt);
         entity.Ignore(x => x.UpdatedAt);

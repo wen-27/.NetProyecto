@@ -23,6 +23,7 @@ public sealed class UpdateServiceTypeHandler : IRequestHandler<UpdateServiceType
         var name = new ServiceTypeName(request.Name);
 
         serviceType.Name = name.Value;
+        serviceType.EstimatedDays = request.EstimatedDays < 1 ? 1 : request.EstimatedDays;
 
         await _serviceTypes.UpdateAsync(serviceType, ct);
         await _unitOfWork.CommitAsync(ct);

@@ -2,7 +2,6 @@ using Application.Abstractions;
 using Domain.Entities;
 using Domain.Enums.OrderStatus;
 using Domain.ValueObjects.Invoice;
-using Domain.ValueObjects.OrderPartDetail;
 using MediatR;
 
 namespace Application.UseCase.Invoices;
@@ -10,22 +9,22 @@ namespace Application.UseCase.Invoices;
 public sealed class GenerateInvoiceHandler : IRequestHandler<GenerateInvoice, int>
 {
     private readonly IInvoiceRepository _invoices;
-    private readonly IOrderPartDetailRepository _orderPartDetails;
+    private readonly IOrderServicePartRepository _orderServiceParts;
     private readonly IPartRepository _parts;
-    private readonly IServiceOrderServiceRepository _orderServices;
+    private readonly IOrderServiceRepository _orderServices;
     private readonly IServiceOrderRepository _serviceOrders;
     private readonly IUnitOfWork _unitOfWork;
 
     public GenerateInvoiceHandler(
         IInvoiceRepository invoices,
-        IOrderPartDetailRepository orderPartDetails,
+        IOrderServicePartRepository orderServiceParts,
         IPartRepository parts,
-        IServiceOrderServiceRepository orderServices,
+        IOrderServiceRepository orderServices,
         IServiceOrderRepository serviceOrders,
         IUnitOfWork unitOfWork)
     {
         _invoices = invoices;
-        _orderPartDetails = orderPartDetails;
+        _orderServiceParts = orderServiceParts;
         _parts = parts;
         _orderServices = orderServices;
         _serviceOrders = serviceOrders;
@@ -51,11 +50,14 @@ public sealed class GenerateInvoiceHandler : IRequestHandler<GenerateInvoice, in
             throw new InvalidOperationException("Solo se puede generar factura para una orden completada.");
         }
 
-        var orderParts = await _orderPartDetails.GetByServiceOrderIdAsync(
-            new OrderPartDetailServiceOrderId(serviceOrderId.Value),
-            ct);
-
         var orderServices = await _orderServices.GetByServiceOrderIdAsync(serviceOrderId.Value, ct);
+        var orderParts = new List<OrderServicePart>();
+
+        foreach (var orderService in orderServices)
+        {
+            orderParts.AddRange(await _orderServiceParts.GetByOrderServiceIdAsync(orderService.Id, ct));
+        }
+
         var laborCost = new InvoiceLaborCost(orderServices.Sum(service => service.LaborCost));
         var partsTotal = orderParts.Sum(detail => detail.Quantity * detail.AppliedUnitPrice);
         var total = new InvoiceTotal(laborCost.Value + partsTotal);

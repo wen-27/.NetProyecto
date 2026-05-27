@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Infrastructure.Seeders;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -17,7 +18,6 @@ public class AppDbContext : DbContext
     public DbSet<CardType> CardTypes => Set<CardType>();
     public DbSet<City> Cities => Set<City>();
     public DbSet<Country> Countries => Set<Country>();
-    public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<DocumentType> DocumentTypes => Set<DocumentType>();
     public DbSet<EmailDomain> EmailDomains => Set<EmailDomain>();
@@ -29,7 +29,6 @@ public class AppDbContext : DbContext
     public DbSet<MechanicSpecialty> MechanicSpecialties => Set<MechanicSpecialty>();
     public DbSet<MechanicSpecialtyAssignment> MechanicSpecialtyAssignments => Set<MechanicSpecialtyAssignment>();
     public DbSet<Neighborhood> Neighborhoods => Set<Neighborhood>();
-    public DbSet<OrderPartDetail> OrderPartDetails => Set<OrderPartDetail>();
     public DbSet<OrderService> OrderServices => Set<OrderService>();
     public DbSet<OrderServicePart> OrderServiceParts => Set<OrderServicePart>();
     public DbSet<OrderStatus> OrderStatuses => Set<OrderStatus>();
@@ -44,15 +43,11 @@ public class AppDbContext : DbContext
     public DbSet<PaymentMethod> PaymentMethods => Set<PaymentMethod>();
     public DbSet<PaymentStatus> PaymentStatuses => Set<PaymentStatus>();
     public DbSet<Person> Persons => Set<Person>();
-    public DbSet<PersonAddress> PersonAddresses => Set<PersonAddress>();
-    public DbSet<PersonDocument> PersonDocuments => Set<PersonDocument>();
     public DbSet<PersonEmail> PersonEmails => Set<PersonEmail>();
     public DbSet<PersonPhone> PersonPhones => Set<PersonPhone>();
     public DbSet<PersonRole> PersonRoles => Set<PersonRole>();
-    public DbSet<PhoneCode> PhoneCodes => Set<PhoneCode>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<ServiceOrder> ServiceOrders => Set<ServiceOrder>();
-    public DbSet<ServiceOrderService> ServiceOrderServices => Set<ServiceOrderService>();
     public DbSet<ServiceType> ServiceTypes => Set<ServiceType>();
     public DbSet<StreetType> StreetTypes => Set<StreetType>();
     public DbSet<Supplier> Suppliers => Set<Supplier>();
@@ -69,5 +64,6 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        modelBuilder.SeedCoreData();
     }
 }

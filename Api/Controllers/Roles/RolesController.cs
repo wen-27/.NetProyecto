@@ -2,10 +2,12 @@ using Api.Controllers;
 using Api.DTOs.Roles;
 using Application.UseCase.Roles;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.Roles;
 
+[Authorize(Policy = "AdminOnly")]
 public sealed class RolesController : BaseApiController
 {
     public RolesController(ISender sender) : base(sender)

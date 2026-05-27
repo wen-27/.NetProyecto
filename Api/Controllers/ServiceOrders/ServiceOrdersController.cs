@@ -2,10 +2,13 @@ using Api.Controllers;
 using Api.DTOs.ServiceOrders;
 using Application.UseCase.ServiceOrders;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Controllers.ServiceOrders;
 
+[EnableRateLimiting("service-orders")]
 public sealed class ServiceOrdersController : BaseApiController
 {
     public ServiceOrdersController(ISender sender) : base(sender)
@@ -26,6 +29,7 @@ public sealed class ServiceOrdersController : BaseApiController
         return Ok(await Sender.Send(new GetServiceOrderById(id), ct));
     }
 
+    [Authorize(Policy = "ReceptionistOrAdmin")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateServiceOrder command, CancellationToken ct)
     {
@@ -33,6 +37,7 @@ public sealed class ServiceOrdersController : BaseApiController
         return Created($"/api/serviceorders/{id}", new { id });
     }
 
+    [Authorize(Policy = "MechanicOrAdmin")]
     [HttpPatch("{id:int}/work")]
     public async Task<IActionResult> RecordWork(int id, RecordServiceOrderWorkRequest request, CancellationToken ct)
     {
@@ -40,6 +45,7 @@ public sealed class ServiceOrdersController : BaseApiController
         return NoContent();
     }
 
+    [Authorize(Policy = "MechanicOrAdmin")]
     [HttpPatch("{id:int}/status")]
     public async Task<IActionResult> ChangeStatus(int id, ChangeServiceOrderStatusRequest request, CancellationToken ct)
     {

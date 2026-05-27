@@ -13,8 +13,8 @@ public class OrderServiceConfiguration : IEntityTypeConfiguration<Domain.Entitie
         entity.Property(x => x.Description).HasColumnType("text");
         entity.Property(x => x.WorkPerformed).HasColumnType("text");
         entity.Property(x => x.LaborCost).HasPrecision(10, 2).IsRequired();
-        entity.HasOne(x => x.ServiceOrder).WithMany().HasForeignKey(x => x.ServiceOrderId).OnDelete(DeleteBehavior.Restrict);
-        entity.HasOne(x => x.ServiceType).WithMany().HasForeignKey(x => x.ServiceTypeId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne(x => x.ServiceOrder).WithMany(x => x.OrderServices).HasForeignKey(x => x.ServiceOrderId).OnDelete(DeleteBehavior.Restrict);
+        entity.HasOne(x => x.ServiceType).WithMany(x => x.OrderServices).HasForeignKey(x => x.ServiceTypeId).OnDelete(DeleteBehavior.Restrict);
         entity.Ignore(x => x.CreatedAt);
         entity.Ignore(x => x.UpdatedAt);
         entity.Ignore(x => x.IsActive);

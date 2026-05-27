@@ -5,10 +5,17 @@ namespace Domain.Entities;
 public class PersonPhone : BaseEntity
 {
     public int PersonId { get; set; }
-    public int PhoneCodeId { get; set; }
+    public int CountryId { get; set; }
     public string PhoneNumber { get; set; } = string.Empty;
     public bool IsPrimary { get; set; }
 
+    public int PhoneCodeId
+    {
+        get => CountryId;
+        set => CountryId = value;
+    }
+
     public Person Person { get; set; } = null!;
     public PhoneCode PhoneCode { get; set; } = null!;
+    public Country Country { get; set; } = null!;
 }

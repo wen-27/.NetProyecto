@@ -56,7 +56,7 @@ public sealed record PersonDto(int Id, string FirstNames, string LastNames, Date
 
 public sealed record PersonEmailDto(int Id, int PersonId, int EmailDomainId, string EmailUser, bool IsPrimary);
 
-public sealed record PersonPhoneDto(int Id, int PersonId, int PhoneCodeId, string PhoneNumber, bool IsPrimary);
+public sealed record PersonPhoneDto(int Id, int PersonId, int CountryId, string PhoneNumber, bool IsPrimary);
 
 public sealed record PhoneCodeDto(int Id, string Code, string Country);
 
@@ -72,7 +72,7 @@ public sealed record ServiceOrderDto(
 
 public sealed record ServiceOrderServiceDto(int Id, int ServiceOrderId, int ServiceTypeId, int MechanicId, string? Description, decimal LaborCost);
 
-public sealed record ServiceTypeDto(int Id, string Name);
+public sealed record ServiceTypeDto(int Id, string Name, int EstimatedDays);
 
 public sealed record SupplierDto(int Id, string Name, string? TaxId, string? Phone, string? Email, bool Status);
 
@@ -146,7 +146,7 @@ public static class EntityDtoMapper
 
     public static PersonEmailDto ToDto(this PersonEmail entity) => new(entity.Id, entity.PersonId, entity.EmailDomainId, entity.EmailUser, entity.IsPrimary);
 
-    public static PersonPhoneDto ToDto(this PersonPhone entity) => new(entity.Id, entity.PersonId, entity.PhoneCodeId, entity.PhoneNumber, entity.IsPrimary);
+    public static PersonPhoneDto ToDto(this PersonPhone entity) => new(entity.Id, entity.PersonId, entity.CountryId, entity.PhoneNumber, entity.IsPrimary);
 
     public static PhoneCodeDto ToDto(this PhoneCode entity) => new(entity.Id, entity.Code, entity.Country);
 
@@ -156,7 +156,7 @@ public static class EntityDtoMapper
 
     public static ServiceOrderServiceDto ToDto(this ServiceOrderService entity) => new(entity.Id, entity.ServiceOrderId, entity.ServiceTypeId, entity.MechanicId, entity.Description, entity.LaborCost);
 
-    public static ServiceTypeDto ToDto(this ServiceType entity) => new(entity.Id, entity.Name);
+    public static ServiceTypeDto ToDto(this ServiceType entity) => new(entity.Id, entity.Name, entity.EstimatedDays);
 
     public static SupplierDto ToDto(this Supplier entity) => new(entity.Id, entity.Name, entity.TaxId, entity.Phone, entity.Email, entity.Status);
 

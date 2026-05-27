@@ -10,20 +10,22 @@ public class PersonPhoneConfiguration : IEntityTypeConfiguration<Domain.Entities
         entity.ToTable("PersonPhones");
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("PersonPhoneId");
-        entity.Property(x => x.PhoneNumber).HasMaxLength(30).IsRequired();
+        entity.Property(x => x.PhoneNumber).HasMaxLength(20).IsRequired();
         entity.Property(x => x.IsPrimary).IsRequired();
-        entity.HasIndex(x => new { x.PhoneCodeId, x.PhoneNumber }).IsUnique();
+        entity.HasIndex(x => new { x.CountryId, x.PhoneNumber }).IsUnique();
 
         entity.HasOne(x => x.Person)
             .WithMany(x => x.Phones)
             .HasForeignKey(x => x.PersonId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        entity.HasOne(x => x.PhoneCode)
-            .WithMany(x => x.PersonPhones)
-            .HasForeignKey(x => x.PhoneCodeId)
+        entity.HasOne(x => x.Country)
+            .WithMany()
+            .HasForeignKey(x => x.CountryId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        entity.Ignore(x => x.PhoneCodeId);
+        entity.Ignore(x => x.PhoneCode);
         entity.Ignore(x => x.CreatedAt);
         entity.Ignore(x => x.UpdatedAt);
         entity.Ignore(x => x.IsActive);

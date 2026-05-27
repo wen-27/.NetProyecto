@@ -22,6 +22,46 @@ namespace Infrastructure.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("Domain.Entities.Address", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("AddressId");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Complement")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<string>("MainNumber")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<int>("NeighborhoodId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SecondaryNumber")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<int>("StreetTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TertiaryNumber")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NeighborhoodId");
+
+                    b.HasIndex("StreetTypeId");
+
+                    b.ToTable("Addresses", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Entities.Audit", b =>
                 {
                     b.Property<int>("Id")
@@ -80,6 +120,38 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("AuditActionTypes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "CREATE"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "UPDATE"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "DELETE"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "CANCEL"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "VOID"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "LOGIN"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.CardType", b =>
@@ -102,6 +174,28 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("CardTypes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Visa"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Mastercard"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "AmericanExpress"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Debit"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.City", b =>
@@ -127,29 +221,84 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Cities", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DepartmentId = 1,
+                            Name = "Bucaramanga"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DepartmentId = 1,
+                            Name = "Floridablanca"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DepartmentId = 1,
+                            Name = "Giron"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DepartmentId = 2,
+                            Name = "Bogota"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DepartmentId = 3,
+                            Name = "Medellin"
+                        });
                 });
 
-            modelBuilder.Entity("Domain.Entities.Customer", b =>
+            modelBuilder.Entity("Domain.Entities.Country", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("CustomerId");
+                        .HasColumnName("CountryId");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("PersonId")
-                        .HasColumnType("int");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("tinyint(1)");
+                    b.Property<string>("PhoneCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PersonId")
+                    b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Customers", (string)null);
+                    b.ToTable("Countries", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Colombia",
+                            PhoneCode = "+57"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Venezuela",
+                            PhoneCode = "+58"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Ecuador",
+                            PhoneCode = "+593"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Department", b =>
@@ -161,6 +310,9 @@ namespace Infrastructure.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CountryId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -168,10 +320,30 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("CountryId", "Name")
                         .IsUnique();
 
                     b.ToTable("Departments", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CountryId = 1,
+                            Name = "Santander"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CountryId = 1,
+                            Name = "Cundinamarca"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CountryId = 1,
+                            Name = "Antioquia"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.DocumentType", b =>
@@ -202,6 +374,32 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("DocumentTypes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "CC",
+                            Name = "Cedula de Ciudadania"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "NIT",
+                            Name = "NIT"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "CE",
+                            Name = "Cedula de Extranjeria"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Code = "PAS",
+                            Name = "Pasaporte"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.EmailDomain", b =>
@@ -224,6 +422,50 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("EmailDomains", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.Gender", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("GenderId");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Genders", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Male"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Female"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Other"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "PreferNotToSay"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Invoice", b =>
@@ -313,14 +555,214 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("InvoiceStatuses", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Draft"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Issued"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Paid"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Cancelled"
+                        });
                 });
 
-            modelBuilder.Entity("Domain.Entities.OrderPartDetail", b =>
+            modelBuilder.Entity("Domain.Entities.MechanicAssignment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("ServiceOrderPartId");
+                        .HasColumnName("MechanicAssignmentId");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MechanicPersonId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderServiceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SpecialtyId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MechanicPersonId");
+
+                    b.HasIndex("SpecialtyId");
+
+                    b.HasIndex("OrderServiceId", "MechanicPersonId")
+                        .IsUnique();
+
+                    b.ToTable("MechanicAssignments", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.MechanicSpecialty", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("SpecialtyId");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("MechanicSpecialties", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Engine"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Electrical"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "AirConditioning"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Suspension"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Brakes"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "GeneralDiagnostics"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Bodywork"
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Entities.MechanicSpecialtyAssignment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("AssignmentId");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SpecialtyId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SpecialtyId");
+
+                    b.HasIndex("PersonId", "SpecialtyId")
+                        .IsUnique();
+
+                    b.ToTable("MechanicSpecialtyAssignments", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.Neighborhood", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("NeighborhoodId");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CityId");
+
+                    b.ToTable("Neighborhoods", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.OrderService", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("OrderServiceId");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ApprovalDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool?>("CustomerApproved")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("LaborCost")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("ServiceOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServiceTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WorkPerformed")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServiceOrderId");
+
+                    b.HasIndex("ServiceTypeId");
+
+                    b.ToTable("OrderServices", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.OrderServicePart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("OrderServicePartId");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
@@ -328,23 +770,29 @@ namespace Infrastructure.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<DateTime?>("ApprovalDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool?>("CustomerApproved")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("OrderServiceId")
+                        .HasColumnType("int");
+
                     b.Property<int>("PartId")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("ServiceOrderId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("PartId");
 
-                    b.HasIndex("ServiceOrderId", "PartId")
+                    b.HasIndex("OrderServiceId", "PartId")
                         .IsUnique();
 
-                    b.ToTable("ServiceOrderParts", (string)null);
+                    b.ToTable("OrderServiceParts", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.OrderStatus", b =>
@@ -367,6 +815,33 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("OrderStatuses", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Pending"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "InProgress"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Completed"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Cancelled"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Voided"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.OrderStatusHistory", b =>
@@ -501,6 +976,48 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("PartCategories", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Filters"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Oils and Lubricants"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Brakes"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Suspension"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Electrical"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Air Conditioning"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Engine"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Bodywork"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.PartPurchase", b =>
@@ -660,6 +1177,23 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("PaymentMethods", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Cash"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Card"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "BankTransfer"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.PaymentStatus", b =>
@@ -682,6 +1216,28 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("PaymentStatuses", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Pending"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Completed"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Refunded"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Failed"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Person", b =>
@@ -693,87 +1249,56 @@ namespace Infrastructure.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("FirstNames")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                    b.Property<int?>("AddressId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("LastNames")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                    b.Property<DateOnly?>("BirthDate")
+                        .HasColumnType("date");
 
-                    b.Property<DateTime>("RegistrationDate")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Persons", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.PersonAddress", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("PersonAddressId");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
-
-                    b.Property<int>("CityId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsPrimary")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int>("PersonId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CityId");
-
-                    b.HasIndex("PersonId");
-
-                    b.ToTable("PersonAddresses", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.PersonDocument", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("PersonDocumentId");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("DocumentNumber")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
 
                     b.Property<int>("DocumentTypeId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsPrimary")
-                        .HasColumnType("tinyint(1)");
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
-                    b.Property<int>("PersonId")
+                    b.Property<int?>("GenderId")
                         .HasColumnType("int");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MiddleName")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("SecondLastName")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PersonId");
+                    b.HasIndex("AddressId");
 
-                    b.HasIndex("DocumentTypeId", "DocumentNumber")
+                    b.HasIndex("DocumentNumber")
                         .IsUnique();
 
-                    b.ToTable("PersonDocuments", (string)null);
+                    b.HasIndex("DocumentTypeId");
+
+                    b.HasIndex("GenderId");
+
+                    b.ToTable("Persons", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.PersonEmail", b =>
@@ -820,55 +1345,66 @@ namespace Infrastructure.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CountryId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsPrimary")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<int>("PersonId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PhoneCodeId")
-                        .HasColumnType("int");
-
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("varchar(30)");
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PersonId");
 
-                    b.HasIndex("PhoneCodeId", "PhoneNumber")
+                    b.HasIndex("CountryId", "PhoneNumber")
                         .IsUnique();
 
                     b.ToTable("PersonPhones", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entities.PhoneCode", b =>
+            modelBuilder.Entity("Domain.Entities.PersonRole", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("PhoneCodeId");
+                        .HasColumnName("PersonRoleId");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("varchar(80)");
+                    b.Property<int>("PersonId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PersonId1")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RoleId1")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Code")
+                    b.HasIndex("PersonId1");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("RoleId1");
+
+                    b.HasIndex("PersonId", "RoleId")
                         .IsUnique();
 
-                    b.ToTable("PhoneCodes", (string)null);
+                    b.ToTable("PersonRoles", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Role", b =>
@@ -891,6 +1427,28 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Roles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            RoleName = "Client"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            RoleName = "Mechanic"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            RoleName = "Receptionist"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.ServiceOrder", b =>
@@ -902,20 +1460,29 @@ namespace Infrastructure.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CancellationDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CancellationReason")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<DateTime>("EntryDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("EstimatedDeliveryDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("GeneralDescription")
+                        .HasColumnType("text");
+
                     b.Property<int>("OrderStatusId")
                         .HasColumnType("int");
 
                     b.Property<int>("VehicleId")
                         .HasColumnType("int");
-
-                    b.Property<string>("WorkPerformed")
-                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -926,43 +1493,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("ServiceOrders", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entities.ServiceOrderService", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("ServiceOrderServiceId");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasColumnType("longtext");
-
-                    b.Property<decimal>("LaborCost")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<int>("MechanicId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ServiceOrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ServiceTypeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MechanicId");
-
-                    b.HasIndex("ServiceTypeId");
-
-                    b.HasIndex("ServiceOrderId", "ServiceTypeId")
-                        .IsUnique();
-
-                    b.ToTable("ServiceOrderServices", (string)null);
-                });
-
             modelBuilder.Entity("Domain.Entities.ServiceType", b =>
                 {
                     b.Property<int>("Id")
@@ -971,6 +1501,11 @@ namespace Infrastructure.Migrations
                         .HasColumnName("ServiceTypeId");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EstimatedDays")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -983,6 +1518,98 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("ServiceTypes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            EstimatedDays = 1,
+                            Name = "Preventive Maintenance"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            EstimatedDays = 3,
+                            Name = "Mechanical Repair"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            EstimatedDays = 1,
+                            Name = "Diagnostics"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            EstimatedDays = 2,
+                            Name = "Air Conditioning"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            EstimatedDays = 2,
+                            Name = "Electrical"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            EstimatedDays = 5,
+                            Name = "Bodywork and Paint"
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Entities.StreetType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("StreetTypeId");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("StreetTypes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Calle"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Carrera"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Avenida"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Diagonal"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Transversal"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Circular"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Supplier", b =>
@@ -1031,6 +1658,12 @@ namespace Infrastructure.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -1039,8 +1672,11 @@ namespace Infrastructure.Migrations
                     b.Property<int>("PersonId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("tinyint(1)");
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("RefreshTokenExpiration")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -1133,6 +1769,47 @@ namespace Infrastructure.Migrations
                     b.ToTable("VehicleBrands", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.VehicleEntryInventory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("EntryInventoryId");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("HasScratches")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("HasToolbox")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Observations")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("OwnershipCardDelivered")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("RegisteredAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ScratchesDescription")
+                        .HasColumnType("text");
+
+                    b.Property<int>("ServiceOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ToolboxDescription")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServiceOrderId")
+                        .IsUnique();
+
+                    b.ToTable("VehicleEntryInventory", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Entities.VehicleModel", b =>
                 {
                     b.Property<int>("Id")
@@ -1167,9 +1844,6 @@ namespace Infrastructure.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CustomerId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("date");
 
@@ -1183,8 +1857,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
 
                     b.HasIndex("PersonId");
 
@@ -1213,6 +1885,57 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("VehicleTypes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Sedan"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "SUV"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Pickup"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Van"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Motorcycle"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Truck"
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Entities.Address", b =>
+                {
+                    b.HasOne("Domain.Entities.Neighborhood", "Neighborhood")
+                        .WithMany()
+                        .HasForeignKey("NeighborhoodId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.StreetType", "StreetType")
+                        .WithMany()
+                        .HasForeignKey("StreetTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Neighborhood");
+
+                    b.Navigation("StreetType");
                 });
 
             modelBuilder.Entity("Domain.Entities.Audit", b =>
@@ -1245,15 +1968,15 @@ namespace Infrastructure.Migrations
                     b.Navigation("Department");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Customer", b =>
+            modelBuilder.Entity("Domain.Entities.Department", b =>
                 {
-                    b.HasOne("Domain.Entities.Person", "Person")
-                        .WithOne("Customer")
-                        .HasForeignKey("Domain.Entities.Customer", "PersonId")
+                    b.HasOne("Domain.Entities.Country", "Country")
+                        .WithMany()
+                        .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Person");
+                    b.Navigation("Country");
                 });
 
             modelBuilder.Entity("Domain.Entities.Invoice", b =>
@@ -1286,23 +2009,99 @@ namespace Infrastructure.Migrations
                     b.Navigation("Invoice");
                 });
 
-            modelBuilder.Entity("Domain.Entities.OrderPartDetail", b =>
+            modelBuilder.Entity("Domain.Entities.MechanicAssignment", b =>
                 {
-                    b.HasOne("Domain.Entities.Part", "Part")
-                        .WithMany("OrderDetails")
-                        .HasForeignKey("PartId")
+                    b.HasOne("Domain.Entities.Person", "MechanicPerson")
+                        .WithMany()
+                        .HasForeignKey("MechanicPersonId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.OrderService", "OrderService")
+                        .WithMany()
+                        .HasForeignKey("OrderServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.MechanicSpecialty", "Specialty")
+                        .WithMany()
+                        .HasForeignKey("SpecialtyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MechanicPerson");
+
+                    b.Navigation("OrderService");
+
+                    b.Navigation("Specialty");
+                });
+
+            modelBuilder.Entity("Domain.Entities.MechanicSpecialtyAssignment", b =>
+                {
+                    b.HasOne("Domain.Entities.Person", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.MechanicSpecialty", "Specialty")
+                        .WithMany()
+                        .HasForeignKey("SpecialtyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Person");
+
+                    b.Navigation("Specialty");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Neighborhood", b =>
+                {
+                    b.HasOne("Domain.Entities.City", "City")
+                        .WithMany()
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("City");
+                });
+
+            modelBuilder.Entity("Domain.Entities.OrderService", b =>
+                {
                     b.HasOne("Domain.Entities.ServiceOrder", "ServiceOrder")
-                        .WithMany("PartDetails")
+                        .WithMany("OrderServices")
                         .HasForeignKey("ServiceOrderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Part");
+                    b.HasOne("Domain.Entities.ServiceType", "ServiceType")
+                        .WithMany("OrderServices")
+                        .HasForeignKey("ServiceTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("ServiceOrder");
+
+                    b.Navigation("ServiceType");
+                });
+
+            modelBuilder.Entity("Domain.Entities.OrderServicePart", b =>
+                {
+                    b.HasOne("Domain.Entities.OrderService", "OrderService")
+                        .WithMany()
+                        .HasForeignKey("OrderServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Part", "Part")
+                        .WithMany("OrderServiceParts")
+                        .HasForeignKey("PartId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("OrderService");
+
+                    b.Navigation("Part");
                 });
 
             modelBuilder.Entity("Domain.Entities.OrderStatusHistory", b =>
@@ -1433,42 +2232,29 @@ namespace Infrastructure.Migrations
                     b.Navigation("Payment");
                 });
 
-            modelBuilder.Entity("Domain.Entities.PersonAddress", b =>
+            modelBuilder.Entity("Domain.Entities.Person", b =>
                 {
-                    b.HasOne("Domain.Entities.City", "City")
-                        .WithMany("PersonAddresses")
-                        .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.HasOne("Domain.Entities.Address", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Domain.Entities.Person", "Person")
-                        .WithMany("Addresses")
-                        .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("City");
-
-                    b.Navigation("Person");
-                });
-
-            modelBuilder.Entity("Domain.Entities.PersonDocument", b =>
-                {
                     b.HasOne("Domain.Entities.DocumentType", "DocumentType")
-                        .WithMany("PersonDocuments")
+                        .WithMany()
                         .HasForeignKey("DocumentTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Person", "Person")
-                        .WithMany("Documents")
-                        .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.HasOne("Domain.Entities.Gender", "Gender")
+                        .WithMany()
+                        .HasForeignKey("GenderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Address");
 
                     b.Navigation("DocumentType");
 
-                    b.Navigation("Person");
+                    b.Navigation("Gender");
                 });
 
             modelBuilder.Entity("Domain.Entities.PersonEmail", b =>
@@ -1492,21 +2278,48 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.PersonPhone", b =>
                 {
+                    b.HasOne("Domain.Entities.Country", "Country")
+                        .WithMany()
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Person", "Person")
                         .WithMany("Phones")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.PhoneCode", "PhoneCode")
-                        .WithMany("PersonPhones")
-                        .HasForeignKey("PhoneCodeId")
+                    b.Navigation("Country");
+
+                    b.Navigation("Person");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PersonRole", b =>
+                {
+                    b.HasOne("Domain.Entities.Person", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.Person", null)
+                        .WithMany("PersonRoles")
+                        .HasForeignKey("PersonId1");
+
+                    b.HasOne("Domain.Entities.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Role", null)
+                        .WithMany("PersonRoles")
+                        .HasForeignKey("RoleId1");
+
                     b.Navigation("Person");
 
-                    b.Navigation("PhoneCode");
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Domain.Entities.ServiceOrder", b =>
@@ -1526,33 +2339,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("OrderStatus");
 
                     b.Navigation("Vehicle");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ServiceOrderService", b =>
-                {
-                    b.HasOne("Domain.Entities.User", "Mechanic")
-                        .WithMany("ServiceOrderServicesAsMechanic")
-                        .HasForeignKey("MechanicId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.ServiceOrder", "ServiceOrder")
-                        .WithMany("Services")
-                        .HasForeignKey("ServiceOrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.ServiceType", "ServiceType")
-                        .WithMany("ServiceOrderServices")
-                        .HasForeignKey("ServiceTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Mechanic");
-
-                    b.Navigation("ServiceOrder");
-
-                    b.Navigation("ServiceType");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -1604,6 +2390,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("VehicleType");
                 });
 
+            modelBuilder.Entity("Domain.Entities.VehicleEntryInventory", b =>
+                {
+                    b.HasOne("Domain.Entities.ServiceOrder", "ServiceOrder")
+                        .WithOne()
+                        .HasForeignKey("Domain.Entities.VehicleEntryInventory", "ServiceOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ServiceOrder");
+                });
+
             modelBuilder.Entity("Domain.Entities.VehicleModel", b =>
                 {
                     b.HasOne("Domain.Entities.VehicleBrand", "VehicleBrand")
@@ -1617,10 +2414,6 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.VehicleOwnerHistory", b =>
                 {
-                    b.HasOne("Domain.Entities.Customer", null)
-                        .WithMany("VehicleHistory")
-                        .HasForeignKey("CustomerId");
-
                     b.HasOne("Domain.Entities.Person", "Person")
                         .WithMany("VehicleHistory")
                         .HasForeignKey("PersonId")
@@ -1648,24 +2441,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("PaymentCards");
                 });
 
-            modelBuilder.Entity("Domain.Entities.City", b =>
-                {
-                    b.Navigation("PersonAddresses");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Customer", b =>
-                {
-                    b.Navigation("VehicleHistory");
-                });
-
             modelBuilder.Entity("Domain.Entities.Department", b =>
                 {
                     b.Navigation("Cities");
-                });
-
-            modelBuilder.Entity("Domain.Entities.DocumentType", b =>
-                {
-                    b.Navigation("PersonDocuments");
                 });
 
             modelBuilder.Entity("Domain.Entities.EmailDomain", b =>
@@ -1696,7 +2474,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Part", b =>
                 {
-                    b.Navigation("OrderDetails");
+                    b.Navigation("OrderServiceParts");
 
                     b.Navigation("PurchaseDetails");
                 });
@@ -1733,13 +2511,9 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Person", b =>
                 {
-                    b.Navigation("Addresses");
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("Documents");
-
                     b.Navigation("Emails");
+
+                    b.Navigation("PersonRoles");
 
                     b.Navigation("Phones");
 
@@ -1748,13 +2522,10 @@ namespace Infrastructure.Migrations
                     b.Navigation("VehicleHistory");
                 });
 
-            modelBuilder.Entity("Domain.Entities.PhoneCode", b =>
-                {
-                    b.Navigation("PersonPhones");
-                });
-
             modelBuilder.Entity("Domain.Entities.Role", b =>
                 {
+                    b.Navigation("PersonRoles");
+
                     b.Navigation("UserRoles");
                 });
 
@@ -1762,16 +2533,14 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("Invoice");
 
-                    b.Navigation("PartDetails");
-
-                    b.Navigation("Services");
+                    b.Navigation("OrderServices");
 
                     b.Navigation("StatusHistory");
                 });
 
             modelBuilder.Entity("Domain.Entities.ServiceType", b =>
                 {
-                    b.Navigation("ServiceOrderServices");
+                    b.Navigation("OrderServices");
                 });
 
             modelBuilder.Entity("Domain.Entities.Supplier", b =>
@@ -1784,8 +2553,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Audits");
 
                     b.Navigation("OrderStatusHistory");
-
-                    b.Navigation("ServiceOrderServicesAsMechanic");
 
                     b.Navigation("UserRoles");
                 });

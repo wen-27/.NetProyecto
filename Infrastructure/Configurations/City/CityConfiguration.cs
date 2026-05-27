@@ -18,6 +18,7 @@ public class CityConfiguration : IEntityTypeConfiguration<Domain.Entities.City>
             .HasForeignKey(x => x.DepartmentId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        entity.Ignore(x => x.PersonAddresses);
         entity.Ignore(x => x.CreatedAt);
         entity.Ignore(x => x.UpdatedAt);
         entity.Ignore(x => x.IsActive);

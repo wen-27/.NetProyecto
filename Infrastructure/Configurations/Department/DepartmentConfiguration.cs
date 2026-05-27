@@ -11,7 +11,13 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Domain.Entities.
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("DepartmentId");
         entity.Property(x => x.Name).HasMaxLength(100).IsRequired();
-        entity.HasIndex(x => x.Name).IsUnique();
+        entity.HasIndex(x => new { x.CountryId, x.Name }).IsUnique();
+
+        entity.HasOne(x => x.Country)
+            .WithMany()
+            .HasForeignKey(x => x.CountryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         entity.Ignore(x => x.CreatedAt);
         entity.Ignore(x => x.UpdatedAt);
         entity.Ignore(x => x.IsActive);

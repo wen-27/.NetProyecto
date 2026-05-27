@@ -5,6 +5,7 @@ namespace Domain.Entities;
 public class ServiceType : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
+    public int EstimatedDays { get; set; } = 1;
 
-    public ICollection<ServiceOrderService> ServiceOrderServices { get; set; } = new List<ServiceOrderService>();
+    public ICollection<OrderService> OrderServices { get; set; } = new List<OrderService>();
 }

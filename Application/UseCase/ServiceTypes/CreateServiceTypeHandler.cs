@@ -27,7 +27,8 @@ public sealed class CreateServiceTypeHandler : IRequestHandler<CreateServiceType
 
         var serviceType = new ServiceType
         {
-            Name = name.Value
+            Name = name.Value,
+            EstimatedDays = request.EstimatedDays < 1 ? 1 : request.EstimatedDays
         };
 
         await _serviceTypes.AddAsync(serviceType, ct);

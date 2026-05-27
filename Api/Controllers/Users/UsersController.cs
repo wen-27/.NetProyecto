@@ -2,10 +2,12 @@ using Api.Controllers;
 using Api.DTOs.Users;
 using Application.UseCase.Users;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.Users;
 
+[Authorize(Policy = "AdminOnly")]
 public sealed class UsersController : BaseApiController
 {
     public UsersController(ISender sender) : base(sender)

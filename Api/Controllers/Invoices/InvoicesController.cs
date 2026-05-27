@@ -1,6 +1,7 @@
 using Api.Controllers;
 using Application.UseCase.Invoices;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.Invoices;
@@ -25,6 +26,7 @@ public sealed class InvoicesController : BaseApiController
         return Ok(await Sender.Send(new GetInvoiceById(id), ct));
     }
 
+    [Authorize(Policy = "MechanicOrAdmin")]
     [HttpPost]
     public async Task<IActionResult> Generate(GenerateInvoice command, CancellationToken ct)
     {

@@ -19,11 +19,11 @@ public sealed class AddPersonPhoneHandler : IRequestHandler<AddPersonPhone, int>
     public async Task<int> Handle(AddPersonPhone request, CancellationToken ct)
     {
         var personId = new PersonPhonePersonId(request.PersonId);
-        var phoneCodeId = new PersonPhoneCodeId(request.PhoneCodeId);
+        var countryId = new PersonPhoneCodeId(request.CountryId);
         var phoneNumber = new PersonPhoneNumber(request.PhoneNumber);
         var isPrimary = new PersonPhoneIsPrimary(request.IsPrimary);
 
-        if (await _personPhones.ExistsPhoneAsync(phoneCodeId, phoneNumber, ct))
+        if (await _personPhones.ExistsPhoneAsync(countryId, phoneNumber, ct))
         {
             throw new InvalidOperationException("Ya existe ese teléfono.");
         }
@@ -31,7 +31,7 @@ public sealed class AddPersonPhoneHandler : IRequestHandler<AddPersonPhone, int>
         var personPhone = new PersonPhone
         {
             PersonId = personId.Value,
-            PhoneCodeId = phoneCodeId.Value,
+            CountryId = countryId.Value,
             PhoneNumber = phoneNumber.Value,
             IsPrimary = isPrimary.Value
         };

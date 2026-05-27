@@ -1,12 +1,11 @@
 using Application.Abstractions;
 using Infrastructure.Context;
 using Infrastructure.Repositories;
-using Infrastructure.Repositories.VehicleOwnerHistory;
-using Infrastructure.Repositories.Vehicles;
 using Infrastructure.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace Infrastructure;
 
@@ -29,32 +28,31 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
-        services.AddScoped<IVehicleRepository, VehicleRepository>();
-        services.AddScoped<IVehicleOwnerHistoryRepository, VehicleOwnerHistoryRepository>();
-        services.AddRepositoryProxies();
+        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+        services.AddConcreteRepositories();
 
         return services;
     }
 
-    private static IServiceCollection AddRepositoryProxies(this IServiceCollection services)
+    private static IServiceCollection AddConcreteRepositories(this IServiceCollection services)
     {
-        var repositoryTypes = typeof(IUnitOfWork).Assembly
+        var repositoryInterfaces = typeof(IUnitOfWork).Assembly
             .GetTypes()
             .Where(x => x.IsInterface && x.Namespace == "Application.Abstractions" && x.Name.StartsWith('I') && x.Name.EndsWith("Repository"))
             .ToArray();
 
-        foreach (var repositoryType in repositoryTypes)
-        {
-            if (services.Any(x => x.ServiceType == repositoryType))
-            {
-                continue;
-            }
+        var repositoryImplementations = Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Where(x => x.IsClass && !x.IsAbstract && x.Name.EndsWith("Repository", StringComparison.Ordinal))
+            .ToArray();
 
-            services.AddScoped(repositoryType, provider =>
+        foreach (var repositoryInterface in repositoryInterfaces)
+        {
+            var implementation = repositoryImplementations.SingleOrDefault(x => repositoryInterface.IsAssignableFrom(x));
+            if (implementation is not null)
             {
-                var context = provider.GetRequiredService<AppDbContext>();
-                return EfRepositoryProxy.Create(repositoryType, context);
-            });
+                services.AddScoped(repositoryInterface, implementation);
+            }
         }
 
         return services;

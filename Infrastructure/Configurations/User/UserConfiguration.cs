@@ -11,7 +11,10 @@ public class UserConfiguration : IEntityTypeConfiguration<Domain.Entities.User>
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("UserId");
         entity.Property(x => x.PasswordHash).HasMaxLength(255).IsRequired();
-        entity.Property(x => x.Status).IsRequired();
+        entity.Property(x => x.RefreshToken).HasColumnType("text");
+        entity.Property(x => x.RefreshTokenExpiration);
+        entity.Property(x => x.IsActive).IsRequired();
+        entity.Property(x => x.CreatedAt).IsRequired();
         entity.HasIndex(x => x.PersonId).IsUnique();
 
         entity.HasOne(x => x.Person)
@@ -19,8 +22,8 @@ public class UserConfiguration : IEntityTypeConfiguration<Domain.Entities.User>
             .HasForeignKey<Domain.Entities.User>(x => x.PersonId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        entity.Ignore(x => x.CreatedAt);
+        entity.Ignore(x => x.Status);
+        entity.Ignore(x => x.ServiceOrderServicesAsMechanic);
         entity.Ignore(x => x.UpdatedAt);
-        entity.Ignore(x => x.IsActive);
     }
 }

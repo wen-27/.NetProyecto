@@ -62,24 +62,15 @@ public sealed class ApiMappingRegister : IRegister
         config.NewConfig<DocumentType, DocumentTypeResponse>();
         config.NewConfig<Gender, GenderResponse>();
         config.NewConfig<Person, PersonResponse>()
-            .Map(dest => dest.DocumentTypeId, _ => 0)
-            .Map(dest => dest.DocumentNumber, _ => string.Empty)
-            .Map(dest => dest.FirstName, src => src.FirstNames)
-            .Map(dest => dest.MiddleName, _ => (string?)null)
-            .Map(dest => dest.LastName, src => src.LastNames)
-            .Map(dest => dest.SecondLastName, _ => (string?)null)
-            .Map(dest => dest.BirthDate, _ => (DateOnly?)null)
-            .Map(dest => dest.GenderId, _ => (int?)null)
-            .Map(dest => dest.AddressId, _ => (int?)null)
-            .Map(dest => dest.CreatedAt, src => src.RegistrationDate);
+            .Map(dest => dest.CreatedAt, src => src.CreatedAt);
         config.NewConfig<EmailDomain, EmailDomainResponse>();
         config.NewConfig<PersonEmail, PersonEmailResponse>();
         config.NewConfig<PersonPhone, PersonPhoneResponse>()
-            .Map(dest => dest.CountryId, src => src.PhoneCodeId);
+            .Map(dest => dest.CountryId, src => src.CountryId);
         config.NewConfig<Role, RoleResponse>();
         config.NewConfig<PersonRole, PersonRoleResponse>();
         config.NewConfig<User, UserResponse>()
-            .Map(dest => dest.IsActive, src => src.Status);
+            .Map(dest => dest.IsActive, src => src.IsActive);
         config.NewConfig<MechanicSpecialty, MechanicSpecialtyResponse>();
         config.NewConfig<MechanicSpecialtyAssignment, MechanicSpecialtyAssignmentResponse>();
         config.NewConfig<VehicleType, VehicleTypeResponse>();

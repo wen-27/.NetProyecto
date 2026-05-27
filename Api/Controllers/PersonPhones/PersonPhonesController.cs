@@ -36,7 +36,7 @@ public sealed class PersonPhonesController : BaseApiController
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdatePersonPhoneRequest request, CancellationToken ct)
     {
-        await Sender.Send(new UpdatePersonPhone(id, request.PhoneCodeId, request.PhoneNumber, request.IsPrimary), ct);
+        await Sender.Send(new UpdatePersonPhone(id, request.CountryId, request.PhoneNumber, request.IsPrimary), ct);
         return NoContent();
     }
 }

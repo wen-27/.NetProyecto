@@ -36,7 +36,7 @@ public sealed class ServiceTypesController : BaseApiController
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateServiceTypeRequest request, CancellationToken ct)
     {
-        await Sender.Send(new UpdateServiceType(id, request.Name), ct);
+        await Sender.Send(new UpdateServiceType(id, request.Name, request.EstimatedDays), ct);
         return NoContent();
     }
 }

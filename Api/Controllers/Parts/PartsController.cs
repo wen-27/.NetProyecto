@@ -2,10 +2,13 @@ using Api.Controllers;
 using Api.DTOs.Parts;
 using Application.UseCase.Parts;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Controllers.Parts;
 
+[EnableRateLimiting("parts")]
 public sealed class PartsController : BaseApiController
 {
     public PartsController(ISender sender) : base(sender)
@@ -26,6 +29,7 @@ public sealed class PartsController : BaseApiController
         return Ok(await Sender.Send(new GetPartById(id), ct));
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<IActionResult> Create(CreatePart command, CancellationToken ct)
     {
@@ -33,6 +37,7 @@ public sealed class PartsController : BaseApiController
         return Created($"/api/parts/{id}", new { id });
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdatePartRequest request, CancellationToken ct)
     {
