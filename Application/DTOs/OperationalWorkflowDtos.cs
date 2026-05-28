@@ -157,8 +157,11 @@ public sealed record ConfirmDeliveryDateDto(DateTime DeliveryDate);
 
 public sealed record ClientOrderSummaryDto(
     int Id,
+    string Code,
     string Status,
     string? VehiclePlate,
+    string Vehicle,
+    string Customer,
     decimal EstimatedTotal,
     DateTime EntryDate,
     DateTime? DeliveryDate,
@@ -168,8 +171,11 @@ public sealed record ClientOrderSummaryDto(
 
 public sealed record ClientOrderDetailDto(
     int Id,
+    string Code,
     string Status,
     string? VehiclePlate,
+    string Vehicle,
+    string Customer,
     decimal EstimatedTotal,
     DateTime EntryDate,
     DateTime? DeliveryDate,
