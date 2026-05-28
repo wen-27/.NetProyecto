@@ -1,6 +1,8 @@
 using Application.Abstractions;
+using Application.Abstractions.OperationalWorkflow;
 using Infrastructure.Context;
 using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Infrastructure.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +30,7 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+        services.AddScoped<IOperationalWorkflowService, OperationalWorkflowService>();
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddConcreteRepositories();
 

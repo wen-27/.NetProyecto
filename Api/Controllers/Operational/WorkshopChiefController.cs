@@ -1,0 +1,32 @@
+using Application.Abstractions.OperationalWorkflow;
+using Application.DTOs;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Api.Controllers.Operational;
+
+[Route("api/workshop-chief")]
+[Authorize(Roles = "WorkshopChief,Admin")]
+public sealed class WorkshopChiefController : OperationalControllerBase
+{
+    private readonly IOperationalWorkflowService _workflow;
+
+    public WorkshopChiefController(IOperationalWorkflowService workflow)
+    {
+        _workflow = workflow;
+    }
+
+    [HttpGet("requests")]
+    public Task<IActionResult> GetRequests(CancellationToken ct) => ExecuteAsync(async () => Ok(await _workflow.GetWorkshopChiefRequestsAsync(ct)));
+
+    [HttpGet("requests/{requestId:int}")]
+    public Task<IActionResult> GetRequest(int requestId, CancellationToken ct) => ExecuteAsync(async () => Ok(await _workflow.GetWorkshopChiefRequestAsync(requestId, ct)));
+
+    [HttpPost("requests/{requestId:int}/approve")]
+    public Task<IActionResult> Approve(int requestId, WorkshopChiefReviewRequestDto dto, CancellationToken ct) =>
+        ExecuteAsync(async () => Ok(await _workflow.ApproveWorkshopChiefRequestAsync(CurrentPersonId(), requestId, dto, ct)));
+
+    [HttpPost("requests/{requestId:int}/reject")]
+    public Task<IActionResult> Reject(int requestId, WorkshopChiefReviewRequestDto dto, CancellationToken ct) =>
+        ExecuteAsync(async () => Ok(await _workflow.RejectWorkshopChiefRequestAsync(CurrentPersonId(), requestId, dto, ct)));
+}

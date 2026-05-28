@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
 
     public DbSet<Audit> Audits => Set<Audit>();
     public DbSet<AuditActionType> AuditActionTypes => Set<AuditActionType>();
+    public DbSet<AdditionalServiceRequest> AdditionalServiceRequests => Set<AdditionalServiceRequest>();
     public DbSet<Address> Addresses => Set<Address>();
     public DbSet<CardType> CardTypes => Set<CardType>();
     public DbSet<City> Cities => Set<City>();
@@ -25,6 +26,7 @@ public class AppDbContext : DbContext
     public DbSet<Invoice> Invoices => Set<Invoice>();
     public DbSet<InvoiceDetail> InvoiceDetails => Set<InvoiceDetail>();
     public DbSet<InvoiceStatus> InvoiceStatuses => Set<InvoiceStatus>();
+    public DbSet<InventoryHistory> InventoryHistory => Set<InventoryHistory>();
     public DbSet<MechanicAssignment> MechanicAssignments => Set<MechanicAssignment>();
     public DbSet<MechanicSpecialty> MechanicSpecialties => Set<MechanicSpecialty>();
     public DbSet<MechanicSpecialtyAssignment> MechanicSpecialtyAssignments => Set<MechanicSpecialtyAssignment>();
@@ -50,6 +52,7 @@ public class AppDbContext : DbContext
     public DbSet<ServiceOrder> ServiceOrders => Set<ServiceOrder>();
     public DbSet<ServiceType> ServiceTypes => Set<ServiceType>();
     public DbSet<StreetType> StreetTypes => Set<StreetType>();
+    public DbSet<StockSubmission> StockSubmissions => Set<StockSubmission>();
     public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<User> Users => Set<User>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
@@ -59,6 +62,8 @@ public class AppDbContext : DbContext
     public DbSet<VehicleEntryInventory> VehicleEntryInventory => Set<VehicleEntryInventory>();
     public DbSet<VehicleOwnerHistory> VehicleOwnerHistory => Set<VehicleOwnerHistory>();
     public DbSet<VehicleType> VehicleTypes => Set<VehicleType>();
+    public DbSet<WorkshopService> WorkshopServices => Set<WorkshopService>();
+    public DbSet<WorkshopServicePart> WorkshopServiceParts => Set<WorkshopServicePart>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

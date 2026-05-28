@@ -3,10 +3,17 @@ namespace Domain.Constants;
 public static class RoleNames
 {
     public const string Admin = "Admin";
-    public const string Mecanico = "Mecánico";
-    public const string Recepcionista = "Recepcionista";
+    public const string Receptionist = "Receptionist";
+    public const string Mechanic = "Mechanic";
+    public const string Client = "Client";
+    public const string WorkshopChief = "WorkshopChief";
+    public const string WarehouseChief = "WarehouseChief";
+    public const string InventoryManager = "InventoryManager";
 
-    public const string AdminOrRecepcionista = Admin + "," + Recepcionista;
-    public const string AdminOrMecanico = Admin + "," + Mecanico;
-    public const string AnyInternalRole = Admin + "," + Mecanico + "," + Recepcionista;
+    public const string AdminOrReceptionist = Admin + "," + Receptionist;
+    public const string AdminOrMechanic = Admin + "," + Mechanic;
+    public const string AdminOrWorkshopChief = Admin + "," + WorkshopChief;
+    public const string AdminOrWarehouseChief = Admin + "," + WarehouseChief;
+    public const string AdminOrInventoryManager = Admin + "," + InventoryManager;
+    public const string AnyInternalRole = Admin + "," + Mechanic + "," + Receptionist + "," + WorkshopChief + "," + WarehouseChief + "," + InventoryManager;
 }

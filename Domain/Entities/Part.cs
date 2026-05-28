@@ -15,5 +15,8 @@ public class Part : BaseEntity
     public PartCategory PartCategory { get; set; } = null!;
     public PartBrand? PartBrand { get; set; }
     public ICollection<OrderServicePart> OrderServiceParts { get; set; } = new List<OrderServicePart>();
+    public ICollection<WorkshopServicePart> WorkshopServiceParts { get; set; } = new List<WorkshopServicePart>();
+    public ICollection<AdditionalServiceRequest> AdditionalServiceRequests { get; set; } = new List<AdditionalServiceRequest>();
+    public ICollection<InventoryHistory> InventoryHistory { get; set; } = new List<InventoryHistory>();
     public ICollection<PartPurchaseDetail> PurchaseDetails { get; set; } = new List<PartPurchaseDetail>();
 }

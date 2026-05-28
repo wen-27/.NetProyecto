@@ -8,7 +8,7 @@ namespace Infrastructure.Seeders;
 
 public static class DevelopmentDataSeeder
 {
-    private const string DefaultPassword = "Password123*";
+    private const string DefaultPassword = "Admin123*";
 
     public static async Task SeedDevelopmentDataAsync(this IServiceProvider serviceProvider, IConfiguration configuration)
     {
@@ -19,6 +19,7 @@ public static class DevelopmentDataSeeder
 
         await SeedUsersAsync(context, configuration);
         await SeedInventoryAsync(context);
+        await SeedWorkshopServicesAsync(context);
 
         await transaction.CommitAsync();
     }
@@ -29,32 +30,53 @@ public static class DevelopmentDataSeeder
         {
             new SeedUser(
                 RoleName: "Admin",
-                Email: configuration["SeedUsers:Admin:Email"] ?? "admin@mail.com",
+                Email: configuration["SeedUsers:Admin:Email"] ?? "admin@autotaller.com",
                 Password: configuration["SeedUsers:Admin:Password"] ?? DefaultPassword,
                 DocumentNumber: configuration["SeedUsers:Admin:DocumentNumber"] ?? "ADMIN-0001",
                 FirstName: "Admin",
                 LastName: "AutoTaller"),
             new SeedUser(
                 RoleName: "Mechanic",
-                Email: configuration["SeedUsers:Mechanic:Email"] ?? "mechanic@mail.com",
+                Email: configuration["SeedUsers:Mechanic:Email"] ?? "mecanico@autotaller.com",
                 Password: configuration["SeedUsers:Mechanic:Password"] ?? DefaultPassword,
                 DocumentNumber: configuration["SeedUsers:Mechanic:DocumentNumber"] ?? "MECH-0001",
                 FirstName: "Mecanico",
                 LastName: "Principal"),
             new SeedUser(
                 RoleName: "Receptionist",
-                Email: configuration["SeedUsers:Receptionist:Email"] ?? "receptionist@mail.com",
+                Email: configuration["SeedUsers:Receptionist:Email"] ?? "recepcion@autotaller.com",
                 Password: configuration["SeedUsers:Receptionist:Password"] ?? DefaultPassword,
                 DocumentNumber: configuration["SeedUsers:Receptionist:DocumentNumber"] ?? "RECEP-0001",
                 FirstName: "Recepcionista",
                 LastName: "Principal"),
             new SeedUser(
                 RoleName: "Client",
-                Email: configuration["SeedUsers:Client:Email"] ?? "client@mail.com",
+                Email: configuration["SeedUsers:Client:Email"] ?? "cliente@autotaller.com",
                 Password: configuration["SeedUsers:Client:Password"] ?? DefaultPassword,
                 DocumentNumber: configuration["SeedUsers:Client:DocumentNumber"] ?? "CLIENT-0001",
                 FirstName: "Cliente",
-                LastName: "Demo")
+                LastName: "Demo"),
+            new SeedUser(
+                RoleName: "WorkshopChief",
+                Email: configuration["SeedUsers:WorkshopChief:Email"] ?? "jefetaller@autotaller.com",
+                Password: configuration["SeedUsers:WorkshopChief:Password"] ?? DefaultPassword,
+                DocumentNumber: configuration["SeedUsers:WorkshopChief:DocumentNumber"] ?? "CHIEF-WORKSHOP-0001",
+                FirstName: "Jefe",
+                LastName: "Taller"),
+            new SeedUser(
+                RoleName: "WarehouseChief",
+                Email: configuration["SeedUsers:WarehouseChief:Email"] ?? "jefebodega@autotaller.com",
+                Password: configuration["SeedUsers:WarehouseChief:Password"] ?? DefaultPassword,
+                DocumentNumber: configuration["SeedUsers:WarehouseChief:DocumentNumber"] ?? "CHIEF-WAREHOUSE-0001",
+                FirstName: "Jefe",
+                LastName: "Bodega"),
+            new SeedUser(
+                RoleName: "InventoryManager",
+                Email: configuration["SeedUsers:InventoryManager:Email"] ?? "jefealmacen@autotaller.com",
+                Password: configuration["SeedUsers:InventoryManager:Password"] ?? DefaultPassword,
+                DocumentNumber: configuration["SeedUsers:InventoryManager:DocumentNumber"] ?? "MANAGER-INVENTORY-0001",
+                FirstName: "Jefe",
+                LastName: "Almacen")
         };
 
         foreach (var user in users)
@@ -77,7 +99,7 @@ public static class DevelopmentDataSeeder
         var emailParts = SplitEmail(normalizedEmail)
             ?? throw new InvalidOperationException($"El correo {seedUser.Email} no tiene un formato valido.");
 
-        var role = await context.Roles.FirstOrDefaultAsync(x => x.RoleName == seedUser.RoleName);
+        var role = await context.Roles.AsTracking().FirstOrDefaultAsync(x => x.RoleName == seedUser.RoleName);
         if (role is null)
         {
             role = new Role { RoleName = seedUser.RoleName };
@@ -85,7 +107,7 @@ public static class DevelopmentDataSeeder
             await context.SaveChangesAsync();
         }
 
-        var documentType = await context.DocumentTypes.FirstOrDefaultAsync(x => x.Code == "CC");
+        var documentType = await context.DocumentTypes.AsTracking().FirstOrDefaultAsync(x => x.Code == "CC");
         if (documentType is null)
         {
             documentType = new DocumentType { Code = "CC", Name = "Cedula de Ciudadania" };
@@ -93,7 +115,7 @@ public static class DevelopmentDataSeeder
             await context.SaveChangesAsync();
         }
 
-        var domain = await context.EmailDomains.FirstOrDefaultAsync(x => x.Domain == emailParts.Domain);
+        var domain = await context.EmailDomains.AsTracking().FirstOrDefaultAsync(x => x.Domain == emailParts.Domain);
         if (domain is null)
         {
             domain = new EmailDomain { Domain = emailParts.Domain };
@@ -102,6 +124,7 @@ public static class DevelopmentDataSeeder
         }
 
         var existingUser = await context.Users
+            .AsTracking()
             .Include(x => x.Person)
             .ThenInclude(x => x.Emails)
             .ThenInclude(x => x.EmailDomain)
@@ -119,7 +142,7 @@ public static class DevelopmentDataSeeder
             return existingUser.PersonId;
         }
 
-        var person = await context.Persons.FirstOrDefaultAsync(x => x.DocumentNumber == seedUser.DocumentNumber);
+        var person = await context.Persons.AsTracking().FirstOrDefaultAsync(x => x.DocumentNumber == seedUser.DocumentNumber);
         if (person is null)
         {
             person = new Person
@@ -170,7 +193,7 @@ public static class DevelopmentDataSeeder
 
     private static async Task EnsurePersonRoleAsync(AppDbContext context, int personId, int roleId)
     {
-        var personRole = await context.PersonRoles.FirstOrDefaultAsync(x => x.PersonId == personId && x.RoleId == roleId);
+        var personRole = await context.PersonRoles.AsTracking().FirstOrDefaultAsync(x => x.PersonId == personId && x.RoleId == roleId);
         if (personRole is null)
         {
             await context.PersonRoles.AddAsync(new PersonRole
@@ -187,7 +210,7 @@ public static class DevelopmentDataSeeder
 
     private static async Task EnsureMechanicSpecialtyAsync(AppDbContext context, int personId, string specialtyName)
     {
-        var specialty = await context.MechanicSpecialties.FirstOrDefaultAsync(x => x.Name == specialtyName);
+        var specialty = await context.MechanicSpecialties.AsTracking().FirstOrDefaultAsync(x => x.Name == specialtyName);
         if (specialty is null)
         {
             specialty = new MechanicSpecialty { Name = specialtyName };
@@ -218,23 +241,27 @@ public static class DevelopmentDataSeeder
         var monroeId = await EnsurePartBrandAsync(context, "Monroe");
         var densoId = await EnsurePartBrandAsync(context, "Denso");
 
-        var supplierId = await EnsureSupplierAsync(
-            context,
-            name: "AutoParts Colombia",
-            taxId: "900123456-1",
-            phone: "6071234567",
-            email: "ventas@autoparts.test");
+        var suppliers = new Dictionary<string, int>
+        {
+            ["AutoPartes Colombia S.A.S."] = await EnsureSupplierAsync(context, "AutoPartes Colombia S.A.S.", "900123456-1", "6071234567", "ventas@autopartes.test"),
+            ["Lubricantes del Oriente"] = await EnsureSupplierAsync(context, "Lubricantes del Oriente", "900123456-2", "6077654321", "ventas@lubrioriente.test"),
+            ["Repuestos Premium Bucaramanga"] = await EnsureSupplierAsync(context, "Repuestos Premium Bucaramanga", "900123456-3", "6073332211", "ventas@premiumbga.test"),
+            ["Distribuidora Nacional de Llantas"] = await EnsureSupplierAsync(context, "Distribuidora Nacional de Llantas", "900123456-4", "6074443322", "ventas@llantasnacional.test"),
+            ["Baterías Andinas"] = await EnsureSupplierAsync(context, "Baterías Andinas", "900123456-5", "6075554433", "ventas@bateriasandinas.test")
+        };
 
         var parts = new[]
         {
-            new SeedPart("FIL-AIR-001", "Filtro de aire motor", 1, boschId, 25, 5, 35000m),
-            new SeedPart("FIL-OIL-001", "Filtro de aceite", 1, boschId, 30, 5, 28000m),
-            new SeedPart("OIL-10W30-001", "Aceite sintetico 10W30 1L", 2, mobilId, 60, 12, 42000m),
-            new SeedPart("BRK-PAD-001", "Pastillas de freno delanteras", 3, acDelcoId, 18, 4, 120000m),
-            new SeedPart("SUS-SHOCK-001", "Amortiguador delantero", 4, monroeId, 10, 2, 260000m),
-            new SeedPart("ELE-SPARK-001", "Bujia iridium", 5, ngkId, 40, 8, 38000m),
-            new SeedPart("AC-FILTER-001", "Filtro de cabina aire acondicionado", 6, densoId, 20, 4, 52000m),
-            new SeedPart("ENG-BELT-001", "Correa de accesorios", 7, boschId, 15, 3, 85000m)
+            new SeedPart("REF-ACE-20W50", "Aceite 20W50", 2, mobilId, 40, 10, 78000m),
+            new SeedPart("REF-FIL-ACE-UNI", "Filtro de aceite universal", 1, boschId, 35, 8, 36000m),
+            new SeedPart("REF-LLA-R15", "Llanta rin 15", 4, monroeId, 24, 6, 260000m),
+            new SeedPart("REF-PAS-FRE-DEL", "Pastillas de freno delanteras", 3, acDelcoId, 30, 8, 145000m),
+            new SeedPart("REF-BAT-12V", "Batería 12V", 5, acDelcoId, 18, 4, 390000m),
+            new SeedPart("REF-FIL-AIR", "Filtro de aire", 1, densoId, 32, 8, 52000m),
+            new SeedPart("REF-BUJ-STD", "Bujías estándar", 5, ngkId, 80, 20, 28000m),
+            new SeedPart("REF-LIQ-FRE", "Líquido de frenos", 3, acDelcoId, 28, 8, 42000m),
+            new SeedPart("REF-COR-REP", "Correa de repartición", 7, boschId, 16, 4, 165000m),
+            new SeedPart("REF-LIM-UNI", "Limpiaparabrisas universal", 8, boschId, 35, 10, 34000m)
         };
 
         var seededPartIds = new List<int>();
@@ -243,13 +270,72 @@ public static class DevelopmentDataSeeder
             seededPartIds.Add(await EnsurePartAsync(context, part));
         }
 
-        await EnsureInitialPurchaseAsync(context, supplierId, seededPartIds);
+        await EnsureInitialPurchaseAsync(context, suppliers["AutoPartes Colombia S.A.S."], seededPartIds);
         await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedWorkshopServicesAsync(AppDbContext context)
+    {
+        await EnsureWorkshopServiceAsync(context, "Cambio de aceite", "Cambio de aceite del motor y filtro.", "Mantenimiento", 30m, new[] { ("REF-ACE-20W50", 1), ("REF-FIL-ACE-UNI", 1) });
+        await EnsureWorkshopServiceAsync(context, "Cambio de llantas", "Cambio de cuatro llantas.", "Llantas", 20m, new[] { ("REF-LLA-R15", 4) });
+        await EnsureWorkshopServiceAsync(context, "Revisión de frenos", "Revisión y reemplazo básico de componentes delanteros.", "Frenos", 35m, new[] { ("REF-PAS-FRE-DEL", 1), ("REF-LIQ-FRE", 1) });
+        await EnsureWorkshopServiceAsync(context, "Cambio de batería", "Cambio de batería principal.", "Eléctrico", 15m, new[] { ("REF-BAT-12V", 1) });
+        await EnsureWorkshopServiceAsync(context, "Cambio de filtro de aire", "Cambio de filtro de aire del motor.", "Mantenimiento", 20m, new[] { ("REF-FIL-AIR", 1) });
+        await EnsureWorkshopServiceAsync(context, "Cambio de bujías", "Cambio de bujías estándar.", "Motor", 25m, new[] { ("REF-BUJ-STD", 4) });
+        await EnsureWorkshopServiceAsync(context, "Alineación", "Alineación del vehículo.", "Llantas", 100m, Array.Empty<(string Code, int Quantity)>());
+        await EnsureWorkshopServiceAsync(context, "Balanceo", "Balanceo de ruedas.", "Llantas", 100m, Array.Empty<(string Code, int Quantity)>());
+        await EnsureWorkshopServiceAsync(context, "Diagnóstico general", "Diagnóstico general del vehículo.", "Diagnóstico", 100m, Array.Empty<(string Code, int Quantity)>());
+        await EnsureWorkshopServiceAsync(context, "Mantenimiento preventivo", "Mantenimiento preventivo básico.", "Mantenimiento", 30m, new[] { ("REF-ACE-20W50", 1), ("REF-FIL-ACE-UNI", 1), ("REF-FIL-AIR", 1) });
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task EnsureWorkshopServiceAsync(AppDbContext context, string name, string description, string category, decimal laborPercentage, IReadOnlyCollection<(string Code, int Quantity)> partDefinitions)
+    {
+        var service = await context.WorkshopServices
+            .AsTracking()
+            .Include(x => x.Parts)
+            .FirstOrDefaultAsync(x => x.Name == name);
+
+        if (service is null)
+        {
+            service = new WorkshopService { Name = name, CreatedAt = DateTime.UtcNow };
+            await context.WorkshopServices.AddAsync(service);
+            await context.SaveChangesAsync();
+        }
+
+        service.Description = description;
+        service.Category = category;
+        service.LaborPercentage = laborPercentage;
+        service.Status = Domain.Enums.WorkshopServiceStatus.Active;
+        service.IsActive = true;
+
+        context.WorkshopServiceParts.RemoveRange(service.Parts);
+        service.Parts.Clear();
+
+        decimal subtotal = 0m;
+        foreach (var definition in partDefinitions)
+        {
+            var part = await context.Parts.FirstAsync(x => x.Code == definition.Code);
+            var lineTotal = part.UnitPrice * definition.Quantity;
+            subtotal += lineTotal;
+            service.Parts.Add(new WorkshopServicePart
+            {
+                WorkshopServiceId = service.Id,
+                PartId = part.Id,
+                QuantityRequired = definition.Quantity,
+                UnitSalePrice = part.UnitPrice,
+                LineTotal = lineTotal
+            });
+        }
+
+        service.PartsSubtotal = subtotal;
+        service.LaborAmount = subtotal * laborPercentage / 100m;
+        service.FinalPrice = service.PartsSubtotal + service.LaborAmount;
     }
 
     private static async Task<int> EnsurePartBrandAsync(AppDbContext context, string name)
     {
-        var brand = await context.PartBrands.FirstOrDefaultAsync(x => x.Name == name);
+        var brand = await context.PartBrands.AsTracking().FirstOrDefaultAsync(x => x.Name == name);
         if (brand is null)
         {
             brand = new PartBrand { Name = name };
@@ -262,7 +348,7 @@ public static class DevelopmentDataSeeder
 
     private static async Task<int> EnsureSupplierAsync(AppDbContext context, string name, string taxId, string phone, string email)
     {
-        var supplier = await context.Suppliers.FirstOrDefaultAsync(x => x.TaxId == taxId);
+        var supplier = await context.Suppliers.AsTracking().FirstOrDefaultAsync(x => x.TaxId == taxId);
         if (supplier is null)
         {
             supplier = new Supplier
@@ -289,7 +375,7 @@ public static class DevelopmentDataSeeder
 
     private static async Task<int> EnsurePartAsync(AppDbContext context, SeedPart seed)
     {
-        var part = await context.Parts.FirstOrDefaultAsync(x => x.Code == seed.Code);
+        var part = await context.Parts.AsTracking().FirstOrDefaultAsync(x => x.Code == seed.Code);
         if (part is null)
         {
             part = new Part
@@ -324,6 +410,7 @@ public static class DevelopmentDataSeeder
     private static async Task EnsureInitialPurchaseAsync(AppDbContext context, int supplierId, IReadOnlyCollection<int> partIds)
     {
         var existingPurchase = await context.PartPurchases
+            .AsTracking()
             .Include(x => x.Details)
             .FirstOrDefaultAsync(x => x.SupplierId == supplierId);
 

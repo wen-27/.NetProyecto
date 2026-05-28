@@ -11,9 +11,11 @@ public class ServiceOrderConfiguration : IEntityTypeConfiguration<Domain.Entitie
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("ServiceOrderId");
         entity.Property(x => x.EntryDate).IsRequired();
+        entity.Property(x => x.EstimatedTotal).HasPrecision(18, 2).IsRequired();
         entity.Property(x => x.GeneralDescription).HasColumnType("text");
         entity.Property(x => x.CancellationReason).HasColumnType("text");
         entity.Property(x => x.CancellationDate);
+        entity.Property(x => x.DeliveryDate);
         entity.Property(x => x.CreatedAt).IsRequired();
 
         entity.HasOne(x => x.Vehicle)

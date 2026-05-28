@@ -9,6 +9,8 @@ public class ServiceOrder : BaseEntity
 
     public DateTime EntryDate { get; set; } = DateTime.UtcNow;
     public DateTime? EstimatedDeliveryDate { get; set; }
+    public DateTime? DeliveryDate { get; set; }
+    public decimal EstimatedTotal { get; set; }
     public string? GeneralDescription { get; set; }
     public string? WorkPerformed { get; set; }
     public string? CancellationReason { get; set; }
@@ -20,4 +22,5 @@ public class ServiceOrder : BaseEntity
     public ICollection<OrderService> OrderServices { get; set; } = new List<OrderService>();
     public ICollection<OrderStatusHistory> StatusHistory { get; set; } = new List<OrderStatusHistory>();
     public Invoice? Invoice { get; set; }
+    public ICollection<AdditionalServiceRequest> AdditionalServiceRequests { get; set; } = new List<AdditionalServiceRequest>();
 }

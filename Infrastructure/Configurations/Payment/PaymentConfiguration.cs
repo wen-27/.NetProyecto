@@ -13,6 +13,9 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Domain.Entities.Pay
         entity.Property(x => x.PaymentDate).IsRequired();
         entity.Property(x => x.Amount).HasPrecision(10, 2).IsRequired();
         entity.Property(x => x.Reference).HasMaxLength(100);
+        entity.Property(x => x.RejectedReason).HasColumnType("text");
+        entity.Property(x => x.VerifiedAt);
+        entity.Property(x => x.DeliveryDate);
 
         entity.HasOne(x => x.Invoice)
             .WithMany(x => x.Payments)
@@ -27,6 +30,16 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Domain.Entities.Pay
         entity.HasOne(x => x.PaymentStatus)
             .WithMany(x => x.Payments)
             .HasForeignKey(x => x.PaymentStatusId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        entity.HasOne(x => x.ClientPerson)
+            .WithMany()
+            .HasForeignKey(x => x.ClientPersonId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        entity.HasOne(x => x.VerifiedByReceptionistPerson)
+            .WithMany()
+            .HasForeignKey(x => x.VerifiedByReceptionistPersonId)
             .OnDelete(DeleteBehavior.Restrict);
 
         entity.Ignore(x => x.CreatedAt);

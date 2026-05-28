@@ -11,14 +11,23 @@ public static class ModelBuilderSeeder
             new { Id = 1, RoleName = "Admin" },
             new { Id = 2, RoleName = "Client" },
             new { Id = 3, RoleName = "Mechanic" },
-            new { Id = 4, RoleName = "Receptionist" });
+            new { Id = 4, RoleName = "Receptionist" },
+            new { Id = 5, RoleName = "WorkshopChief" },
+            new { Id = 6, RoleName = "WarehouseChief" },
+            new { Id = 7, RoleName = "InventoryManager" });
 
         modelBuilder.Entity<OrderStatus>().HasData(
-            new { Id = 1, Name = "Pending" },
-            new { Id = 2, Name = "InProgress" },
-            new { Id = 3, Name = "Completed" },
-            new { Id = 4, Name = "Cancelled" },
-            new { Id = 5, Name = "Voided" });
+            new { Id = 1, Name = "Created" },
+            new { Id = 2, Name = "PendingAssignment" },
+            new { Id = 3, Name = "Assigned" },
+            new { Id = 4, Name = "InProgress" },
+            new { Id = 5, Name = "PendingClientApproval" },
+            new { Id = 6, Name = "WaitingForPayment" },
+            new { Id = 7, Name = "PaymentUnderReview" },
+            new { Id = 8, Name = "Paid" },
+            new { Id = 9, Name = "ReadyForDelivery" },
+            new { Id = 10, Name = "Delivered" },
+            new { Id = 11, Name = "Cancelled" });
 
         modelBuilder.Entity<MechanicSpecialty>().HasData(
             new { Id = 1, Name = "Engine" },
@@ -30,15 +39,19 @@ public static class ModelBuilderSeeder
             new { Id = 7, Name = "Bodywork" });
 
         modelBuilder.Entity<PaymentMethod>().HasData(
-            new { Id = 1, Name = "Cash" },
-            new { Id = 2, Name = "Card" },
-            new { Id = 3, Name = "BankTransfer" });
+            new { Id = 1, Name = "Efectivo" },
+            new { Id = 2, Name = "Transferencia" },
+            new { Id = 3, Name = "Tarjeta débito" },
+            new { Id = 4, Name = "Tarjeta crédito" },
+            new { Id = 5, Name = "Nequi" },
+            new { Id = 6, Name = "Daviplata" });
 
         modelBuilder.Entity<PaymentStatus>().HasData(
             new { Id = 1, Name = "Pending" },
-            new { Id = 2, Name = "Completed" },
-            new { Id = 3, Name = "Refunded" },
-            new { Id = 4, Name = "Failed" });
+            new { Id = 2, Name = "PendingReceptionVerification" },
+            new { Id = 3, Name = "Approved" },
+            new { Id = 4, Name = "Rejected" },
+            new { Id = 5, Name = "Refunded" });
 
         modelBuilder.Entity<InvoiceStatus>().HasData(
             new { Id = 1, Name = "Draft" },

@@ -33,9 +33,15 @@ public static class AuthServiceExtensions
             options.AddPolicy("MechanicOnly", policy => policy.RequireRole("Mechanic"));
             options.AddPolicy("ReceptionistOnly", policy => policy.RequireRole("Receptionist"));
             options.AddPolicy("ClientOnly", policy => policy.RequireRole("Client"));
-            options.AddPolicy("InternalStaff", policy => policy.RequireRole("Admin", "Mechanic", "Receptionist"));
+            options.AddPolicy("WorkshopChiefOnly", policy => policy.RequireRole("WorkshopChief"));
+            options.AddPolicy("WarehouseChiefOnly", policy => policy.RequireRole("WarehouseChief"));
+            options.AddPolicy("InventoryManagerOnly", policy => policy.RequireRole("InventoryManager"));
+            options.AddPolicy("InternalStaff", policy => policy.RequireRole("Admin", "Mechanic", "Receptionist", "WorkshopChief", "WarehouseChief", "InventoryManager"));
             options.AddPolicy("MechanicOrAdmin", policy => policy.RequireRole("Mechanic", "Admin"));
             options.AddPolicy("ReceptionistOrAdmin", policy => policy.RequireRole("Receptionist", "Admin"));
+            options.AddPolicy("WorkshopChiefOrAdmin", policy => policy.RequireRole("WorkshopChief", "Admin"));
+            options.AddPolicy("WarehouseChiefOrAdmin", policy => policy.RequireRole("WarehouseChief", "Admin"));
+            options.AddPolicy("InventoryManagerOrAdmin", policy => policy.RequireRole("InventoryManager", "Admin"));
             options.AddPolicy("ReceptionistMechanicOrAdmin", policy => policy.RequireRole("Receptionist", "Mechanic", "Admin"));
         });
 
