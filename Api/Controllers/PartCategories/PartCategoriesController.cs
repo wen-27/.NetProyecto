@@ -27,7 +27,7 @@ public sealed class PartCategoriesController : BaseApiController
         return Ok(await Sender.Send(new GetPartCategoryById(id), ct));
     }
 
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "InventoryManagerOrAdmin")]
     [HttpPost]
     public async Task<IActionResult> Create(CreatePartCategory command, CancellationToken ct)
     {
@@ -35,7 +35,7 @@ public sealed class PartCategoriesController : BaseApiController
         return Created($"/api/partcategories/{id}", new { id });
     }
 
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "InventoryManagerOrAdmin")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdatePartCategoryRequest request, CancellationToken ct)
     {

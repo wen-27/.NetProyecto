@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Api.Controllers;
 using Api.DTOs.OrderServices;
 using Api.DTOs.ServiceOrders;
@@ -111,7 +112,7 @@ public sealed class ServiceOrdersController : BaseApiController
         return Created($"/api/serviceorders/{serviceOrder.Id}", new { id = serviceOrder.Id });
     }
 
-    [Authorize(Policy = "WorkshopChiefOrAdmin")]
+    [Authorize(Policy = "InternalStaff")]
     [HttpPost("diagnostic")]
     public async Task<IActionResult> CreateDiagnosticOrder(CreateDiagnosticServiceOrderRequest request, CancellationToken ct)
     {
@@ -120,12 +121,24 @@ public sealed class ServiceOrdersController : BaseApiController
             return BadRequest("Debe seleccionar un cliente y un vehículo asociado.");
         }
 
+        var serviceAssignments = (request.ServiceAssignments is { Count: > 0 }
+                ? request.ServiceAssignments
+                : request.ServiceAssignment is null
+                    ? Array.Empty<DiagnosticServiceAssignmentRequest>()
+                    : new[] { request.ServiceAssignment })
+            .ToList();
+
         if (request.Mileage < 0 ||
             string.IsNullOrWhiteSpace(request.ProblemDescription) ||
             string.IsNullOrWhiteSpace(request.Observations) ||
             string.IsNullOrWhiteSpace(request.Checklist.FuelLevel) ||
             string.IsNullOrWhiteSpace(request.Checklist.ObjectsInsideVehicle) ||
-            string.IsNullOrWhiteSpace(request.ServiceAssignment.Observation))
+            serviceAssignments.Count == 0 ||
+            serviceAssignments.Any(x =>
+                x.ServiceTypeId <= 0 ||
+                x.SpecialtyId <= 0 ||
+                x.MechanicPersonId <= 0 ||
+                string.IsNullOrWhiteSpace(x.Observation)))
         {
             return BadRequest("Debe completar todos los datos de ingreso, checklist y asignación.");
         }
@@ -162,24 +175,60 @@ public sealed class ServiceOrdersController : BaseApiController
             return BadRequest("El vehículo ya tiene una orden activa.");
         }
 
-        var serviceTypeExists = await _dbContext.ServiceTypes.AnyAsync(x => x.Id == request.ServiceAssignment.ServiceTypeId, ct);
-        if (!serviceTypeExists)
+        var serviceTypeIds = serviceAssignments.Select(x => x.ServiceTypeId).Distinct().ToArray();
+        foreach (var serviceTypeId in serviceTypeIds)
         {
-            return BadRequest("El servicio seleccionado no existe.");
+            var serviceTypeExists = await _dbContext.ServiceTypes.AnyAsync(x => x.Id == serviceTypeId, ct);
+            if (!serviceTypeExists)
+            {
+                return BadRequest("Uno o más tipos de servicio no existen.");
+            }
         }
 
-        var mechanicCanHandleSpecialty = await _dbContext.MechanicSpecialtyAssignments.AnyAsync(x =>
-            x.PersonId == request.ServiceAssignment.MechanicPersonId &&
-            x.SpecialtyId == request.ServiceAssignment.SpecialtyId,
-            ct);
-        if (!mechanicCanHandleSpecialty)
+        var workshopServiceIds = serviceAssignments
+            .Where(x => x.WorkshopServiceId.HasValue)
+            .Select(x => x.WorkshopServiceId!.Value)
+            .Distinct()
+            .ToArray();
+        var workshopServices = new Dictionary<int, WorkshopService>();
+        foreach (var workshopServiceId in workshopServiceIds)
         {
-            return BadRequest("El mecánico seleccionado no tiene asignada esa especialidad.");
+            var workshopService = await _dbContext.WorkshopServices.FirstOrDefaultAsync(x =>
+                x.Id == workshopServiceId &&
+                x.Status == WorkshopServiceStatus.Active,
+                ct);
+            if (workshopService is null)
+            {
+                return BadRequest("Uno o más servicios del taller no existen o están inactivos.");
+            }
+
+            workshopServices[workshopServiceId] = workshopService;
+        }
+
+        foreach (var assignment in serviceAssignments)
+        {
+            var mechanicCanHandleSpecialty = await _dbContext.MechanicSpecialtyAssignments.AnyAsync(x =>
+                x.PersonId == assignment.MechanicPersonId &&
+                x.SpecialtyId == assignment.SpecialtyId,
+                ct);
+            if (!mechanicCanHandleSpecialty)
+            {
+                return BadRequest("Uno o más mecánicos seleccionados no tienen asignada la especialidad requerida.");
+            }
         }
 
         await using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
 
         vehicle.Mileage = request.Mileage;
+        var estimatedTotal = serviceAssignments.Sum(assignment =>
+        {
+            var workshopService = assignment.WorkshopServiceId.HasValue
+                ? workshopServices[assignment.WorkshopServiceId.Value]
+                : null;
+
+            return workshopService?.FinalPrice ?? assignment.LaborCost;
+        });
+
         var serviceOrder = new ServiceOrder
         {
             VehicleId = request.VehicleId,
@@ -187,7 +236,7 @@ public sealed class ServiceOrdersController : BaseApiController
             EntryDate = request.EntryDate,
             EstimatedDeliveryDate = request.EstimatedDeliveryDate,
             GeneralDescription = $"Problema reportado: {request.ProblemDescription}\nObservaciones: {request.Observations}",
-            EstimatedTotal = request.ServiceAssignment.LaborCost
+            EstimatedTotal = estimatedTotal
         };
 
         await _dbContext.ServiceOrders.AddAsync(serviceOrder, ct);
@@ -214,30 +263,56 @@ public sealed class ServiceOrdersController : BaseApiController
             RegisteredAt = DateTime.UtcNow
         }, ct);
 
-        var orderService = new OrderService
+        foreach (var assignment in serviceAssignments)
+        {
+            var workshopService = assignment.WorkshopServiceId.HasValue
+                ? workshopServices[assignment.WorkshopServiceId.Value]
+                : null;
+
+            var orderService = new OrderService
+            {
+                ServiceOrderId = serviceOrder.Id,
+                ServiceTypeId = assignment.ServiceTypeId,
+                WorkshopServiceId = assignment.WorkshopServiceId,
+                Description = assignment.Observation,
+                LaborCost = workshopService?.LaborAmount ?? assignment.LaborCost,
+                Price = workshopService?.PartsSubtotal ?? 0,
+                Status = OrderServiceStatus.Pending
+            };
+
+            await _dbContext.OrderServices.AddAsync(orderService, ct);
+            await _dbContext.SaveChangesAsync(ct);
+
+            await _dbContext.MechanicAssignments.AddAsync(new MechanicAssignment
+            {
+                OrderServiceId = orderService.Id,
+                MechanicPersonId = assignment.MechanicPersonId,
+                SpecialtyId = assignment.SpecialtyId
+            }, ct);
+        }
+
+        var diagnosticMechanicPersonId = CurrentPersonIdOrDefault() ?? serviceAssignments[0].MechanicPersonId;
+        await _dbContext.MechanicDiagnostics.AddAsync(new MechanicDiagnostic
         {
             ServiceOrderId = serviceOrder.Id,
-            ServiceTypeId = request.ServiceAssignment.ServiceTypeId,
-            Description = request.ServiceAssignment.Observation,
-            LaborCost = request.ServiceAssignment.LaborCost,
-            Price = 0,
-            Status = OrderServiceStatus.Pending
-        };
-
-        await _dbContext.OrderServices.AddAsync(orderService, ct);
-        await _dbContext.SaveChangesAsync(ct);
-
-        await _dbContext.MechanicAssignments.AddAsync(new MechanicAssignment
-        {
-            OrderServiceId = orderService.Id,
-            MechanicPersonId = request.ServiceAssignment.MechanicPersonId,
-            SpecialtyId = request.ServiceAssignment.SpecialtyId
+            MechanicPersonId = diagnosticMechanicPersonId,
+            Status = MechanicDiagnosticStatus.PendingWorkshopChiefApproval,
+            Findings = request.ProblemDescription.Trim(),
+            RecommendedWork = request.Observations.Trim(),
+            SubmittedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow
         }, ct);
 
         await _dbContext.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
 
         return Created($"/api/serviceorders/{serviceOrder.Id}", new { id = serviceOrder.Id });
+    }
+
+    private int? CurrentPersonIdOrDefault()
+    {
+        var value = User.FindFirstValue("PersonId");
+        return int.TryParse(value, out var personId) ? personId : null;
     }
 
     [Authorize(Policy = "InternalStaff")]

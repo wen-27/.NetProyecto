@@ -62,7 +62,8 @@ public sealed record ServiceOrderDto(
     decimal EstimatedTotal,
     string? Customer,
     string? Vehicle,
-    string? Status);
+    string? Status,
+    string? GeneralDescription);
 
 public sealed record ServiceTypeDto(int Id, string Name, int EstimatedDays);
 
@@ -158,7 +159,8 @@ public static class EntityDtoMapper
             entity.EstimatedTotal,
             string.IsNullOrWhiteSpace(customer) ? null : customer,
             string.IsNullOrWhiteSpace(vehicle) ? null : vehicle,
-            entity.OrderStatus?.Name);
+            entity.OrderStatus?.Name,
+            entity.GeneralDescription);
     }
 
     public static ServiceTypeDto ToDto(this ServiceType entity) => new(entity.Id, entity.Name, entity.EstimatedDays);

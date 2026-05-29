@@ -198,8 +198,37 @@ public sealed record OrderServiceDetailDto(
 
 public sealed record MechanicOrderDetailDto(
     int Id,
+    string Code,
     string Status,
     string? VehiclePlate,
+    string Vehicle,
+    string Customer,
+    decimal EstimatedTotal,
+    DateTime EntryDate,
+    DateTime? EstimatedDeliveryDate,
     IReadOnlyList<OrderServiceDetailDto> Services);
 
 public sealed record RecordMechanicWorkDto(string WorkPerformed);
+
+public sealed record UpdateMechanicOrderServiceStatusDto(string Status);
+
+public sealed record CreateMechanicDiagnosticDto(
+    string Findings,
+    string RecommendedWork);
+
+public sealed record ReviewMechanicDiagnosticDto(string? Comment);
+
+public sealed record MechanicDiagnosticResponseDto(
+    int Id,
+    int ServiceOrderId,
+    string OrderCode,
+    string Customer,
+    string Vehicle,
+    int MechanicPersonId,
+    string Mechanic,
+    string Status,
+    string Findings,
+    string RecommendedWork,
+    string? WorkshopChiefComment,
+    DateTime SubmittedAt,
+    DateTime? ReviewedAt);

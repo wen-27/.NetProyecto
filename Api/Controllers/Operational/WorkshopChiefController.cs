@@ -22,6 +22,20 @@ public sealed class WorkshopChiefController : OperationalControllerBase
     [HttpGet("requests/{requestId:int}")]
     public Task<IActionResult> GetRequest(int requestId, CancellationToken ct) => ExecuteAsync(async () => Ok(await _workflow.GetWorkshopChiefRequestAsync(requestId, ct)));
 
+    [HttpGet("diagnostics")]
+    public Task<IActionResult> GetDiagnostics(CancellationToken ct) => ExecuteAsync(async () => Ok(await _workflow.GetWorkshopChiefDiagnosticsAsync(ct)));
+
+    [HttpGet("diagnostics/{diagnosticId:int}")]
+    public Task<IActionResult> GetDiagnostic(int diagnosticId, CancellationToken ct) => ExecuteAsync(async () => Ok(await _workflow.GetWorkshopChiefDiagnosticAsync(diagnosticId, ct)));
+
+    [HttpPost("diagnostics/{diagnosticId:int}/approve")]
+    public Task<IActionResult> ApproveDiagnostic(int diagnosticId, ReviewMechanicDiagnosticDto dto, CancellationToken ct) =>
+        ExecuteAsync(async () => Ok(await _workflow.ApproveMechanicDiagnosticAsync(CurrentPersonId(), diagnosticId, dto, ct)));
+
+    [HttpPost("diagnostics/{diagnosticId:int}/reject")]
+    public Task<IActionResult> RejectDiagnostic(int diagnosticId, ReviewMechanicDiagnosticDto dto, CancellationToken ct) =>
+        ExecuteAsync(async () => Ok(await _workflow.RejectMechanicDiagnosticAsync(CurrentPersonId(), diagnosticId, dto, ct)));
+
     [HttpPost("requests/{requestId:int}/approve")]
     public Task<IActionResult> Approve(int requestId, WorkshopChiefReviewRequestDto dto, CancellationToken ct) =>
         ExecuteAsync(async () => Ok(await _workflow.ApproveWorkshopChiefRequestAsync(CurrentPersonId(), requestId, dto, ct)));

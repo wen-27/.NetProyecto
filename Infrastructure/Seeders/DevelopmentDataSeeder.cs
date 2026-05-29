@@ -41,7 +41,40 @@ public static class DevelopmentDataSeeder
                 Password: configuration["SeedUsers:Mechanic:Password"] ?? DefaultPassword,
                 DocumentNumber: configuration["SeedUsers:Mechanic:DocumentNumber"] ?? "MECH-0001",
                 FirstName: "Mecanico",
-                LastName: "Principal"),
+                LastName: "Principal",
+                Specialties: new[] { "GeneralDiagnostics", "Engine", "Diagnóstico" }),
+            new SeedUser(
+                RoleName: "Mechanic",
+                Email: configuration["SeedUsers:DiagnosticMechanic:Email"] ?? "diagnostico@autotaller.com",
+                Password: configuration["SeedUsers:DiagnosticMechanic:Password"] ?? DefaultPassword,
+                DocumentNumber: configuration["SeedUsers:DiagnosticMechanic:DocumentNumber"] ?? "MECH-DIAG-0001",
+                FirstName: "Diana",
+                LastName: "Diagnostico",
+                Specialties: new[] { "Diagnóstico", "GeneralDiagnostics" }),
+            new SeedUser(
+                RoleName: "Mechanic",
+                Email: configuration["SeedUsers:MaintenanceMechanic:Email"] ?? "mantenimiento@autotaller.com",
+                Password: configuration["SeedUsers:MaintenanceMechanic:Password"] ?? DefaultPassword,
+                DocumentNumber: configuration["SeedUsers:MaintenanceMechanic:DocumentNumber"] ?? "MECH-MANT-0001",
+                FirstName: "Manuel",
+                LastName: "Mantenimiento",
+                Specialties: new[] { "Mantenimiento" }),
+            new SeedUser(
+                RoleName: "Mechanic",
+                Email: configuration["SeedUsers:ElectricMechanic:Email"] ?? "electricista@autotaller.com",
+                Password: configuration["SeedUsers:ElectricMechanic:Password"] ?? DefaultPassword,
+                DocumentNumber: configuration["SeedUsers:ElectricMechanic:DocumentNumber"] ?? "MECH-ELEC-0001",
+                FirstName: "Elena",
+                LastName: "Electricista",
+                Specialties: new[] { "Electricista", "Electrical" }),
+            new SeedUser(
+                RoleName: "Mechanic",
+                Email: configuration["SeedUsers:BrakesMechanic:Email"] ?? "frenos@autotaller.com",
+                Password: configuration["SeedUsers:BrakesMechanic:Password"] ?? DefaultPassword,
+                DocumentNumber: configuration["SeedUsers:BrakesMechanic:DocumentNumber"] ?? "MECH-FREN-0001",
+                FirstName: "Fabian",
+                LastName: "Frenos",
+                Specialties: new[] { "Frenos", "Brakes" }),
             new SeedUser(
                 RoleName: "Receptionist",
                 Email: configuration["SeedUsers:Receptionist:Email"] ?? "recepcion@autotaller.com",
@@ -85,8 +118,10 @@ public static class DevelopmentDataSeeder
 
             if (user.RoleName == "Mechanic")
             {
-                await EnsureMechanicSpecialtyAsync(context, personId, "GeneralDiagnostics");
-                await EnsureMechanicSpecialtyAsync(context, personId, "Engine");
+                foreach (var specialty in user.Specialties ?? Array.Empty<string>())
+                {
+                    await EnsureMechanicSpecialtyAsync(context, personId, specialty);
+                }
             }
         }
 
@@ -462,7 +497,8 @@ public static class DevelopmentDataSeeder
         string Password,
         string DocumentNumber,
         string FirstName,
-        string LastName);
+        string LastName,
+        IReadOnlyList<string>? Specialties = null);
 
     private sealed record SeedPart(
         string Code,

@@ -28,6 +28,7 @@ public class AppDbContext : DbContext
     public DbSet<InvoiceStatus> InvoiceStatuses => Set<InvoiceStatus>();
     public DbSet<InventoryHistory> InventoryHistory => Set<InventoryHistory>();
     public DbSet<MechanicAssignment> MechanicAssignments => Set<MechanicAssignment>();
+    public DbSet<MechanicDiagnostic> MechanicDiagnostics => Set<MechanicDiagnostic>();
     public DbSet<MechanicSpecialty> MechanicSpecialties => Set<MechanicSpecialty>();
     public DbSet<MechanicSpecialtyAssignment> MechanicSpecialtyAssignments => Set<MechanicSpecialtyAssignment>();
     public DbSet<Neighborhood> Neighborhoods => Set<Neighborhood>();

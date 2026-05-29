@@ -25,6 +25,13 @@ public sealed class MechanicController : OperationalControllerBase
     [HttpGet("requests")]
     public Task<IActionResult> GetRequests(CancellationToken ct) => ExecuteAsync(async () => Ok(await _workflow.GetMechanicRequestsAsync(CurrentPersonId(), ct)));
 
+    [HttpGet("diagnostics")]
+    public Task<IActionResult> GetDiagnostics(CancellationToken ct) => ExecuteAsync(async () => Ok(await _workflow.GetMechanicDiagnosticsAsync(CurrentPersonId(), ct)));
+
+    [HttpPost("orders/{orderId:int}/diagnostics")]
+    public Task<IActionResult> SubmitDiagnostic(int orderId, CreateMechanicDiagnosticDto dto, CancellationToken ct) =>
+        ExecuteAsync(async () => Created($"/api/mechanic/diagnostics", await _workflow.SubmitMechanicDiagnosticAsync(CurrentPersonId(), orderId, dto, ct)));
+
     [HttpPost("orders/{orderId:int}/additional-requests")]
     public Task<IActionResult> CreateAdditionalRequest(int orderId, CreateAdditionalRequestDto dto, CancellationToken ct) =>
         ExecuteAsync(async () => Created($"/api/mechanic/requests", await _workflow.CreateAdditionalRequestAsync(CurrentPersonId(), orderId, dto, ct)));
@@ -34,6 +41,22 @@ public sealed class MechanicController : OperationalControllerBase
         ExecuteAsync(async () =>
         {
             await _workflow.RecordMechanicWorkAsync(CurrentPersonId(), orderId, dto, ct);
+            return NoContent();
+        });
+
+    [HttpPost("orders/{orderId:int}/complete")]
+    public Task<IActionResult> CompleteOrder(int orderId, RecordMechanicWorkDto dto, CancellationToken ct) =>
+        ExecuteAsync(async () =>
+        {
+            await _workflow.CompleteMechanicOrderAsync(CurrentPersonId(), orderId, dto, ct);
+            return NoContent();
+        });
+
+    [HttpPatch("order-services/{orderServiceId:int}/status")]
+    public Task<IActionResult> UpdateOrderServiceStatus(int orderServiceId, UpdateMechanicOrderServiceStatusDto dto, CancellationToken ct) =>
+        ExecuteAsync(async () =>
+        {
+            await _workflow.UpdateMechanicOrderServiceStatusAsync(CurrentPersonId(), orderServiceId, dto, ct);
             return NoContent();
         });
 }

@@ -36,7 +36,11 @@ public static class ModelBuilderSeeder
             new { Id = 4, Name = "Suspension" },
             new { Id = 5, Name = "Brakes" },
             new { Id = 6, Name = "GeneralDiagnostics" },
-            new { Id = 7, Name = "Bodywork" });
+            new { Id = 7, Name = "Bodywork" },
+            new { Id = 8, Name = "Diagnóstico" },
+            new { Id = 9, Name = "Mantenimiento" },
+            new { Id = 10, Name = "Electricista" },
+            new { Id = 11, Name = "Frenos" });
 
         modelBuilder.Entity<PaymentMethod>().HasData(
             new { Id = 1, Name = "Efectivo" },

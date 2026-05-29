@@ -57,8 +57,6 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
             throw new InvalidOperationException("El comentario técnico es obligatorio.");
         }
 
-        await EnsureMechanicAssignedAsync(mechanicPersonId, orderId, ct);
-
         var order = await _context.ServiceOrders
             .AsTracking()
             .Include(x => x.Vehicle)
@@ -122,6 +120,161 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
         await _context.SaveChangesAsync(ct);
     }
 
+    public async Task CompleteMechanicOrderAsync(int mechanicPersonId, int orderId, RecordMechanicWorkDto dto, CancellationToken ct)
+    {
+        var order = await _context.ServiceOrders
+            .AsTracking()
+            .Include(x => x.OrderServices)
+            .FirstOrDefaultAsync(x => x.Id == orderId, ct)
+            ?? throw new KeyNotFoundException("La orden no existe.");
+
+        var isAssigned = await _context.MechanicAssignments.AnyAsync(x =>
+            x.MechanicPersonId == mechanicPersonId &&
+            x.OrderService.ServiceOrderId == orderId, ct);
+
+        if (!isAssigned && order.OrderStatusId != (int)ServiceOrderStatus.Created)
+        {
+            throw new UnauthorizedAccessException("Solo el mecánico asignado puede completar esta orden.");
+        }
+
+        if (IsClosedOrder(order.OrderStatusId))
+        {
+            throw new InvalidOperationException("No se puede completar una orden cancelada, entregada o cerrada.");
+        }
+
+        var hasPendingRequests = await _context.AdditionalServiceRequests.AnyAsync(x =>
+            x.ServiceOrderId == orderId &&
+            (x.Status == AdditionalRequestStatus.PendingWorkshopChiefApproval ||
+             x.Status == AdditionalRequestStatus.PendingClientApproval),
+            ct);
+
+        if (hasPendingRequests)
+        {
+            throw new InvalidOperationException("La orden tiene solicitudes pendientes de aprobación.");
+        }
+
+        order.WorkPerformed = string.IsNullOrWhiteSpace(dto.WorkPerformed)
+            ? "Orden completada por el mecánico."
+            : dto.WorkPerformed.Trim();
+        order.OrderStatusId = (int)ServiceOrderStatus.PendingClientApproval;
+
+        foreach (var service in order.OrderServices.Where(x => x.Status != OrderServiceStatus.Invoiced))
+        {
+            service.Status = OrderServiceStatus.Completed;
+            service.WorkPerformed = string.IsNullOrWhiteSpace(service.WorkPerformed)
+                ? order.WorkPerformed
+                : service.WorkPerformed;
+        }
+
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task UpdateMechanicOrderServiceStatusAsync(int mechanicPersonId, int orderServiceId, UpdateMechanicOrderServiceStatusDto dto, CancellationToken ct)
+    {
+        var status = dto.Status?.Trim().ToLowerInvariant() switch
+        {
+            "assigned" or "pending" or "asignada" or "asignadas" => OrderServiceStatus.Pending,
+            "started" or "approved" or "iniciada" or "iniciadas" => OrderServiceStatus.Approved,
+            "inprogress" or "in_progress" or "enproceso" or "en proceso" => OrderServiceStatus.InProgress,
+            "completed" or "finished" or "terminada" or "terminadas" => OrderServiceStatus.Completed,
+            _ => throw new InvalidOperationException("El estado del trabajo no es válido.")
+        };
+
+        var orderService = await _context.OrderServices
+            .AsTracking()
+            .Include(x => x.ServiceOrder)
+            .FirstOrDefaultAsync(x => x.Id == orderServiceId, ct)
+            ?? throw new KeyNotFoundException("El trabajo asignado no existe.");
+
+        var isAssigned = await _context.MechanicAssignments.AnyAsync(x =>
+            x.OrderServiceId == orderServiceId &&
+            x.MechanicPersonId == mechanicPersonId, ct);
+
+        if (!isAssigned)
+        {
+            throw new UnauthorizedAccessException("Solo el mecánico asignado puede actualizar este trabajo.");
+        }
+
+        var allowed = orderService.Status switch
+        {
+            OrderServiceStatus.Pending => status is OrderServiceStatus.Pending or OrderServiceStatus.Approved,
+            OrderServiceStatus.Approved => status is OrderServiceStatus.Approved or OrderServiceStatus.InProgress,
+            OrderServiceStatus.InProgress => status is OrderServiceStatus.InProgress or OrderServiceStatus.Completed,
+            OrderServiceStatus.Completed => status is OrderServiceStatus.Completed,
+            _ => false
+        };
+
+        if (!allowed)
+        {
+            throw new InvalidOperationException("La transición de estado del trabajo no es válida.");
+        }
+
+        orderService.Status = status;
+        if (status == OrderServiceStatus.Completed && string.IsNullOrWhiteSpace(orderService.WorkPerformed))
+        {
+            orderService.WorkPerformed = "Trabajo terminado por el mecánico asignado.";
+        }
+
+        if (orderService.ServiceOrder.OrderStatusId < (int)ServiceOrderStatus.InProgress &&
+            status is OrderServiceStatus.Approved or OrderServiceStatus.InProgress)
+        {
+            orderService.ServiceOrder.OrderStatusId = (int)ServiceOrderStatus.InProgress;
+        }
+
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<MechanicDiagnosticResponseDto>> GetMechanicDiagnosticsAsync(int mechanicPersonId, CancellationToken ct)
+    {
+        var diagnostics = await DiagnosticQuery()
+            .Where(x => x.MechanicPersonId == mechanicPersonId)
+            .OrderByDescending(x => x.ReviewedAt ?? x.SubmittedAt)
+            .ToListAsync(ct);
+        return diagnostics.Select(ToMechanicDiagnostic).ToList();
+    }
+
+    public async Task<MechanicDiagnosticResponseDto> SubmitMechanicDiagnosticAsync(int mechanicPersonId, int orderId, CreateMechanicDiagnosticDto dto, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Findings))
+        {
+            throw new InvalidOperationException("El diagnóstico encontrado es obligatorio.");
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.RecommendedWork))
+        {
+            throw new InvalidOperationException("El trabajo recomendado es obligatorio.");
+        }
+
+        await EnsureMechanicAssignedAsync(mechanicPersonId, orderId, ct);
+
+        var hasPendingDiagnostic = await _context.MechanicDiagnostics.AnyAsync(x =>
+            x.ServiceOrderId == orderId &&
+            x.MechanicPersonId == mechanicPersonId &&
+            x.Status == MechanicDiagnosticStatus.PendingWorkshopChiefApproval,
+            ct);
+        if (hasPendingDiagnostic)
+        {
+            throw new InvalidOperationException("Ya existe un diagnóstico pendiente de aprobación para esta orden.");
+        }
+
+        var diagnostic = new MechanicDiagnostic
+        {
+            ServiceOrderId = orderId,
+            MechanicPersonId = mechanicPersonId,
+            Status = MechanicDiagnosticStatus.PendingWorkshopChiefApproval,
+            Findings = dto.Findings.Trim(),
+            RecommendedWork = dto.RecommendedWork.Trim(),
+            SubmittedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _context.MechanicDiagnostics.AddAsync(diagnostic, ct);
+        await _context.SaveChangesAsync(ct);
+
+        var saved = await DiagnosticQuery().FirstAsync(x => x.Id == diagnostic.Id, ct);
+        return ToMechanicDiagnostic(saved);
+    }
+
     public async Task<IReadOnlyList<AdditionalRequestResponseDto>> GetWorkshopChiefRequestsAsync(CancellationToken ct)
     {
         var requests = await RequestQuery()
@@ -177,6 +330,67 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
         request.WorkshopChiefReviewedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);
         return await GetWorkshopChiefRequestAsync(requestId, ct);
+    }
+
+    public async Task<IReadOnlyList<MechanicDiagnosticResponseDto>> GetWorkshopChiefDiagnosticsAsync(CancellationToken ct)
+    {
+        await EnsureDiagnosticRecordsForDiagnosticOrdersAsync(ct);
+
+        var diagnostics = await DiagnosticQuery()
+            .OrderByDescending(x => x.ReviewedAt ?? x.SubmittedAt)
+            .ToListAsync(ct);
+        return diagnostics.Select(ToMechanicDiagnostic).ToList();
+    }
+
+    public async Task<MechanicDiagnosticResponseDto> GetWorkshopChiefDiagnosticAsync(int diagnosticId, CancellationToken ct)
+    {
+        var diagnostic = await DiagnosticQuery().FirstOrDefaultAsync(x => x.Id == diagnosticId, ct)
+            ?? throw new KeyNotFoundException("El diagnóstico no existe.");
+        return ToMechanicDiagnostic(diagnostic);
+    }
+
+    public async Task<MechanicDiagnosticResponseDto> ApproveMechanicDiagnosticAsync(int workshopChiefPersonId, int diagnosticId, ReviewMechanicDiagnosticDto dto, CancellationToken ct)
+    {
+        var diagnostic = await _context.MechanicDiagnostics.AsTracking().FirstOrDefaultAsync(x => x.Id == diagnosticId, ct)
+            ?? throw new KeyNotFoundException("El diagnóstico no existe.");
+
+        if (diagnostic.Status != MechanicDiagnosticStatus.PendingWorkshopChiefApproval)
+        {
+            throw new InvalidOperationException("El diagnóstico no está pendiente de aprobación.");
+        }
+
+        diagnostic.Status = MechanicDiagnosticStatus.Approved;
+        diagnostic.WorkshopChiefPersonId = workshopChiefPersonId;
+        diagnostic.WorkshopChiefComment = string.IsNullOrWhiteSpace(dto.Comment) ? "Diagnóstico aprobado por jefe de taller." : dto.Comment.Trim();
+        diagnostic.ReviewedAt = DateTime.UtcNow;
+
+        var order = await _context.ServiceOrders.AsTracking().FirstOrDefaultAsync(x => x.Id == diagnostic.ServiceOrderId, ct);
+        if (order is not null && order.OrderStatusId < (int)ServiceOrderStatus.InProgress)
+        {
+            order.OrderStatusId = (int)ServiceOrderStatus.InProgress;
+        }
+
+        await _context.SaveChangesAsync(ct);
+        return await GetWorkshopChiefDiagnosticAsync(diagnostic.Id, ct);
+    }
+
+    public async Task<MechanicDiagnosticResponseDto> RejectMechanicDiagnosticAsync(int workshopChiefPersonId, int diagnosticId, ReviewMechanicDiagnosticDto dto, CancellationToken ct)
+    {
+        var diagnostic = await _context.MechanicDiagnostics.AsTracking().FirstOrDefaultAsync(x => x.Id == diagnosticId, ct)
+            ?? throw new KeyNotFoundException("El diagnóstico no existe.");
+
+        if (diagnostic.Status != MechanicDiagnosticStatus.PendingWorkshopChiefApproval)
+        {
+            throw new InvalidOperationException("El diagnóstico no está pendiente de aprobación.");
+        }
+
+        diagnostic.Status = MechanicDiagnosticStatus.Rejected;
+        diagnostic.WorkshopChiefPersonId = workshopChiefPersonId;
+        diagnostic.WorkshopChiefComment = string.IsNullOrWhiteSpace(dto.Comment) ? "Diagnóstico desaprobado por jefe de taller." : dto.Comment.Trim();
+        diagnostic.ReviewedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(ct);
+        return await GetWorkshopChiefDiagnosticAsync(diagnostic.Id, ct);
     }
 
     public async Task<IReadOnlyList<WorkshopServiceResponseDto>> GetWorkshopServicesAsync(CancellationToken ct)
@@ -881,6 +1095,11 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
         return _context.ServiceOrders
             .Include(x => x.OrderStatus)
             .Include(x => x.Vehicle)
+            .ThenInclude(x => x.VehicleModel)
+            .ThenInclude(x => x.VehicleBrand)
+            .Include(x => x.Vehicle)
+            .ThenInclude(x => x.OwnerHistory)
+            .ThenInclude(x => x.Person)
             .Include(x => x.OrderServices)
             .ThenInclude(x => x.ServiceType)
             .Include(x => x.OrderServices)
@@ -919,6 +1138,88 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
             .Include(x => x.MechanicPerson)
             .Include(x => x.WorkshopService)
             .Include(x => x.Part);
+    }
+
+    private IQueryable<MechanicDiagnostic> DiagnosticQuery()
+    {
+        return _context.MechanicDiagnostics
+            .Include(x => x.ServiceOrder)
+            .ThenInclude(x => x.OrderStatus)
+            .Include(x => x.ServiceOrder)
+            .ThenInclude(x => x.Vehicle)
+            .ThenInclude(x => x.VehicleModel)
+            .ThenInclude(x => x.VehicleBrand)
+            .Include(x => x.ServiceOrder)
+            .ThenInclude(x => x.Vehicle)
+            .ThenInclude(x => x.OwnerHistory)
+            .ThenInclude(x => x.Person)
+            .Include(x => x.MechanicPerson);
+    }
+
+    private async Task EnsureDiagnosticRecordsForDiagnosticOrdersAsync(CancellationToken ct)
+    {
+        var diagnosticOrders = await _context.ServiceOrders
+            .Where(order =>
+                order.GeneralDescription != null &&
+                order.GeneralDescription.Contains("Problema reportado") &&
+                !_context.MechanicDiagnostics.Any(diagnostic => diagnostic.ServiceOrderId == order.Id))
+            .Select(order => new
+            {
+                order.Id,
+                order.GeneralDescription,
+                order.EntryDate
+            })
+            .ToListAsync(ct);
+
+        if (diagnosticOrders.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var order in diagnosticOrders)
+        {
+            var mechanicPersonId = await _context.MechanicAssignments
+                .Where(assignment => assignment.OrderService.ServiceOrderId == order.Id)
+                .Select(assignment => assignment.MechanicPersonId)
+                .FirstOrDefaultAsync(ct);
+
+            if (mechanicPersonId == 0)
+            {
+                continue;
+            }
+
+            await _context.MechanicDiagnostics.AddAsync(new MechanicDiagnostic
+            {
+                ServiceOrderId = order.Id,
+                MechanicPersonId = mechanicPersonId,
+                Status = MechanicDiagnosticStatus.PendingWorkshopChiefApproval,
+                Findings = ExtractDiagnosticSection(order.GeneralDescription, "Problema reportado:"),
+                RecommendedWork = ExtractDiagnosticSection(order.GeneralDescription, "Observaciones:"),
+                SubmittedAt = order.EntryDate,
+                CreatedAt = DateTime.UtcNow
+            }, ct);
+        }
+
+        await _context.SaveChangesAsync(ct);
+    }
+
+    private static string ExtractDiagnosticSection(string? description, string label)
+    {
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            return "Diagnóstico pendiente.";
+        }
+
+        var start = description.IndexOf(label, StringComparison.OrdinalIgnoreCase);
+        if (start < 0)
+        {
+            return description.Trim();
+        }
+
+        start += label.Length;
+        var nextLabel = description.IndexOf('\n', start);
+        var value = nextLabel < 0 ? description[start..] : description[start..nextLabel];
+        return string.IsNullOrWhiteSpace(value) ? "Diagnóstico pendiente." : value.Trim();
     }
 
     private IQueryable<WorkshopService> WorkshopServiceQuery()
@@ -1162,7 +1463,35 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
 
     private static MechanicOrderDetailDto ToMechanicOrderDetail(ServiceOrder order)
     {
-        return new MechanicOrderDetailDto(order.Id, order.OrderStatus.Name, order.Vehicle.Vin, order.OrderServices.Select(ToOrderServiceDetail).ToList());
+        return new MechanicOrderDetailDto(
+            order.Id,
+            OrderCode(order),
+            order.OrderStatus.Name,
+            order.Vehicle.Vin,
+            VehicleDisplayName(order.Vehicle),
+            CurrentOwnerName(order),
+            order.EstimatedTotal,
+            order.EntryDate,
+            order.EstimatedDeliveryDate,
+            order.OrderServices.Select(ToOrderServiceDetail).ToList());
+    }
+
+    private static MechanicDiagnosticResponseDto ToMechanicDiagnostic(MechanicDiagnostic diagnostic)
+    {
+        return new MechanicDiagnosticResponseDto(
+            diagnostic.Id,
+            diagnostic.ServiceOrderId,
+            OrderCode(diagnostic.ServiceOrder),
+            CurrentOwnerName(diagnostic.ServiceOrder),
+            VehicleDisplayName(diagnostic.ServiceOrder.Vehicle),
+            diagnostic.MechanicPersonId,
+            PersonDisplayName(diagnostic.MechanicPerson, diagnostic.MechanicPersonId),
+            diagnostic.Status.ToString(),
+            diagnostic.Findings,
+            diagnostic.RecommendedWork,
+            diagnostic.WorkshopChiefComment,
+            diagnostic.SubmittedAt,
+            diagnostic.ReviewedAt);
     }
 
     private static ClientOrderDetailDto ToClientOrderDetail(ServiceOrder order)

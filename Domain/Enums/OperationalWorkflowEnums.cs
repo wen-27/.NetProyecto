@@ -52,3 +52,10 @@ public enum WorkshopServiceStatus
     Active = 1,
     Inactive = 2
 }
+
+public enum MechanicDiagnosticStatus
+{
+    PendingWorkshopChiefApproval = 1,
+    Approved = 2,
+    Rejected = 3
+}

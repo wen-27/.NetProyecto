@@ -38,7 +38,8 @@ public sealed record CreateDiagnosticServiceOrderRequest(
     string Observations,
     DateTime EstimatedDeliveryDate,
     DiagnosticEntryChecklistRequest Checklist,
-    DiagnosticServiceAssignmentRequest ServiceAssignment);
+    DiagnosticServiceAssignmentRequest? ServiceAssignment,
+    IReadOnlyList<DiagnosticServiceAssignmentRequest>? ServiceAssignments);
 
 public sealed record DiagnosticEntryChecklistRequest(
     bool Lights,
@@ -53,6 +54,7 @@ public sealed record DiagnosticEntryChecklistRequest(
 
 public sealed record DiagnosticServiceAssignmentRequest(
     int ServiceTypeId,
+    int? WorkshopServiceId,
     int SpecialtyId,
     int MechanicPersonId,
     string Observation,

@@ -9,11 +9,19 @@ public interface IOperationalWorkflowService
     Task<IReadOnlyList<AdditionalRequestResponseDto>> GetMechanicRequestsAsync(int mechanicPersonId, CancellationToken ct);
     Task<AdditionalRequestResponseDto> CreateAdditionalRequestAsync(int mechanicPersonId, int orderId, CreateAdditionalRequestDto dto, CancellationToken ct);
     Task RecordMechanicWorkAsync(int mechanicPersonId, int orderId, RecordMechanicWorkDto dto, CancellationToken ct);
+    Task CompleteMechanicOrderAsync(int mechanicPersonId, int orderId, RecordMechanicWorkDto dto, CancellationToken ct);
+    Task UpdateMechanicOrderServiceStatusAsync(int mechanicPersonId, int orderServiceId, UpdateMechanicOrderServiceStatusDto dto, CancellationToken ct);
+    Task<IReadOnlyList<MechanicDiagnosticResponseDto>> GetMechanicDiagnosticsAsync(int mechanicPersonId, CancellationToken ct);
+    Task<MechanicDiagnosticResponseDto> SubmitMechanicDiagnosticAsync(int mechanicPersonId, int orderId, CreateMechanicDiagnosticDto dto, CancellationToken ct);
 
     Task<IReadOnlyList<AdditionalRequestResponseDto>> GetWorkshopChiefRequestsAsync(CancellationToken ct);
     Task<AdditionalRequestResponseDto> GetWorkshopChiefRequestAsync(int requestId, CancellationToken ct);
     Task<AdditionalRequestResponseDto> ApproveWorkshopChiefRequestAsync(int workshopChiefPersonId, int requestId, WorkshopChiefReviewRequestDto dto, CancellationToken ct);
     Task<AdditionalRequestResponseDto> RejectWorkshopChiefRequestAsync(int workshopChiefPersonId, int requestId, WorkshopChiefReviewRequestDto dto, CancellationToken ct);
+    Task<IReadOnlyList<MechanicDiagnosticResponseDto>> GetWorkshopChiefDiagnosticsAsync(CancellationToken ct);
+    Task<MechanicDiagnosticResponseDto> GetWorkshopChiefDiagnosticAsync(int diagnosticId, CancellationToken ct);
+    Task<MechanicDiagnosticResponseDto> ApproveMechanicDiagnosticAsync(int workshopChiefPersonId, int diagnosticId, ReviewMechanicDiagnosticDto dto, CancellationToken ct);
+    Task<MechanicDiagnosticResponseDto> RejectMechanicDiagnosticAsync(int workshopChiefPersonId, int diagnosticId, ReviewMechanicDiagnosticDto dto, CancellationToken ct);
 
     Task<IReadOnlyList<WorkshopServiceResponseDto>> GetWorkshopServicesAsync(CancellationToken ct);
     Task<WorkshopServiceResponseDto> GetWorkshopServiceAsync(int id, CancellationToken ct);
