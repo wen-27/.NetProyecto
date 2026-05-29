@@ -18,8 +18,11 @@ public sealed record OrderServiceResponse(
     int Id,
     int ServiceOrderId,
     int ServiceTypeId,
+    int? WorkshopServiceId,
     string? Description,
     string? WorkPerformed,
     decimal LaborCost,
+    decimal Price,
+    int Status,
     bool? CustomerApproved,
     DateTime? ApprovalDate);

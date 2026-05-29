@@ -58,7 +58,11 @@ public sealed record ServiceOrderDto(
     int OrderStatusId,
     DateTime EntryDate,
     DateTime? EstimatedDeliveryDate,
-    string? WorkPerformed);
+    string? WorkPerformed,
+    decimal EstimatedTotal,
+    string? Customer,
+    string? Vehicle,
+    string? Status);
 
 public sealed record ServiceTypeDto(int Id, string Name, int EstimatedDays);
 
@@ -130,7 +134,32 @@ public static class EntityDtoMapper
 
     public static RoleDto ToDto(this Role entity) => new(entity.Id, entity.RoleName);
 
-    public static ServiceOrderDto ToDto(this ServiceOrder entity) => new(entity.Id, entity.VehicleId, entity.OrderStatusId, entity.EntryDate, entity.EstimatedDeliveryDate, entity.WorkPerformed);
+    public static ServiceOrderDto ToDto(this ServiceOrder entity)
+    {
+        var owner = entity.Vehicle?.OwnerHistory?
+            .Where(x => x.EndDate == null)
+            .OrderByDescending(x => x.StartDate)
+            .FirstOrDefault()
+            ?.Person;
+        var customer = owner is null
+            ? null
+            : string.Join(' ', new[] { owner.FirstName, owner.MiddleName, owner.LastName, owner.SecondLastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        var brand = entity.Vehicle?.VehicleModel?.VehicleBrand?.BrandName;
+        var model = entity.Vehicle?.VehicleModel?.ModelName;
+        var vehicle = string.Join(' ', new[] { brand, model, entity.Vehicle?.Year.ToString() }.Where(x => !string.IsNullOrWhiteSpace(x)));
+
+        return new ServiceOrderDto(
+            entity.Id,
+            entity.VehicleId,
+            entity.OrderStatusId,
+            entity.EntryDate,
+            entity.EstimatedDeliveryDate,
+            entity.WorkPerformed,
+            entity.EstimatedTotal,
+            string.IsNullOrWhiteSpace(customer) ? null : customer,
+            string.IsNullOrWhiteSpace(vehicle) ? null : vehicle,
+            entity.OrderStatus?.Name);
+    }
 
     public static ServiceTypeDto ToDto(this ServiceType entity) => new(entity.Id, entity.Name, entity.EstimatedDays);
 

@@ -23,6 +23,8 @@ public interface IOperationalWorkflowService
 
     Task<IReadOnlyList<ClientOrderSummaryDto>> GetClientOrdersAsync(int clientPersonId, CancellationToken ct);
     Task<ClientOrderDetailDto> GetClientOrderAsync(int clientPersonId, int orderId, CancellationToken ct);
+    Task<ClientOrderDetailDto> ApproveClientOrderAsync(int clientPersonId, int orderId, ClientReviewAdditionalRequestDto dto, CancellationToken ct);
+    Task<ClientOrderDetailDto> RejectClientOrderAsync(int clientPersonId, int orderId, ClientReviewAdditionalRequestDto dto, CancellationToken ct);
     Task<IReadOnlyList<AdditionalRequestResponseDto>> GetClientApprovalsAsync(int clientPersonId, CancellationToken ct);
     Task<AdditionalRequestResponseDto> ApproveClientRequestAsync(int clientPersonId, int requestId, ClientReviewAdditionalRequestDto dto, CancellationToken ct);
     Task<AdditionalRequestResponseDto> RejectClientRequestAsync(int clientPersonId, int requestId, ClientReviewAdditionalRequestDto dto, CancellationToken ct);

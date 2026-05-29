@@ -22,6 +22,14 @@ public sealed class ClientWorkflowController : OperationalControllerBase
     [HttpGet("orders/{orderId:int}")]
     public Task<IActionResult> GetOrder(int orderId, CancellationToken ct) => ExecuteAsync(async () => Ok(await _workflow.GetClientOrderAsync(CurrentPersonId(), orderId, ct)));
 
+    [HttpPost("orders/{orderId:int}/approve")]
+    public Task<IActionResult> ApproveOrder(int orderId, ClientReviewAdditionalRequestDto dto, CancellationToken ct) =>
+        ExecuteAsync(async () => Ok(await _workflow.ApproveClientOrderAsync(CurrentPersonId(), orderId, dto, ct)));
+
+    [HttpPost("orders/{orderId:int}/reject")]
+    public Task<IActionResult> RejectOrder(int orderId, ClientReviewAdditionalRequestDto dto, CancellationToken ct) =>
+        ExecuteAsync(async () => Ok(await _workflow.RejectClientOrderAsync(CurrentPersonId(), orderId, dto, ct)));
+
     [HttpGet("approvals")]
     public Task<IActionResult> GetApprovals(CancellationToken ct) => ExecuteAsync(async () => Ok(await _workflow.GetClientApprovalsAsync(CurrentPersonId(), ct)));
 

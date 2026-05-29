@@ -38,7 +38,7 @@ public static class AuthServiceExtensions
             options.AddPolicy("InventoryManagerOnly", policy => policy.RequireRole("InventoryManager"));
             options.AddPolicy("InternalStaff", policy => policy.RequireRole("Admin", "Mechanic", "Receptionist", "WorkshopChief", "WarehouseChief", "InventoryManager"));
             options.AddPolicy("MechanicOrAdmin", policy => policy.RequireRole("Mechanic", "Admin"));
-            options.AddPolicy("ReceptionistOrAdmin", policy => policy.RequireRole("Receptionist", "Admin"));
+            options.AddPolicy("ReceptionistOrAdmin", policy => policy.RequireRole("Receptionist", "WorkshopChief", "Admin"));
             options.AddPolicy("WorkshopChiefOrAdmin", policy => policy.RequireRole("WorkshopChief", "Admin"));
             options.AddPolicy("WarehouseChiefOrAdmin", policy => policy.RequireRole("WarehouseChief", "Admin"));
             options.AddPolicy("InventoryManagerOrAdmin", policy => policy.RequireRole("InventoryManager", "Admin"));

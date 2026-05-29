@@ -203,6 +203,20 @@ public sealed class RoleRepository : GenericRepository<Role>, IRoleRepository
 public sealed class ServiceOrderRepository : GenericRepository<ServiceOrder>, IServiceOrderRepository
 {
     public ServiceOrderRepository(AppDbContext context) : base(context) { }
+    public new Task<ServiceOrder?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        return Context.ServiceOrders
+            .AsNoTracking()
+            .Include(x => x.Vehicle)
+            .ThenInclude(x => x.VehicleModel)
+            .ThenInclude(x => x.VehicleBrand)
+            .Include(x => x.Vehicle)
+            .ThenInclude(x => x.OwnerHistory)
+            .ThenInclude(x => x.Person)
+            .Include(x => x.OrderStatus)
+            .FirstOrDefaultAsync(x => x.Id == id, ct);
+    }
+
     public Task<IReadOnlyList<ServiceOrder>> GetByVehicleIdAsync(ServiceOrderVehicleId vehicleId, CancellationToken ct = default) => ListByAsync(nameof(ServiceOrder.VehicleId), vehicleId, ct);
     public Task<IReadOnlyList<ServiceOrder>> GetByStatusIdAsync(ServiceOrderStatusId statusId, CancellationToken ct = default) => ListByAsync(nameof(ServiceOrder.OrderStatusId), statusId, ct);
     public Task<bool> HasActiveOrderForVehicleAsync(ServiceOrderVehicleId vehicleId, CancellationToken ct = default)
@@ -224,6 +238,12 @@ public sealed class ServiceOrderRepository : GenericRepository<ServiceOrder>, IS
         CancellationToken ct = default)
     {
         return await ApplyFilters(search, clientPersonId, vin, fromDate, toDate, statusId, mechanicPersonId)
+            .Include(x => x.Vehicle)
+            .ThenInclude(x => x.VehicleModel)
+            .ThenInclude(x => x.VehicleBrand)
+            .Include(x => x.Vehicle)
+            .ThenInclude(x => x.OwnerHistory)
+            .ThenInclude(x => x.Person)
             .OrderByDescending(x => x.EntryDate)
             .ThenByDescending(x => x.Id)
             .Skip((page - 1) * pageSize)
@@ -256,7 +276,11 @@ public sealed class ServiceOrderRepository : GenericRepository<ServiceOrder>, IS
         var query = Context.ServiceOrders
             .AsNoTracking()
             .Include(x => x.Vehicle)
+            .ThenInclude(x => x.VehicleModel)
+            .ThenInclude(x => x.VehicleBrand)
+            .Include(x => x.Vehicle)
             .ThenInclude(x => x.OwnerHistory)
+            .ThenInclude(x => x.Person)
             .Include(x => x.OrderStatus)
             .AsQueryable();
 

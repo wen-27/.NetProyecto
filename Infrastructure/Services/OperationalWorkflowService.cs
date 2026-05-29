@@ -102,7 +102,6 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
         };
 
         await _context.AdditionalServiceRequests.AddAsync(request, ct);
-        order.OrderStatusId = (int)ServiceOrderStatus.PendingClientApproval;
         await _context.SaveChangesAsync(ct);
 
         return await GetWorkshopChiefRequestAsync(request.Id, ct);
@@ -126,8 +125,8 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
     public async Task<IReadOnlyList<AdditionalRequestResponseDto>> GetWorkshopChiefRequestsAsync(CancellationToken ct)
     {
         var requests = await RequestQuery()
-            .Where(x => x.Status == AdditionalRequestStatus.PendingWorkshopChiefApproval)
-            .OrderBy(x => x.CreatedAt)
+            .Where(x => x.Status != AdditionalRequestStatus.Draft)
+            .OrderByDescending(x => x.WorkshopChiefReviewedAt ?? x.CreatedAt)
             .ToListAsync(ct);
         return requests.Select(ToAdditionalRequest).ToList();
     }
@@ -251,6 +250,11 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
     public async Task<IReadOnlyList<ClientOrderSummaryDto>> GetClientOrdersAsync(int clientPersonId, CancellationToken ct)
     {
         var orders = await ClientOrderQuery(clientPersonId)
+            .Where(x =>
+                x.OrderServices.Any() ||
+                x.Invoice != null ||
+                x.OrderStatusId >= (int)ServiceOrderStatus.WaitingForPayment ||
+                (x.OrderStatusId == (int)ServiceOrderStatus.PendingClientApproval && x.EstimatedTotal > 0))
             .OrderByDescending(x => x.EntryDate)
             .ToListAsync(ct);
         return orders.Select(x =>
@@ -258,11 +262,15 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
             var payment = x.Invoice?.Payments.OrderByDescending(payment => payment.PaymentDate).FirstOrDefault();
             return new ClientOrderSummaryDto(
                 x.Id,
+                OrderCode(x),
                 x.OrderStatus.Name,
                 x.Vehicle.Vin,
+                x.Vehicle.Vin,
+                CurrentOwnerName(x),
                 x.EstimatedTotal,
                 x.EntryDate,
                 x.DeliveryDate,
+                x.Invoice?.Id,
                 CanPay(x.Invoice, payment),
                 payment?.PaymentStatus.Name,
                 PaymentMessage(payment));
@@ -274,6 +282,52 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
         var order = await ClientOrderQuery(clientPersonId).FirstOrDefaultAsync(x => x.Id == orderId, ct)
             ?? throw new UnauthorizedAccessException("No puedes consultar órdenes de otros clientes.");
         return ToClientOrderDetail(order);
+    }
+
+    public async Task<ClientOrderDetailDto> ApproveClientOrderAsync(int clientPersonId, int orderId, ClientReviewAdditionalRequestDto dto, CancellationToken ct)
+    {
+        var order = await ClientOrderQuery(clientPersonId)
+            .AsTracking()
+            .FirstOrDefaultAsync(x => x.Id == orderId, ct)
+            ?? throw new UnauthorizedAccessException("No puedes aprobar órdenes de otro cliente.");
+
+        if (order.OrderStatusId != (int)ServiceOrderStatus.PendingClientApproval)
+        {
+            throw new InvalidOperationException("La orden no está pendiente de aprobación del cliente.");
+        }
+
+        if (!order.OrderServices.Any() && order.EstimatedTotal <= 0)
+        {
+            throw new InvalidOperationException("La orden aún no tiene servicios registrados para aprobar.");
+        }
+
+        await EnsureInvoiceForOrderAsync(order, ct);
+        order.OrderStatusId = (int)ServiceOrderStatus.WaitingForPayment;
+        order.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync(ct);
+
+        var updatedOrder = await ClientOrderQuery(clientPersonId).FirstAsync(x => x.Id == orderId, ct);
+        return ToClientOrderDetail(updatedOrder);
+    }
+
+    public async Task<ClientOrderDetailDto> RejectClientOrderAsync(int clientPersonId, int orderId, ClientReviewAdditionalRequestDto dto, CancellationToken ct)
+    {
+        var order = await ClientOrderQuery(clientPersonId)
+            .AsTracking()
+            .FirstOrDefaultAsync(x => x.Id == orderId, ct)
+            ?? throw new UnauthorizedAccessException("No puedes rechazar órdenes de otro cliente.");
+
+        if (order.OrderStatusId != (int)ServiceOrderStatus.PendingClientApproval)
+        {
+            throw new InvalidOperationException("La orden no está pendiente de aprobación del cliente.");
+        }
+
+        order.OrderStatusId = (int)ServiceOrderStatus.Cancelled;
+        order.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync(ct);
+
+        var updatedOrder = await ClientOrderQuery(clientPersonId).FirstAsync(x => x.Id == orderId, ct);
+        return ToClientOrderDetail(updatedOrder);
     }
 
     public async Task<IReadOnlyList<AdditionalRequestResponseDto>> GetClientApprovalsAsync(int clientPersonId, CancellationToken ct)
@@ -838,8 +892,13 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
         return OrderQuery()
             .Include(x => x.Vehicle)
             .ThenInclude(x => x.OwnerHistory)
+            .ThenInclude(x => x.Person)
             .Include(x => x.AdditionalServiceRequests)
             .ThenInclude(x => x.WorkshopService)
+            .Include(x => x.AdditionalServiceRequests)
+            .ThenInclude(x => x.Part)
+            .Include(x => x.AdditionalServiceRequests)
+            .ThenInclude(x => x.MechanicPerson)
             .Include(x => x.Invoice)
             .ThenInclude(x => x!.Payments)
             .ThenInclude(x => x.PaymentStatus)
@@ -849,6 +908,15 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
     private IQueryable<AdditionalServiceRequest> RequestQuery()
     {
         return _context.AdditionalServiceRequests
+            .Include(x => x.ServiceOrder)
+            .ThenInclude(x => x.Vehicle)
+            .ThenInclude(x => x.VehicleModel)
+            .ThenInclude(x => x.VehicleBrand)
+            .Include(x => x.ServiceOrder)
+            .ThenInclude(x => x.Vehicle)
+            .ThenInclude(x => x.OwnerHistory)
+            .ThenInclude(x => x.Person)
+            .Include(x => x.MechanicPerson)
             .Include(x => x.WorkshopService)
             .Include(x => x.Part);
     }
@@ -1040,6 +1108,10 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
             request.ServiceOrderId,
             request.MechanicPersonId,
             request.ClientPersonId,
+            request.ServiceOrder is null ? $"OT-{DateTime.UtcNow:yyyy}-{request.ServiceOrderId:0000}" : OrderCode(request.ServiceOrder),
+            request.ServiceOrder is null ? "Cliente" : CurrentOwnerName(request.ServiceOrder),
+            request.ServiceOrder?.Vehicle is null ? "Vehículo asociado a la orden" : VehicleDisplayName(request.ServiceOrder.Vehicle),
+            PersonDisplayName(request.MechanicPerson, request.MechanicPersonId),
             request.RequestType.ToString(),
             request.Status.ToString(),
             request.WorkshopServiceId,
@@ -1052,6 +1124,25 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
             request.ClientComment,
             request.EstimatedPrice,
             request.CreatedAt);
+    }
+
+    private static string VehicleDisplayName(Vehicle vehicle)
+    {
+        var model = vehicle.VehicleModel;
+        var brand = model?.VehicleBrand?.BrandName;
+        var name = string.Join(' ', new[] { brand, model?.ModelName, vehicle.Year > 0 ? vehicle.Year.ToString() : null }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        return string.IsNullOrWhiteSpace(name) ? vehicle.Vin : $"{name} · {vehicle.Vin}";
+    }
+
+    private static string PersonDisplayName(Person? person, int? personId = null)
+    {
+        if (person is null)
+        {
+            return personId.HasValue ? $"Persona #{personId.Value}" : "Sin mecánico asignado";
+        }
+
+        var name = string.Join(' ', new[] { person.FirstNames, person.LastNames }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        return string.IsNullOrWhiteSpace(name) ? $"Persona #{person.Id}" : name;
     }
 
     private static WorkshopServiceResponseDto ToWorkshopService(WorkshopService service)
@@ -1080,11 +1171,15 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
         var latestPayment = order.Invoice?.Payments.OrderByDescending(x => x.PaymentDate).FirstOrDefault();
         return new ClientOrderDetailDto(
             order.Id,
+            OrderCode(order),
             order.OrderStatus.Name,
             order.Vehicle.Vin,
+            order.Vehicle.Vin,
+            CurrentOwnerName(order),
             order.EstimatedTotal,
             order.EntryDate,
             order.DeliveryDate,
+            order.Invoice?.Id,
             CanPay(order.Invoice, latestPayment),
             order.OrderServices.Select(ToOrderServiceDetail).ToList(),
             order.AdditionalServiceRequests.Where(x => x.Status == AdditionalRequestStatus.PendingClientApproval).Select(ToAdditionalRequest).ToList(),
@@ -1095,6 +1190,22 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
     {
         var name = service.WorkshopService?.Name ?? service.ServiceType.Name;
         return new OrderServiceDetailDto(service.Id, name, service.Status.ToString(), service.Price + service.LaborCost);
+    }
+
+    private static string OrderCode(ServiceOrder order)
+    {
+        return $"OT-{order.EntryDate:yyyy}-{order.Id:0000}";
+    }
+
+    private static string CurrentOwnerName(ServiceOrder order)
+    {
+        var owner = order.Vehicle.OwnerHistory.FirstOrDefault(x => x.EndDate == null)?.Person;
+        if (owner is null)
+        {
+            return "Cliente";
+        }
+
+        return string.Join(' ', new[] { owner.FirstNames, owner.LastNames }.Where(x => !string.IsNullOrWhiteSpace(x)));
     }
 
     private static PaymentResponseDto ToPayment(Payment payment)
@@ -1132,6 +1243,61 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
             invoice.Total,
             CanPay(invoice, latestPayment),
             latestPayment is null ? null : ToPayment(latestPayment));
+    }
+
+    private async Task EnsureInvoiceForOrderAsync(ServiceOrder order, CancellationToken ct)
+    {
+        if (order.Invoice is not null)
+        {
+            return;
+        }
+
+        var services = order.OrderServices.ToList();
+        if (services.Count == 0 && order.EstimatedTotal <= 0)
+        {
+            throw new InvalidOperationException("La orden aún no tiene servicios registrados para facturar.");
+        }
+
+        var total = services.Sum(service => service.Price + service.LaborCost);
+        if (total <= 0)
+        {
+            total = order.EstimatedTotal;
+        }
+
+        var invoice = new Invoice
+        {
+            ServiceOrderId = order.Id,
+            InvoiceStatusId = 2,
+            InvoiceDate = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
+            LaborCost = services.Sum(service => service.LaborCost),
+            Total = total
+        };
+
+        foreach (var service in services)
+        {
+            invoice.Details.Add(new InvoiceDetail
+            {
+                Concept = service.WorkshopService?.Name ?? service.Description ?? $"Servicio #{service.ServiceTypeId}",
+                Quantity = 1,
+                UnitPrice = service.Price + service.LaborCost,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        if (services.Count == 0)
+        {
+            invoice.Details.Add(new InvoiceDetail
+            {
+                Concept = $"Orden de servicio {OrderCode(order)}",
+                Quantity = 1,
+                UnitPrice = total,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        await _context.Invoices.AddAsync(invoice, ct);
+        order.Invoice = invoice;
     }
 
     private static bool CanPay(Invoice? invoice, Payment? latestPayment)
