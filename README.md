@@ -16,13 +16,18 @@ En la interfaz pueden mostrarse en español, pero el backend usa estos nombres e
 
 ## Usuarios seed de desarrollo
 
-Estos usuarios son solo para ambiente de desarrollo. La contraseña seed es `Admin123*`.
+Estos usuarios son solo para ambiente de desarrollo. La contraseña seed comun es `DevPass123!` y queda hasheada en la base de datos.
 
 - `admin@autotaller.com`
-- `recepcion@autotaller.com`
+- `recepcionista@autotaller.com`
 - `mecanico@autotaller.com`
-- `cliente@autotaller.com`
-- `jefetaller@autotaller.com`
+- `diagnostico@autotaller.com`
+- `mantenimiento@autotaller.com`
+- `electricista@autotaller.com`
+- `frenos@autotaller.com`
+- `carlos.ramirez@test.com`
+- `laura.gomez@test.com`
+- `jefe.mecanicos@autotaller.com`
 - `jefebodega@autotaller.com`
 - `jefealmacen@autotaller.com`
 
@@ -137,4 +142,38 @@ dotnet ef migrations add AddOperationalWorkflowAndSeeders --project Infrastructu
 dotnet ef database update --project Infrastructure --startup-project Api
 dotnet build
 dotnet run --project Api
+```
+
+### Resetear base local y resembrar datos
+
+Usa estos comandos solo en desarrollo. `database drop` elimina la base de datos local configurada para el proyecto, incluyendo datos ingresados manualmente.
+
+Desde la raíz del repositorio (`/Users/wen/.NetProyecto-1`):
+
+```bash
+dotnet ef database drop --project Infrastructure --startup-project Api
+dotnet ef database update --project Infrastructure --startup-project Api
+dotnet run --project Api
+```
+
+Si ya estas dentro de la carpeta `Api`, usa estas rutas:
+
+```bash
+dotnet ef database drop --project ../Infrastructure/Infrastructure.csproj --startup-project ./Api.csproj
+dotnet ef database update --project ../Infrastructure/Infrastructure.csproj --startup-project ./Api.csproj
+dotnet run --project ./Api.csproj
+```
+
+Al ejecutar `dotnet run --project Api` en ambiente `Development`, el backend corre `DevelopmentDataSeeder` automaticamente y vuelve a crear los datos iniciales.
+
+Si `dotnet ef` no esta disponible:
+
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+Para actualizar la herramienta:
+
+```bash
+dotnet tool update --global dotnet-ef
 ```

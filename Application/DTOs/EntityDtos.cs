@@ -4,7 +4,7 @@ namespace Application.DTOs;
 
 public sealed record AuditActionTypeDto(int Id, string Name);
 
-public sealed record AuditDto(int Id, int UserId, int AuditActionTypeId, string AffectedEntity, int AffectedRecordId, string? Description);
+public sealed record AuditDto(int Id, int UserId, int AuditActionTypeId, string AffectedEntity, int AffectedRecordId, string? Description, DateTime CreatedAt, string? Action, string? User);
 
 public sealed record CardTypeDto(int Id, string Name);
 
@@ -87,7 +87,18 @@ public static class EntityDtoMapper
 {
     public static AuditActionTypeDto ToDto(this AuditActionType entity) => new(entity.Id, entity.Name);
 
-    public static AuditDto ToDto(this Audit entity) => new(entity.Id, entity.UserId, entity.AuditActionTypeId, entity.AffectedEntity, entity.AffectedRecordId, entity.Description);
+    public static AuditDto ToDto(this Audit entity) => new(
+        entity.Id,
+        entity.UserId,
+        entity.AuditActionTypeId,
+        entity.AffectedEntity,
+        entity.AffectedRecordId,
+        entity.Description,
+        entity.CreatedAt,
+        entity.AuditActionType?.Name,
+        entity.User?.Person is null
+            ? $"Usuario #{entity.UserId}"
+            : string.Join(' ', new[] { entity.User.Person.FirstName, entity.User.Person.MiddleName, entity.User.Person.LastName, entity.User.Person.SecondLastName }.Where(x => !string.IsNullOrWhiteSpace(x))));
 
     public static CardTypeDto ToDto(this CardType entity) => new(entity.Id, entity.Name);
 

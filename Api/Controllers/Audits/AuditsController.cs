@@ -1,24 +1,55 @@
 using Api.Controllers;
+using Infrastructure.Context;
+using Application.DTOs;
 using Application.UseCase.Audits;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers.Audits;
 
 [Authorize(Policy = "AdminOnly")]
 public sealed class AuditsController : BaseApiController
 {
-    public AuditsController(ISender sender) : base(sender)
+    private readonly AppDbContext _context;
+
+    public AuditsController(ISender sender, AppDbContext context) : base(sender)
     {
+        _context = context;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetPaged([FromQuery(Name = "pageNumber")] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null, CancellationToken ct = default)
     {
-        var result = await Sender.Send(new GetAuditsPaged(pageNumber, pageSize, search), ct);
-        Response.Headers["X-Total-Count"] = result.TotalCount.ToString();
-        return Ok(result);
+        var query = _context.Audits
+            .AsNoTracking()
+            .Include(audit => audit.AuditActionType)
+            .Include(audit => audit.User).ThenInclude(user => user.Person)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim().ToLower();
+            query = query.Where(audit =>
+                audit.AffectedEntity.ToLower().Contains(term) ||
+                (audit.Description != null && audit.Description.ToLower().Contains(term)) ||
+                audit.AuditActionType.Name.ToLower().Contains(term) ||
+                audit.User.Person.FirstName.ToLower().Contains(term) ||
+                audit.User.Person.LastName.ToLower().Contains(term));
+        }
+
+        var safePage = Math.Max(1, pageNumber);
+        var safePageSize = Math.Max(1, pageSize);
+        var total = await query.CountAsync(ct);
+        var audits = await query
+            .OrderByDescending(audit => audit.CreatedAt)
+            .Skip((safePage - 1) * safePageSize)
+            .Take(safePageSize)
+            .ToListAsync(ct);
+
+        Response.Headers["X-Total-Count"] = total.ToString();
+        return Ok(audits.Select(audit => audit.ToDto()));
     }
 
     [HttpGet("{id:int}")]

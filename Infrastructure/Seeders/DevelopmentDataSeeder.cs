@@ -1,4 +1,6 @@
 using Domain.Entities;
+using Domain.Enums;
+using Domain.Enums.OrderStatus;
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -8,20 +10,53 @@ namespace Infrastructure.Seeders;
 
 public static class DevelopmentDataSeeder
 {
-    private const string DefaultPassword = "Admin123*";
+    private const string DefaultPassword = "DevPass123!";
 
     public static async Task SeedDevelopmentDataAsync(this IServiceProvider serviceProvider, IConfiguration configuration)
     {
         using var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+        await context.Database.MigrateAsync();
+        await EnsureMechanicDiagnosticsTableAsync(context);
+
         await using var transaction = await context.Database.BeginTransactionAsync();
 
         await SeedUsersAsync(context, configuration);
         await SeedInventoryAsync(context);
         await SeedWorkshopServicesAsync(context);
+        await SeedOperationalScenarioAsync(context);
 
         await transaction.CommitAsync();
+    }
+
+    private static Task EnsureMechanicDiagnosticsTableAsync(AppDbContext context)
+    {
+        return context.Database.ExecuteSqlRawAsync("""
+            CREATE TABLE IF NOT EXISTS `MechanicDiagnostics` (
+                `MechanicDiagnosticId` int NOT NULL AUTO_INCREMENT,
+                `ServiceOrderId` int NOT NULL,
+                `MechanicPersonId` int NOT NULL,
+                `WorkshopChiefPersonId` int NULL,
+                `Status` int NOT NULL DEFAULT 1,
+                `Findings` longtext NOT NULL,
+                `RecommendedWork` longtext NOT NULL,
+                `WorkshopChiefComment` longtext NULL,
+                `SubmittedAt` datetime(6) NOT NULL,
+                `ReviewedAt` datetime(6) NULL,
+                `CreatedAt` datetime(6) NOT NULL,
+                PRIMARY KEY (`MechanicDiagnosticId`),
+                KEY `IX_MechanicDiagnostics_MechanicPersonId` (`MechanicPersonId`),
+                KEY `IX_MechanicDiagnostics_ServiceOrderId_MechanicPersonId_Status` (`ServiceOrderId`, `MechanicPersonId`, `Status`),
+                KEY `IX_MechanicDiagnostics_WorkshopChiefPersonId` (`WorkshopChiefPersonId`),
+                CONSTRAINT `FK_MechanicDiagnostics_Persons_MechanicPersonId`
+                    FOREIGN KEY (`MechanicPersonId`) REFERENCES `Persons` (`PersonId`) ON DELETE RESTRICT,
+                CONSTRAINT `FK_MechanicDiagnostics_Persons_WorkshopChiefPersonId`
+                    FOREIGN KEY (`WorkshopChiefPersonId`) REFERENCES `Persons` (`PersonId`) ON DELETE RESTRICT,
+                CONSTRAINT `FK_MechanicDiagnostics_ServiceOrders_ServiceOrderId`
+                    FOREIGN KEY (`ServiceOrderId`) REFERENCES `ServiceOrders` (`ServiceOrderId`) ON DELETE RESTRICT
+            ) CHARACTER SET utf8mb4;
+            """);
     }
 
     private static async Task SeedUsersAsync(AppDbContext context, IConfiguration configuration)
@@ -30,84 +65,77 @@ public static class DevelopmentDataSeeder
         {
             new SeedUser(
                 RoleName: "Admin",
-                Email: configuration["SeedUsers:Admin:Email"] ?? "admin@autotaller.com",
-                Password: configuration["SeedUsers:Admin:Password"] ?? DefaultPassword,
-                DocumentNumber: configuration["SeedUsers:Admin:DocumentNumber"] ?? "ADMIN-0001",
+                Email: "admin@autotaller.com",
+                Password: DefaultPassword,
+                DocumentNumber: "ADMIN-0001",
                 FirstName: "Admin",
-                LastName: "AutoTaller"),
+                LastName: "Sistema"),
             new SeedUser(
                 RoleName: "Mechanic",
-                Email: configuration["SeedUsers:Mechanic:Email"] ?? "mecanico@autotaller.com",
-                Password: configuration["SeedUsers:Mechanic:Password"] ?? DefaultPassword,
-                DocumentNumber: configuration["SeedUsers:Mechanic:DocumentNumber"] ?? "MECH-0001",
+                Email: "mecanico@autotaller.com",
+                Password: DefaultPassword,
+                DocumentNumber: "MECH-0001",
                 FirstName: "Mecanico",
                 LastName: "Principal",
                 Specialties: new[] { "GeneralDiagnostics", "Engine", "Diagnóstico" }),
             new SeedUser(
                 RoleName: "Mechanic",
-                Email: configuration["SeedUsers:DiagnosticMechanic:Email"] ?? "diagnostico@autotaller.com",
-                Password: configuration["SeedUsers:DiagnosticMechanic:Password"] ?? DefaultPassword,
-                DocumentNumber: configuration["SeedUsers:DiagnosticMechanic:DocumentNumber"] ?? "MECH-DIAG-0001",
-                FirstName: "Diana",
-                LastName: "Diagnostico",
+                Email: "diagnostico@autotaller.com",
+                Password: DefaultPassword,
+                DocumentNumber: "MECH-DIAG-0001",
+                FirstName: "Diego",
+                LastName: "Herrera",
                 Specialties: new[] { "Diagnóstico", "GeneralDiagnostics" }),
             new SeedUser(
                 RoleName: "Mechanic",
-                Email: configuration["SeedUsers:MaintenanceMechanic:Email"] ?? "mantenimiento@autotaller.com",
-                Password: configuration["SeedUsers:MaintenanceMechanic:Password"] ?? DefaultPassword,
-                DocumentNumber: configuration["SeedUsers:MaintenanceMechanic:DocumentNumber"] ?? "MECH-MANT-0001",
-                FirstName: "Manuel",
-                LastName: "Mantenimiento",
+                Email: "mantenimiento@autotaller.com",
+                Password: DefaultPassword,
+                DocumentNumber: "MECH-MANT-0001",
+                FirstName: "Luis",
+                LastName: "Martinez",
                 Specialties: new[] { "Mantenimiento" }),
             new SeedUser(
                 RoleName: "Mechanic",
-                Email: configuration["SeedUsers:ElectricMechanic:Email"] ?? "electricista@autotaller.com",
-                Password: configuration["SeedUsers:ElectricMechanic:Password"] ?? DefaultPassword,
-                DocumentNumber: configuration["SeedUsers:ElectricMechanic:DocumentNumber"] ?? "MECH-ELEC-0001",
-                FirstName: "Elena",
-                LastName: "Electricista",
+                Email: "electricista@autotaller.com",
+                Password: DefaultPassword,
+                DocumentNumber: "MECH-ELEC-0001",
+                FirstName: "Felipe",
+                LastName: "Torres",
                 Specialties: new[] { "Electricista", "Electrical" }),
             new SeedUser(
                 RoleName: "Mechanic",
-                Email: configuration["SeedUsers:BrakesMechanic:Email"] ?? "frenos@autotaller.com",
-                Password: configuration["SeedUsers:BrakesMechanic:Password"] ?? DefaultPassword,
-                DocumentNumber: configuration["SeedUsers:BrakesMechanic:DocumentNumber"] ?? "MECH-FREN-0001",
-                FirstName: "Fabian",
-                LastName: "Frenos",
+                Email: "frenos@autotaller.com",
+                Password: DefaultPassword,
+                DocumentNumber: "MECH-FREN-0001",
+                FirstName: "Camilo",
+                LastName: "Vargas",
                 Specialties: new[] { "Frenos", "Brakes" }),
             new SeedUser(
                 RoleName: "Receptionist",
-                Email: configuration["SeedUsers:Receptionist:Email"] ?? "recepcion@autotaller.com",
-                Password: configuration["SeedUsers:Receptionist:Password"] ?? DefaultPassword,
-                DocumentNumber: configuration["SeedUsers:Receptionist:DocumentNumber"] ?? "RECEP-0001",
-                FirstName: "Recepcionista",
-                LastName: "Principal"),
-            new SeedUser(
-                RoleName: "Client",
-                Email: configuration["SeedUsers:Client:Email"] ?? "cliente@autotaller.com",
-                Password: configuration["SeedUsers:Client:Password"] ?? DefaultPassword,
-                DocumentNumber: configuration["SeedUsers:Client:DocumentNumber"] ?? "CLIENT-0001",
-                FirstName: "Cliente",
-                LastName: "Demo"),
+                Email: "recepcionista@autotaller.com",
+                Password: DefaultPassword,
+                DocumentNumber: "RECEP-0001",
+                FirstName: "Andrea",
+                LastName: "Rojas"),
             new SeedUser(
                 RoleName: "WorkshopChief",
-                Email: configuration["SeedUsers:WorkshopChief:Email"] ?? "jefetaller@autotaller.com",
-                Password: configuration["SeedUsers:WorkshopChief:Password"] ?? DefaultPassword,
-                DocumentNumber: configuration["SeedUsers:WorkshopChief:DocumentNumber"] ?? "CHIEF-WORKSHOP-0001",
-                FirstName: "Jefe",
-                LastName: "Taller"),
+                Email: "jefe.mecanicos@autotaller.com",
+                Password: DefaultPassword,
+                DocumentNumber: "CHIEF-WORKSHOP-0001",
+                FirstName: "Jorge",
+                LastName: "Mendez"),
             new SeedUser(
                 RoleName: "WarehouseChief",
-                Email: configuration["SeedUsers:WarehouseChief:Email"] ?? "jefebodega@autotaller.com",
-                Password: configuration["SeedUsers:WarehouseChief:Password"] ?? DefaultPassword,
-                DocumentNumber: configuration["SeedUsers:WarehouseChief:DocumentNumber"] ?? "CHIEF-WAREHOUSE-0001",
+                Email: "jefebodega@autotaller.com",
+                Password: DefaultPassword,
+                DocumentNumber: "CHIEF-WAREHOUSE-0001",
                 FirstName: "Jefe",
                 LastName: "Bodega"),
             new SeedUser(
                 RoleName: "InventoryManager",
-                Email: configuration["SeedUsers:InventoryManager:Email"] ?? "jefealmacen@autotaller.com",
-                Password: configuration["SeedUsers:InventoryManager:Password"] ?? DefaultPassword,
-                DocumentNumber: configuration["SeedUsers:InventoryManager:DocumentNumber"] ?? "MANAGER-INVENTORY-0001",
+                Email: "jefealmacen@autotaller.com",
+                Password: DefaultPassword,
+                DocumentNumber: "MANAGER-INVENTORY-0001",
                 FirstName: "Jefe",
                 LastName: "Almacen")
         };
@@ -211,17 +239,19 @@ public static class DevelopmentDataSeeder
 
         await EnsurePersonRoleAsync(context, person.Id, role.Id);
 
-        var hasUser = await context.Users.AnyAsync(x => x.PersonId == person.Id);
-        if (!hasUser)
+        var user = await context.Users.AsTracking().FirstOrDefaultAsync(x => x.PersonId == person.Id);
+        if (user is null)
         {
-            await context.Users.AddAsync(new User
+            user = new User
             {
                 PersonId = person.Id,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(seedUser.Password),
-                IsActive = true,
                 CreatedAt = DateTime.UtcNow
-            });
+            };
+            await context.Users.AddAsync(user);
         }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(seedUser.Password);
+        user.IsActive = true;
 
         return person.Id;
     }
@@ -321,6 +351,9 @@ public static class DevelopmentDataSeeder
         await EnsureWorkshopServiceAsync(context, "Balanceo", "Balanceo de ruedas.", "Llantas", 100m, Array.Empty<(string Code, int Quantity)>());
         await EnsureWorkshopServiceAsync(context, "Diagnóstico general", "Diagnóstico general del vehículo.", "Diagnóstico", 100m, Array.Empty<(string Code, int Quantity)>());
         await EnsureWorkshopServiceAsync(context, "Mantenimiento preventivo", "Mantenimiento preventivo básico.", "Mantenimiento", 30m, new[] { ("REF-ACE-20W50", 1), ("REF-FIL-ACE-UNI", 1), ("REF-FIL-AIR", 1) });
+        await EnsureWorkshopServiceAsync(context, "Revisión eléctrica", "Revisión del sistema eléctrico, batería, alternador y cableado principal.", "Electricista", 25m, Array.Empty<(string Code, int Quantity)>());
+        await EnsureWorkshopServiceAsync(context, "Reparación sistema eléctrico", "Corrección de fallas eléctricas y reemplazo básico de componentes.", "Electricista", 30m, new[] { ("REF-BAT-12V", 1), ("REF-BUJ-STD", 2) });
+        await EnsureWorkshopServiceAsync(context, "Cambio de pastillas de freno", "Reemplazo de pastillas de freno delanteras y prueba de frenado.", "Frenos", 25m, new[] { ("REF-PAS-FRE-DEL", 1), ("REF-LIQ-FRE", 1) });
         await context.SaveChangesAsync();
     }
 
@@ -364,7 +397,7 @@ public static class DevelopmentDataSeeder
         }
 
         service.PartsSubtotal = subtotal;
-        service.LaborAmount = subtotal * laborPercentage / 100m;
+        service.LaborAmount = subtotal > 0m ? subtotal * laborPercentage / 100m : laborPercentage * 1000m;
         service.FinalPrice = service.PartsSubtotal + service.LaborAmount;
     }
 
@@ -480,6 +513,626 @@ public static class DevelopmentDataSeeder
         }
     }
 
+    private static async Task SeedOperationalScenarioAsync(AppDbContext context)
+    {
+        var carlos = await EnsureCustomerAsync(context, new SeedCustomer(
+            Email: "carlos.ramirez@test.com",
+            Password: DefaultPassword,
+            DocumentNumber: "1001001001",
+            FirstName: "Carlos",
+            MiddleName: "Andres",
+            LastName: "Ramirez",
+            SecondLastName: "Torres",
+            PhoneNumber: "3001112233"));
+
+        var laura = await EnsureCustomerAsync(context, new SeedCustomer(
+            Email: "laura.gomez@test.com",
+            Password: DefaultPassword,
+            DocumentNumber: "1002002002",
+            FirstName: "Laura",
+            MiddleName: "Marcela",
+            LastName: "Gomez",
+            SecondLastName: "Rios",
+            PhoneNumber: "3004445566"));
+
+        await EnsurePaymentMethodAsync(context, "Efectivo");
+        await EnsurePaymentMethodAsync(context, "Transferencia");
+        await EnsurePaymentMethodAsync(context, "Tarjeta");
+        await EnsurePaymentMethodAsync(context, "Nequi");
+        await EnsurePaymentMethodAsync(context, "Daviplata");
+
+        var admin = await GetRequiredUserByEmailAsync(context, "admin@autotaller.com");
+        var receptionist = await GetRequiredUserByEmailAsync(context, "recepcionista@autotaller.com");
+        var workshopChief = await GetRequiredUserByEmailAsync(context, "jefe.mecanicos@autotaller.com");
+        var diagnosticMechanic = await GetRequiredUserByEmailAsync(context, "diagnostico@autotaller.com");
+        var maintenanceMechanic = await GetRequiredUserByEmailAsync(context, "mantenimiento@autotaller.com");
+        var electricMechanic = await GetRequiredUserByEmailAsync(context, "electricista@autotaller.com");
+        var brakesMechanic = await GetRequiredUserByEmailAsync(context, "frenos@autotaller.com");
+
+        var abc123 = await EnsureVehicleAsync(context, "ABC123", "Toyota", "Corolla", "Sedan", 2020, "Gris", 45000);
+        await EnsureCurrentOwnerAsync(context, abc123.Id, carlos.PersonId, new DateTime(2024, 1, 10));
+
+        var def456 = await EnsureVehicleAsync(context, "DEF456", "Chevrolet", "Onix", "Sedan", 2022, "Blanco", 28000);
+        await EnsureCurrentOwnerAsync(context, def456.Id, carlos.PersonId, new DateTime(2024, 6, 5));
+
+        var ghi789 = await EnsureVehicleAsync(context, "GHI789", "Mazda", "CX-30", "SUV", 2021, "Rojo", 36000);
+        await EnsureClosedOwnerHistoryAsync(context, ghi789.Id, carlos.PersonId, new DateTime(2023, 3, 1), new DateTime(2025, 2, 15));
+        await EnsureCurrentOwnerAsync(context, ghi789.Id, laura.PersonId, new DateTime(2025, 2, 15));
+
+        var order1 = await EnsureServiceOrderAsync(
+            context,
+            "SEED-OT-CARLOS-DIAG",
+            abc123.Id,
+            ServiceOrderStatus.Assigned,
+            DateTime.UtcNow.AddDays(-8),
+            "Vehiculo ingresa por ruido extrano en motor y revision general.",
+            admin.Id);
+        await EnsureOrderServiceAsync(context, order1.Id, "Diagnóstico general", "Diagnostics", OrderServiceStatus.Pending, diagnosticMechanic.PersonId, "Revision inicial por testigo de motor.");
+
+        var order2 = await EnsureServiceOrderAsync(
+            context,
+            "SEED-OT-CARLOS-MANT",
+            def456.Id,
+            ServiceOrderStatus.InProgress,
+            DateTime.UtcNow.AddDays(-5),
+            "Mantenimiento preventivo y cambio de aceite para Chevrolet Onix DEF456.",
+            admin.Id);
+        await EnsureOrderServiceAsync(context, order2.Id, "Mantenimiento preventivo", "Preventive Maintenance", OrderServiceStatus.InProgress, maintenanceMechanic.PersonId, "Mantenimiento preventivo en proceso.");
+        await EnsureOrderServiceAsync(context, order2.Id, "Cambio de aceite", "Preventive Maintenance", OrderServiceStatus.InProgress, maintenanceMechanic.PersonId, "Cambio de aceite y filtro en proceso.");
+
+        var order3 = await EnsureServiceOrderAsync(
+            context,
+            "SEED-OT-LAURA-FRENOS",
+            ghi789.Id,
+            ServiceOrderStatus.ReadyForDelivery,
+            DateTime.UtcNow.AddDays(-12),
+            "Revision electrica y frenos para Mazda CX-30 GHI789.",
+            admin.Id);
+        await EnsureOrderServiceAsync(context, order3.Id, "Revisión eléctrica", "Electrical", OrderServiceStatus.Completed, electricMechanic.PersonId, "Revision electrica completada.");
+        await EnsureOrderServiceAsync(context, order3.Id, "Revisión de frenos", "Mechanical Repair", OrderServiceStatus.Completed, brakesMechanic.PersonId, "Revision de frenos completada.");
+
+        await RefreshServiceOrderTotalAsync(context, order1.Id);
+        await RefreshServiceOrderTotalAsync(context, order2.Id);
+        await RefreshServiceOrderTotalAsync(context, order3.Id);
+
+        await EnsureMechanicDiagnosticAsync(
+            context,
+            order1.Id,
+            diagnosticMechanic.PersonId,
+            null,
+            MechanicDiagnosticStatus.PendingWorkshopChiefApproval,
+            "SEED-DIAG-PENDING",
+            "Se detecta ruido intermitente y testigo de motor activo.",
+            "Realizar escaneo y prueba de sensores antes de aprobar trabajos adicionales.",
+            null);
+
+        await EnsureMechanicDiagnosticAsync(
+            context,
+            order2.Id,
+            diagnosticMechanic.PersonId,
+            workshopChief.PersonId,
+            MechanicDiagnosticStatus.Approved,
+            "SEED-DIAG-APPROVED",
+            "El sistema electrico requiere ajuste preventivo y cambio de componentes menores.",
+            "Aprobar revision electrica y mantenimiento preventivo.",
+            "Aprobado para continuar con los trabajos.");
+
+        await EnsureMechanicDiagnosticAsync(
+            context,
+            order3.Id,
+            diagnosticMechanic.PersonId,
+            workshopChief.PersonId,
+            MechanicDiagnosticStatus.Rejected,
+            "SEED-DIAG-REJECTED",
+            "Se propuso reemplazo completo del sistema de frenos.",
+            "Reemplazo completo no requerido para el estado actual.",
+            "Rechazado: solo procede cambio de pastillas y prueba de frenado.");
+
+        var invoice2 = await EnsureInvoiceAsync(context, order2.Id, "Issued", DateTime.UtcNow.AddDays(-3));
+        await EnsureInvoiceDetailAsync(context, invoice2.Id, "Mantenimiento preventivo y cambio de aceite", 1, order2.EstimatedTotal);
+
+        var invoice3 = await EnsureInvoiceAsync(context, order3.Id, "Paid", DateTime.UtcNow.AddDays(-9));
+        await EnsureInvoiceDetailAsync(context, invoice3.Id, "Revision electrica y frenos", 1, order3.EstimatedTotal);
+
+        await EnsurePaymentAsync(context, invoice2.Id, carlos.PersonId, "Transferencia", "PendingReceptionVerification", order2.EstimatedTotal, "SEED-PAY-PENDING-CARLOS", DateTime.UtcNow.AddDays(-2), null, null);
+        await EnsurePaymentAsync(context, invoice2.Id, carlos.PersonId, "Transferencia", "Rejected", order2.EstimatedTotal, "SEED-PAY-REJECTED-CARLOS", DateTime.UtcNow.AddDays(-4), receptionist.PersonId, "Comprobante ilegible.");
+        await EnsurePaymentAsync(context, invoice3.Id, laura.PersonId, "Tarjeta", "Approved", order3.EstimatedTotal, "SEED-PAY-APPROVED-LAURA", DateTime.UtcNow.AddDays(-8), receptionist.PersonId, null);
+
+        order2.OrderStatusId = (int)ServiceOrderStatus.PaymentUnderReview;
+        order3.DeliveryDate ??= DateTime.UtcNow.AddDays(1);
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task<SeedPersonResult> EnsureCustomerAsync(AppDbContext context, SeedCustomer seed)
+    {
+        var normalizedEmail = seed.Email.Trim().ToLowerInvariant();
+        var emailParts = SplitEmail(normalizedEmail)
+            ?? throw new InvalidOperationException($"El correo {seed.Email} no tiene un formato valido.");
+
+        var clientRole = await EnsureRoleAsync(context, "Client");
+        var documentType = await EnsureDocumentTypeAsync(context, "CC", "Cedula de Ciudadania");
+        var country = await EnsureCountryAsync(context, "Colombia", "+57");
+        var domain = await EnsureEmailDomainAsync(context, emailParts.Domain);
+
+        var existingEmail = await context.PersonEmails
+            .AsTracking()
+            .Include(x => x.Person)
+            .FirstOrDefaultAsync(x => x.EmailDomainId == domain.Id && x.EmailUser == emailParts.User);
+
+        var person = await context.Persons.AsTracking().FirstOrDefaultAsync(x => x.DocumentNumber == seed.DocumentNumber);
+        if (person is null && existingEmail is not null)
+        {
+            person = existingEmail.Person;
+        }
+
+        if (person is null)
+        {
+            person = new Person
+            {
+                DocumentTypeId = documentType.Id,
+                DocumentNumber = seed.DocumentNumber,
+                CreatedAt = DateTime.UtcNow
+            };
+            await context.Persons.AddAsync(person);
+            await context.SaveChangesAsync();
+        }
+
+        person.FirstName = seed.FirstName;
+        person.MiddleName = seed.MiddleName;
+        person.LastName = seed.LastName;
+        person.SecondLastName = seed.SecondLastName;
+        person.DocumentTypeId = documentType.Id;
+        person.DocumentNumber = seed.DocumentNumber;
+
+        if (existingEmail is null)
+        {
+            await context.PersonEmails.AddAsync(new PersonEmail
+            {
+                PersonId = person.Id,
+                EmailDomainId = domain.Id,
+                EmailUser = emailParts.User,
+                IsPrimary = true
+            });
+        }
+        else
+        {
+            existingEmail.PersonId = person.Id;
+            existingEmail.IsPrimary = true;
+        }
+
+        var phone = await context.PersonPhones.AsTracking().FirstOrDefaultAsync(x => x.CountryId == country.Id && x.PhoneNumber == seed.PhoneNumber);
+        if (phone is null)
+        {
+            await context.PersonPhones.AddAsync(new PersonPhone
+            {
+                PersonId = person.Id,
+                CountryId = country.Id,
+                PhoneNumber = seed.PhoneNumber,
+                IsPrimary = true
+            });
+        }
+        else if (phone.PersonId == person.Id)
+        {
+            phone.IsPrimary = true;
+        }
+
+        await EnsurePersonRoleAsync(context, person.Id, clientRole.Id);
+
+        var user = await context.Users.AsTracking().FirstOrDefaultAsync(x => x.PersonId == person.Id);
+        if (user is null)
+        {
+            user = new User
+            {
+                PersonId = person.Id,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(seed.Password),
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            await context.Users.AddAsync(user);
+            await context.SaveChangesAsync();
+        }
+        else
+        {
+            user.IsActive = true;
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(seed.Password);
+        }
+
+        return new SeedPersonResult(person.Id, user.Id);
+    }
+
+    private static async Task<Role> EnsureRoleAsync(AppDbContext context, string roleName)
+    {
+        var role = await context.Roles.AsTracking().FirstOrDefaultAsync(x => x.RoleName == roleName);
+        if (role is not null)
+        {
+            return role;
+        }
+
+        role = new Role { RoleName = roleName };
+        await context.Roles.AddAsync(role);
+        await context.SaveChangesAsync();
+        return role;
+    }
+
+    private static async Task<DocumentType> EnsureDocumentTypeAsync(AppDbContext context, string code, string name)
+    {
+        var documentType = await context.DocumentTypes.AsTracking().FirstOrDefaultAsync(x => x.Code == code);
+        if (documentType is not null)
+        {
+            return documentType;
+        }
+
+        documentType = new DocumentType { Code = code, Name = name };
+        await context.DocumentTypes.AddAsync(documentType);
+        await context.SaveChangesAsync();
+        return documentType;
+    }
+
+    private static async Task<Country> EnsureCountryAsync(AppDbContext context, string name, string phoneCode)
+    {
+        var country = await context.Countries.AsTracking().FirstOrDefaultAsync(x => x.Name == name);
+        if (country is not null)
+        {
+            return country;
+        }
+
+        country = new Country { Name = name, PhoneCode = phoneCode };
+        await context.Countries.AddAsync(country);
+        await context.SaveChangesAsync();
+        return country;
+    }
+
+    private static async Task<EmailDomain> EnsureEmailDomainAsync(AppDbContext context, string domainName)
+    {
+        var domain = await context.EmailDomains.AsTracking().FirstOrDefaultAsync(x => x.Domain == domainName);
+        if (domain is not null)
+        {
+            return domain;
+        }
+
+        domain = new EmailDomain { Domain = domainName };
+        await context.EmailDomains.AddAsync(domain);
+        await context.SaveChangesAsync();
+        return domain;
+    }
+
+    private static async Task<Vehicle> EnsureVehicleAsync(AppDbContext context, string vin, string brandName, string modelName, string typeName, int year, string color, int mileage)
+    {
+        var model = await EnsureVehicleModelAsync(context, brandName, modelName);
+        var type = await EnsureVehicleTypeAsync(context, typeName);
+        var vehicle = await context.Vehicles.AsTracking().FirstOrDefaultAsync(x => x.Vin == vin);
+
+        if (vehicle is null)
+        {
+            vehicle = new Vehicle { Vin = vin };
+            await context.Vehicles.AddAsync(vehicle);
+        }
+
+        vehicle.ModelId = model.Id;
+        vehicle.VehicleTypeId = type.Id;
+        vehicle.Year = year;
+        vehicle.Color = color;
+        vehicle.Mileage = mileage;
+        vehicle.IsActive = true;
+        await context.SaveChangesAsync();
+        return vehicle;
+    }
+
+    private static async Task<VehicleModel> EnsureVehicleModelAsync(AppDbContext context, string brandName, string modelName)
+    {
+        var brand = await context.VehicleBrands.AsTracking().FirstOrDefaultAsync(x => x.BrandName == brandName);
+        if (brand is null)
+        {
+            brand = new VehicleBrand { BrandName = brandName };
+            await context.VehicleBrands.AddAsync(brand);
+            await context.SaveChangesAsync();
+        }
+
+        var model = await context.VehicleModels.AsTracking().FirstOrDefaultAsync(x => x.BrandId == brand.Id && x.ModelName == modelName);
+        if (model is not null)
+        {
+            return model;
+        }
+
+        model = new VehicleModel { BrandId = brand.Id, ModelName = modelName };
+        await context.VehicleModels.AddAsync(model);
+        await context.SaveChangesAsync();
+        return model;
+    }
+
+    private static async Task<VehicleType> EnsureVehicleTypeAsync(AppDbContext context, string typeName)
+    {
+        var type = await context.VehicleTypes.AsTracking().FirstOrDefaultAsync(x => x.Name == typeName);
+        if (type is not null)
+        {
+            return type;
+        }
+
+        type = new VehicleType { Name = typeName };
+        await context.VehicleTypes.AddAsync(type);
+        await context.SaveChangesAsync();
+        return type;
+    }
+
+    private static async Task EnsureClosedOwnerHistoryAsync(AppDbContext context, int vehicleId, int personId, DateTime startDate, DateTime endDate)
+    {
+        var existing = await context.VehicleOwnerHistory
+            .AsTracking()
+            .FirstOrDefaultAsync(x => x.VehicleId == vehicleId && x.PersonId == personId && x.StartDate == startDate);
+
+        if (existing is null)
+        {
+            await context.VehicleOwnerHistory.AddAsync(new VehicleOwnerHistory
+            {
+                VehicleId = vehicleId,
+                PersonId = personId,
+                StartDate = startDate,
+                EndDate = endDate
+            });
+            return;
+        }
+
+        existing.EndDate = endDate;
+    }
+
+    private static async Task EnsureCurrentOwnerAsync(AppDbContext context, int vehicleId, int personId, DateTime startDate)
+    {
+        var activeOwners = await context.VehicleOwnerHistory
+            .AsTracking()
+            .Where(x => x.VehicleId == vehicleId && x.EndDate == null)
+            .ToListAsync();
+
+        foreach (var owner in activeOwners.Where(x => x.PersonId != personId))
+        {
+            owner.EndDate = startDate;
+        }
+
+        var current = activeOwners.FirstOrDefault(x => x.PersonId == personId);
+        if (current is not null)
+        {
+            current.StartDate = startDate;
+            return;
+        }
+
+        await context.VehicleOwnerHistory.AddAsync(new VehicleOwnerHistory
+        {
+            VehicleId = vehicleId,
+            PersonId = personId,
+            StartDate = startDate
+        });
+    }
+
+    private static async Task<ServiceOrder> EnsureServiceOrderAsync(AppDbContext context, string seedCode, int vehicleId, ServiceOrderStatus status, DateTime entryDate, string description, int userId)
+    {
+        var order = await context.ServiceOrders
+            .AsTracking()
+            .FirstOrDefaultAsync(x => x.GeneralDescription != null && x.GeneralDescription.Contains(seedCode));
+
+        var fullDescription = $"{description} [{seedCode}]";
+        if (order is null)
+        {
+            order = new ServiceOrder
+            {
+                VehicleId = vehicleId,
+                OrderStatusId = (int)status,
+                EntryDate = entryDate,
+                EstimatedTotal = 0m,
+                GeneralDescription = fullDescription,
+                CreatedAt = entryDate
+            };
+            await context.ServiceOrders.AddAsync(order);
+        }
+
+        order.VehicleId = vehicleId;
+        order.OrderStatusId = (int)status;
+        order.GeneralDescription = fullDescription;
+        order.EstimatedDeliveryDate ??= entryDate.AddDays(5);
+        await context.SaveChangesAsync();
+
+        await EnsureOrderStatusHistoryAsync(context, order.Id, null, (int)status, userId, $"Seeder: {seedCode}");
+        return order;
+    }
+
+    private static async Task EnsureOrderStatusHistoryAsync(AppDbContext context, int serviceOrderId, int? previousStatusId, int newStatusId, int userId, string observation)
+    {
+        var exists = await context.OrderStatusHistory.AnyAsync(x =>
+            x.ServiceOrderId == serviceOrderId &&
+            x.NewOrderStatusId == newStatusId &&
+            x.Observation == observation);
+
+        if (exists)
+        {
+            return;
+        }
+
+        await context.OrderStatusHistory.AddAsync(new OrderStatusHistory
+        {
+            ServiceOrderId = serviceOrderId,
+            PreviousOrderStatusId = previousStatusId,
+            NewOrderStatusId = newStatusId,
+            UserId = userId,
+            ChangeDate = DateTime.UtcNow,
+            Observation = observation
+        });
+    }
+
+    private static async Task<OrderService> EnsureOrderServiceAsync(AppDbContext context, int serviceOrderId, string workshopServiceName, string serviceTypeName, OrderServiceStatus status, int mechanicPersonId, string description)
+    {
+        var workshopService = await context.WorkshopServices.FirstAsync(x => x.Name == workshopServiceName);
+        var serviceType = await context.ServiceTypes.FirstAsync(x => x.Name == serviceTypeName);
+        var orderService = await context.OrderServices
+            .AsTracking()
+            .FirstOrDefaultAsync(x => x.ServiceOrderId == serviceOrderId && x.WorkshopServiceId == workshopService.Id);
+
+        if (orderService is null)
+        {
+            orderService = new OrderService
+            {
+                ServiceOrderId = serviceOrderId,
+                WorkshopServiceId = workshopService.Id,
+                ServiceTypeId = serviceType.Id
+            };
+            await context.OrderServices.AddAsync(orderService);
+        }
+
+        orderService.ServiceTypeId = serviceType.Id;
+        orderService.Description = description;
+        orderService.LaborCost = workshopService.LaborAmount;
+        orderService.Price = workshopService.FinalPrice;
+        orderService.Status = status;
+        orderService.CustomerApproved = status is OrderServiceStatus.Approved or OrderServiceStatus.InProgress or OrderServiceStatus.Completed;
+        orderService.ApprovalDate = orderService.CustomerApproved == true ? DateTime.UtcNow.AddDays(-3) : null;
+        await context.SaveChangesAsync();
+
+        var specialtyName = SpecialtyForWorkshopCategory(workshopService.Category);
+        var specialty = await context.MechanicSpecialties.FirstAsync(x => x.Name == specialtyName);
+        var assignmentExists = await context.MechanicAssignments.AnyAsync(x => x.OrderServiceId == orderService.Id && x.MechanicPersonId == mechanicPersonId);
+        if (!assignmentExists)
+        {
+            await context.MechanicAssignments.AddAsync(new MechanicAssignment
+            {
+                OrderServiceId = orderService.Id,
+                MechanicPersonId = mechanicPersonId,
+                SpecialtyId = specialty.Id
+            });
+        }
+
+        return orderService;
+    }
+
+    private static string SpecialtyForWorkshopCategory(string category) => category switch
+    {
+        "Diagnóstico" => "Diagnóstico",
+        "Mantenimiento" => "Mantenimiento",
+        "Electricista" or "Eléctrico" => "Electricista",
+        "Frenos" => "Frenos",
+        _ => "Mantenimiento"
+    };
+
+    private static async Task RefreshServiceOrderTotalAsync(AppDbContext context, int serviceOrderId)
+    {
+        var order = await context.ServiceOrders.AsTracking().FirstAsync(x => x.Id == serviceOrderId);
+        order.EstimatedTotal = await context.OrderServices
+            .Where(x => x.ServiceOrderId == serviceOrderId)
+            .SumAsync(x => x.Price);
+    }
+
+    private static async Task EnsureMechanicDiagnosticAsync(AppDbContext context, int serviceOrderId, int mechanicPersonId, int? workshopChiefPersonId, MechanicDiagnosticStatus status, string seedCode, string findings, string recommendedWork, string? chiefComment)
+    {
+        var diagnostic = await context.MechanicDiagnostics
+            .AsTracking()
+            .FirstOrDefaultAsync(x => x.ServiceOrderId == serviceOrderId && x.Findings.Contains(seedCode));
+
+        var reviewed = status is MechanicDiagnosticStatus.Approved or MechanicDiagnosticStatus.Rejected;
+        if (diagnostic is null)
+        {
+            diagnostic = new MechanicDiagnostic
+            {
+                ServiceOrderId = serviceOrderId,
+                CreatedAt = DateTime.UtcNow.AddDays(-2)
+            };
+            await context.MechanicDiagnostics.AddAsync(diagnostic);
+        }
+
+        diagnostic.MechanicPersonId = mechanicPersonId;
+        diagnostic.WorkshopChiefPersonId = workshopChiefPersonId;
+        diagnostic.Status = status;
+        diagnostic.Findings = $"{findings} [{seedCode}]";
+        diagnostic.RecommendedWork = recommendedWork;
+        diagnostic.WorkshopChiefComment = chiefComment;
+        diagnostic.SubmittedAt = DateTime.UtcNow.AddDays(-2);
+        diagnostic.ReviewedAt = reviewed ? DateTime.UtcNow.AddDays(-1) : null;
+    }
+
+    private static async Task<Invoice> EnsureInvoiceAsync(AppDbContext context, int serviceOrderId, string statusName, DateTime invoiceDate)
+    {
+        var status = await context.InvoiceStatuses.FirstAsync(x => x.Name == statusName);
+        var order = await context.ServiceOrders.FirstAsync(x => x.Id == serviceOrderId);
+        var invoice = await context.Invoices.AsTracking().FirstOrDefaultAsync(x => x.ServiceOrderId == serviceOrderId);
+
+        if (invoice is null)
+        {
+            invoice = new Invoice
+            {
+                ServiceOrderId = serviceOrderId,
+                InvoiceStatusId = status.Id,
+                InvoiceDate = invoiceDate,
+                LaborCost = order.EstimatedTotal,
+                Total = order.EstimatedTotal
+            };
+            await context.Invoices.AddAsync(invoice);
+        }
+
+        invoice.InvoiceStatusId = status.Id;
+        invoice.InvoiceDate = invoiceDate;
+        invoice.LaborCost = order.EstimatedTotal;
+        invoice.Total = order.EstimatedTotal;
+        await context.SaveChangesAsync();
+        return invoice;
+    }
+
+    private static async Task EnsureInvoiceDetailAsync(AppDbContext context, int invoiceId, string concept, int quantity, decimal unitPrice)
+    {
+        var detail = await context.InvoiceDetails.AsTracking().FirstOrDefaultAsync(x => x.InvoiceId == invoiceId && x.Concept == concept);
+        if (detail is null)
+        {
+            detail = new InvoiceDetail { InvoiceId = invoiceId, Concept = concept };
+            await context.InvoiceDetails.AddAsync(detail);
+        }
+
+        detail.Quantity = quantity;
+        detail.UnitPrice = unitPrice;
+    }
+
+    private static async Task EnsurePaymentAsync(AppDbContext context, int invoiceId, int clientPersonId, string methodName, string statusName, decimal amount, string reference, DateTime paymentDate, int? verifierPersonId, string? rejectedReason)
+    {
+        var method = await context.PaymentMethods.FirstAsync(x => x.Name == methodName);
+        var status = await context.PaymentStatuses.FirstAsync(x => x.Name == statusName);
+        var payment = await context.Payments.AsTracking().FirstOrDefaultAsync(x => x.Reference == reference);
+
+        if (payment is null)
+        {
+            payment = new Payment { Reference = reference };
+            await context.Payments.AddAsync(payment);
+        }
+
+        payment.InvoiceId = invoiceId;
+        payment.ClientPersonId = clientPersonId;
+        payment.PaymentMethodId = method.Id;
+        payment.PaymentStatusId = status.Id;
+        payment.Amount = amount;
+        payment.PaymentDate = paymentDate;
+        payment.VerifiedByReceptionistPersonId = verifierPersonId;
+        payment.VerifiedAt = verifierPersonId.HasValue ? paymentDate.AddHours(3) : null;
+        payment.RejectedReason = rejectedReason;
+    }
+
+    private static async Task<PaymentMethod> EnsurePaymentMethodAsync(AppDbContext context, string name)
+    {
+        var method = await context.PaymentMethods.AsTracking().FirstOrDefaultAsync(x => x.Name == name);
+        if (method is not null)
+        {
+            return method;
+        }
+
+        method = new PaymentMethod { Name = name };
+        await context.PaymentMethods.AddAsync(method);
+        await context.SaveChangesAsync();
+        return method;
+    }
+
+    private static async Task<User> GetRequiredUserByEmailAsync(AppDbContext context, string email)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        return await context.Users
+            .Include(x => x.Person)
+            .ThenInclude(x => x.Emails)
+            .ThenInclude(x => x.EmailDomain)
+            .FirstAsync(x => x.Person.Emails.Any(personEmail =>
+                (personEmail.EmailUser + "@" + personEmail.EmailDomain.Domain).ToLower() == normalizedEmail));
+    }
+
     private static (string User, string Domain)? SplitEmail(string email)
     {
         var parts = email.Split('@', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
@@ -508,4 +1161,16 @@ public static class DevelopmentDataSeeder
         int Stock,
         int MinimumStock,
         decimal UnitPrice);
+
+    private sealed record SeedCustomer(
+        string Email,
+        string Password,
+        string DocumentNumber,
+        string FirstName,
+        string? MiddleName,
+        string LastName,
+        string? SecondLastName,
+        string PhoneNumber);
+
+    private sealed record SeedPersonResult(int PersonId, int UserId);
 }

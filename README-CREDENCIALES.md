@@ -1,40 +1,72 @@
 # AutoTallerManager - Credenciales de prueba
 
-Credenciales para probar los paneles creados y los paneles principales del sistema en ambiente de desarrollo.
+Credenciales para probar los paneles del sistema en ambiente `Development`.
 
-> Nota: estas cuentas se crean desde `DevelopmentDataSeeder`. Las cuentas configuradas en `Api/appsettings.Development.json` usan `Password123*`. Las cuentas que no estan en ese archivo usan la contraseña por defecto del seeder: `Admin123*`.
+> Estas cuentas se crean y reparan automaticamente desde `DevelopmentDataSeeder` al levantar el backend. La contraseña principal de prueba es `DevPass123!`.
+>
+> Para bases locales que quedaron sembradas con datos anteriores, el login en `Development` tambien acepta `Password123*` y actualiza el hash del usuario automaticamente.
 
 ## Paneles principales
 
 | Panel | Rol | Email | Password | Ruta sugerida |
 | --- | --- | --- | --- | --- |
-| Administrador | `Admin` | `admin@mail.com` | `Password123*` | `/dashboard/admin` |
-| Recepcionista | `Receptionist` | `receptionist@mail.com` | `Password123*` | `/dashboard/reception` |
-| Cliente | `Client` | `client@mail.com` | `Password123*` | `/dashboard/client` |
-| Jefe de taller | `WorkshopChief` | `jefetaller@autotaller.com` | `Admin123*` | `/dashboard/workshop-chief` |
+| Administrador | `Admin` | `admin@autotaller.com` | `DevPass123!` | `/dashboard/admin` |
+| Recepcionista | `Receptionist` | `recepcionista@autotaller.com` | `DevPass123!` | `/dashboard/reception` |
+| Jefe de mecanicos | `WorkshopChief` | `jefe.mecanicos@autotaller.com` | `DevPass123!` | `/dashboard/workshop-chief` |
+| Cliente Carlos | `Client` | `carlos.ramirez@test.com` | `DevPass123!` | `/dashboard/client` |
+| Cliente Laura | `Client` | `laura.gomez@test.com` | `DevPass123!` | `/dashboard/client` |
 
 ## Paneles de mecanicos
 
 | Panel | Rol | Especialidad | Email | Password | Ruta sugerida |
 | --- | --- | --- | --- | --- | --- |
-| Mecanico general | `Mechanic` | General / diagnostico | `mechanic@mail.com` | `Password123*` | `/dashboard/mechanic` |
-| Mecanico de diagnostico | `Mechanic` | Diagnostico | `diagnostico@autotaller.com` | `Admin123*` | `/dashboard/mechanic` |
-| Mecanico de electricidad | `Mechanic` | Electricista | `electricista@autotaller.com` | `Admin123*` | `/mechanic/electricity` |
-| Mecanico de mantenimiento | `Mechanic` | Mantenimiento | `mantenimiento@autotaller.com` | `Admin123*` | `/mechanic/maintenance` |
-| Mecanico de frenos | `Mechanic` | Frenos | `frenos@autotaller.com` | `Admin123*` | `/mechanic/brakes` |
+| Mecanico general | `Mechanic` | General / diagnostico | `mecanico@autotaller.com` | `DevPass123!` | `/dashboard/mechanic` |
+| Mecanico de diagnostico | `Mechanic` | Diagnostico | `diagnostico@autotaller.com` | `DevPass123!` | `/dashboard/mechanic` |
+| Mecanico de mantenimiento | `Mechanic` | Mantenimiento | `mantenimiento@autotaller.com` | `DevPass123!` | `/mechanic/maintenance` |
+| Mecanico electricista | `Mechanic` | Electricista | `electricista@autotaller.com` | `DevPass123!` | `/mechanic/electricity` |
+| Mecanico de frenos | `Mechanic` | Frenos | `frenos@autotaller.com` | `DevPass123!` | `/mechanic/brakes` |
 
 ## Paneles de stock e inventario
 
 | Panel | Rol | Email | Password | Ruta sugerida |
 | --- | --- | --- | --- | --- |
-| Jefe de stock / bodega | `WarehouseChief` | `jefebodega@autotaller.com` | `Admin123*` | `/dashboard/warehouse-chief` o `/stock-manager` |
-| Jefe de inventario / almacen | `InventoryManager` | `jefealmacen@autotaller.com` | `Admin123*` | `/dashboard/inventory-manager` o `/inventory-manager` |
+| Jefe de stock / bodega | `WarehouseChief` | `jefebodega@autotaller.com` | `DevPass123!` | `/dashboard/warehouse-chief` o `/stock-manager` |
+| Jefe de inventario / almacen | `InventoryManager` | `jefealmacen@autotaller.com` | `DevPass123!` | `/dashboard/inventory-manager` o `/inventory-manager` |
 
-## Comandos para probar
+## Credenciales legacy
+
+Estas cuentas pueden existir en bases locales antiguas por `Api/appsettings.Development.json`. En `Development`, el login acepta `Password123*` para repararlas si ya estaban creadas:
+
+| Rol | Email | Password |
+| --- | --- | --- |
+| Admin legacy | `admin@mail.com` | `Password123*` |
+| Mechanic legacy | `mechanic@mail.com` | `Password123*` |
+| Receptionist legacy | `receptionist@mail.com` | `Password123*` |
+| Client legacy | `client@mail.com` | `Password123*` |
+
+## Probar login en Swagger
+
+Endpoint:
+
+```txt
+POST /api/auth/login
+```
+
+Body recomendado:
+
+```json
+{
+  "email": "carlos.ramirez@test.com",
+  "password": "DevPass123!"
+}
+```
+
+## Comandos para levantar
 
 Backend:
 
 ```bash
+cd /Users/wen/.NetProyecto-1
 dotnet run --project Api/Api.csproj
 ```
 
@@ -45,8 +77,34 @@ cd /Users/wen/.netFrontend-1
 pnpm run dev
 ```
 
+## Reiniciar base de datos local y volver a sembrar
+
+Usa esto solo en ambiente de desarrollo. `database drop` elimina la base de datos local configurada en `Api/appsettings.json`, por lo que perderas los datos guardados manualmente.
+
+Ejecuta desde la raiz del repositorio (`/Users/wen/.NetProyecto-1`):
+
+```bash
+dotnet ef database drop --project Infrastructure/Infrastructure.csproj --startup-project Api/Api.csproj
+dotnet ef database update --project Infrastructure/Infrastructure.csproj --startup-project Api/Api.csproj
+dotnet run --project Api/Api.csproj
+```
+
+Al iniciar el backend en `Development`, se ejecuta automaticamente `DevelopmentDataSeeder` y quedan creados los usuarios, clientes, vehiculos, ordenes, diagnosticos, facturas y pagos de prueba.
+
+Si `dotnet ef` no existe en tu maquina:
+
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+Si ya lo tienes instalado y falla por version:
+
+```bash
+dotnet tool update --global dotnet-ef
+```
+
 ## Importante
 
-Si cambias credenciales en `Api/appsettings.Development.json`, esas credenciales reemplazan las del seeder para la cuenta correspondiente.
+Si cambias credenciales en el seeder, reinicia el backend en ambiente `Development` para que se reparen los hashes de los usuarios existentes.
 
-Si una cuenta no deja entrar, reinicia el backend en ambiente Development para que el seeder actualice la contraseña del usuario existente.
+Si una cuenta no deja entrar desde la interfaz pero si entra desde Swagger, borra el token/sesion del navegador y vuelve a iniciar sesion.
