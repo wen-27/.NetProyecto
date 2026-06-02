@@ -236,7 +236,7 @@ public sealed class InventoryController : OperationalControllerBase
         var history = await _context.InventoryHistory
             .Include(x => x.Part)
             .OrderByDescending(x => x.CreatedAt)
-            .Select(x => new { x.Id, x.PartId, PartName = x.Part.Description, x.QuantityChange, x.ResultingStock, x.UnitPrice, x.Action, x.Comment, x.CreatedAt })
+            .Select(x => new { x.Id, x.PartId, PartCode = x.Part.Code, PartName = x.Part.Description, x.QuantityChange, x.ResultingStock, x.UnitPrice, x.Action, x.Comment, x.CreatedAt })
             .ToListAsync(ct);
         return Ok(history);
     }

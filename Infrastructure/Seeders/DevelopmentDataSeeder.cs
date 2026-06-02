@@ -27,6 +27,7 @@ public static class DevelopmentDataSeeder
         await SeedInventoryAsync(context);
         await SeedWorkshopServicesAsync(context);
         await SeedOperationalScenarioAsync(context);
+        await SeedInventoryManagerScenarioAsync(context);
         await EnsureSeedPanelRolesAsync(context);
         await SeedAuditTrailAsync(context);
 
@@ -365,16 +366,16 @@ public static class DevelopmentDataSeeder
 
         var parts = new[]
         {
-            new SeedPart("REF-ACE-20W50", "Aceite 20W50", 2, mobilId, 40, 10, 78000m),
+            new SeedPart("REF-ACE-20W50", "Aceite 20W50", 2, mobilId, 9, 10, 78000m),
             new SeedPart("REF-FIL-ACE-UNI", "Filtro de aceite universal", 1, boschId, 35, 8, 36000m),
             new SeedPart("REF-LLA-R15", "Llanta rin 15", 4, monroeId, 24, 6, 260000m),
             new SeedPart("REF-PAS-FRE-DEL", "Pastillas de freno delanteras", 3, acDelcoId, 30, 8, 145000m),
-            new SeedPart("REF-BAT-12V", "Batería 12V", 5, acDelcoId, 18, 4, 390000m),
+            new SeedPart("REF-BAT-12V", "Batería 12V", 5, acDelcoId, 2, 4, 390000m),
             new SeedPart("REF-FIL-AIR", "Filtro de aire", 1, densoId, 32, 8, 52000m),
-            new SeedPart("REF-BUJ-STD", "Bujías estándar", 5, ngkId, 80, 20, 28000m),
+            new SeedPart("REF-BUJ-STD", "Bujías estándar", 5, ngkId, 12, 20, 28000m),
             new SeedPart("REF-LIQ-FRE", "Líquido de frenos", 3, acDelcoId, 28, 8, 42000m),
-            new SeedPart("REF-COR-REP", "Correa de repartición", 7, boschId, 16, 4, 165000m),
-            new SeedPart("REF-LIM-UNI", "Limpiaparabrisas universal", 8, boschId, 35, 10, 34000m)
+            new SeedPart("REF-COR-REP", "Correa de repartición", 7, boschId, 3, 4, 165000m),
+            new SeedPart("REF-LIM-UNI", "Limpiaparabrisas universal", 8, boschId, 8, 10, 34000m)
         };
 
         var seededPartIds = new List<int>();
@@ -514,7 +515,7 @@ public static class DevelopmentDataSeeder
             part.Description = seed.Description;
             part.PartCategoryId = seed.PartCategoryId;
             part.PartBrandId = seed.PartBrandId;
-            part.Stock = Math.Max(part.Stock, seed.Stock);
+            part.Stock = seed.Stock;
             part.MinimumStock = seed.MinimumStock;
             part.UnitPrice = seed.UnitPrice;
             part.IsActive = true;
@@ -559,6 +560,193 @@ public static class DevelopmentDataSeeder
                 UnitPrice = part.UnitPrice
             });
         }
+    }
+
+    private static async Task SeedInventoryManagerScenarioAsync(AppDbContext context)
+    {
+        var warehouseChief = await GetRequiredUserByEmailAsync(context, "jefebodega@autotaller.com");
+        var inventoryManager = await GetRequiredUserByEmailAsync(context, "jefealmacen@autotaller.com");
+
+        var supplierAutoPartes = await context.Suppliers.FirstAsync(x => x.Name == "AutoPartes Colombia S.A.S.");
+        var supplierPremium = await context.Suppliers.FirstAsync(x => x.Name == "Repuestos Premium Bucaramanga");
+        var supplierBaterias = await context.Suppliers.FirstAsync(x => x.Name == "Baterías Andinas");
+
+        var electricalCategory = await context.PartCategories.FirstAsync(x => x.Name == "Electrical");
+        var filtersCategory = await context.PartCategories.FirstAsync(x => x.Name == "Filters");
+        var engineCategory = await context.PartCategories.FirstAsync(x => x.Name == "Engine");
+        var bodyworkCategory = await context.PartCategories.FirstAsync(x => x.Name == "Bodywork");
+
+        var boschBrand = await context.PartBrands.FirstAsync(x => x.Name == "Bosch");
+        var acDelcoBrand = await context.PartBrands.FirstAsync(x => x.Name == "ACDelco");
+        var densoBrand = await context.PartBrands.FirstAsync(x => x.Name == "Denso");
+
+        await EnsureStockSubmissionSeedAsync(
+            context,
+            warehouseChief.PersonId,
+            null,
+            supplierAutoPartes.Id,
+            filtersCategory.Id,
+            boschBrand.Id,
+            "Filtro de aceite reforzado",
+            "REF-FIL-ACE-REF",
+            "Filtro reforzado para servicios preventivos de alta rotación.",
+            28500m,
+            35m,
+            38475m,
+            24,
+            8,
+            StockSubmissionStatus.PendingInventoryManagerReview,
+            "Seeder inventario: solicitud pendiente filtros.");
+
+        await EnsureStockSubmissionSeedAsync(
+            context,
+            warehouseChief.PersonId,
+            null,
+            supplierBaterias.Id,
+            electricalCategory.Id,
+            acDelcoBrand.Id,
+            "Alternador Chevrolet Onix",
+            "REF-ALT-ONIX",
+            "Alternador para reposición de órdenes activas Chevrolet Onix.",
+            420000m,
+            28m,
+            537600m,
+            3,
+            1,
+            StockSubmissionStatus.PendingInventoryManagerReview,
+            "Seeder inventario: solicitud pendiente alternadores.");
+
+        await EnsureStockSubmissionSeedAsync(
+            context,
+            warehouseChief.PersonId,
+            null,
+            supplierPremium.Id,
+            engineCategory.Id,
+            densoBrand.Id,
+            "Sensor oxígeno universal",
+            "REF-SEN-OXI-UNI",
+            "Sensor de oxígeno compatible con diagnósticos de mezcla.",
+            98000m,
+            32m,
+            129360m,
+            10,
+            3,
+            StockSubmissionStatus.PendingInventoryManagerReview,
+            "Seeder inventario: solicitud pendiente sensores.");
+
+        await EnsureStockSubmissionSeedAsync(
+            context,
+            warehouseChief.PersonId,
+            inventoryManager.PersonId,
+            supplierPremium.Id,
+            bodyworkCategory.Id,
+            boschBrand.Id,
+            "Limpiaparabrisas universal",
+            "REF-LIM-UNI",
+            "Reposición aprobada para ventas rápidas en recepción.",
+            31500m,
+            30m,
+            40950m,
+            15,
+            5,
+            StockSubmissionStatus.AddedToInventory,
+            "Seeder inventario: reposición aprobada.",
+            "Aprobado para inventario oficial.",
+            DateTime.UtcNow.AddDays(-1));
+
+        await EnsureInventoryHistorySeedAsync(context, "REF-LIM-UNI", 15, 23, 40950m, "StockApproved", "Seeder inventario: ingreso aprobado desde revisión.", DateTime.UtcNow.AddDays(-1));
+        await EnsureInventoryHistorySeedAsync(context, "REF-ACE-20W50", -6, 9, 78000m, "StockOut", "Seeder inventario: salida a servicios de mantenimiento.", DateTime.UtcNow.AddDays(-3));
+        await EnsureInventoryHistorySeedAsync(context, "REF-BAT-12V", -2, 2, 390000m, "StockOut", "Seeder inventario: consumo por órdenes eléctricas.", DateTime.UtcNow.AddDays(-2).AddHours(-4));
+        await EnsureInventoryHistorySeedAsync(context, "REF-BUJ-STD", -8, 12, 28000m, "StockAdjustment", "Seeder inventario: ajuste por conteo físico.", DateTime.UtcNow.AddDays(-2));
+        await EnsureInventoryHistorySeedAsync(context, "REF-LIM-UNI", -4, 8, 34000m, "StockOut", "Seeder inventario: entrega a bodega para reposición rápida.", DateTime.UtcNow.AddHours(-10));
+    }
+
+    private static async Task EnsureStockSubmissionSeedAsync(
+        AppDbContext context,
+        int warehouseChiefPersonId,
+        int? inventoryManagerPersonId,
+        int supplierId,
+        int categoryId,
+        int? brandId,
+        string productName,
+        string referenceCode,
+        string description,
+        decimal supplierPrice,
+        decimal profitPercentage,
+        decimal salePrice,
+        int quantity,
+        int minimumStock,
+        StockSubmissionStatus status,
+        string warehouseComment,
+        string? inventoryManagerComment = null,
+        DateTime? reviewedAt = null)
+    {
+        var submission = await context.StockSubmissions.AsTracking().FirstOrDefaultAsync(x =>
+            x.ReferenceCode == referenceCode &&
+            x.WarehouseComment == warehouseComment);
+
+        if (submission is null)
+        {
+            submission = new StockSubmission
+            {
+                ReferenceCode = referenceCode,
+                WarehouseComment = warehouseComment,
+                CreatedAt = reviewedAt?.AddHours(-8) ?? DateTime.UtcNow.AddDays(-1)
+            };
+            await context.StockSubmissions.AddAsync(submission);
+        }
+
+        submission.WarehouseChiefPersonId = warehouseChiefPersonId;
+        submission.InventoryManagerPersonId = inventoryManagerPersonId;
+        submission.SupplierId = supplierId;
+        submission.PartCategoryId = categoryId;
+        submission.PartBrandId = brandId;
+        submission.ProductName = productName;
+        submission.Description = description;
+        submission.SupplierPrice = supplierPrice;
+        submission.ProfitPercentage = profitPercentage;
+        submission.SalePrice = salePrice;
+        submission.Quantity = quantity;
+        submission.MinimumStock = minimumStock;
+        submission.Status = status;
+        submission.InventoryManagerComment = inventoryManagerComment;
+        submission.ReviewedAt = reviewedAt;
+        submission.AddedToInventoryAt = status == StockSubmissionStatus.AddedToInventory ? reviewedAt : null;
+        submission.IsActive = true;
+    }
+
+    private static async Task EnsureInventoryHistorySeedAsync(
+        AppDbContext context,
+        string partCode,
+        int quantityChange,
+        int resultingStock,
+        decimal unitPrice,
+        string action,
+        string comment,
+        DateTime createdAt)
+    {
+        var part = await context.Parts.FirstAsync(x => x.Code == partCode);
+        var movement = await context.InventoryHistory.AsTracking().FirstOrDefaultAsync(x =>
+            x.PartId == part.Id &&
+            x.Action == action &&
+            x.Comment == comment);
+
+        if (movement is null)
+        {
+            movement = new InventoryHistory
+            {
+                PartId = part.Id,
+                Action = action,
+                Comment = comment
+            };
+            await context.InventoryHistory.AddAsync(movement);
+        }
+
+        movement.QuantityChange = quantityChange;
+        movement.ResultingStock = resultingStock;
+        movement.UnitPrice = unitPrice;
+        movement.CreatedAt = createdAt;
+        movement.IsActive = true;
     }
 
     private static async Task SeedOperationalScenarioAsync(AppDbContext context)

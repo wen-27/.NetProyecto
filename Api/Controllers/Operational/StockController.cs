@@ -51,7 +51,7 @@ public sealed class StockController : ControllerBase
         query = NormalizeStockStatus(stockStatus) switch
         {
             "available" => query.Where(x => x.Stock > x.MinimumStock),
-            "low" => query.Where(x => x.Stock > 0 && x.Stock <= x.MinimumStock),
+            "low" => query.Where(x => x.Stock <= x.MinimumStock),
             "out" => query.Where(x => x.Stock <= 0),
             _ => query
         };
@@ -67,7 +67,7 @@ public sealed class StockController : ControllerBase
     public async Task<IActionResult> GetLowStock(CancellationToken ct)
     {
         var parts = await PartsQuery()
-            .Where(x => x.Stock > 0 && x.Stock <= x.MinimumStock)
+            .Where(x => x.Stock <= x.MinimumStock)
             .OrderBy(x => x.Stock)
             .ToListAsync(ct);
         return Ok(parts.Select(ToStockPartDto));
