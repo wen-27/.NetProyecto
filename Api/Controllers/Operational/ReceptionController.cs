@@ -257,17 +257,14 @@ public sealed class ReceptionController : OperationalControllerBase
         var query = _context.Persons
             .AsNoTracking()
             .Include(x => x.DocumentType)
+            .Include(x => x.Gender)
+            .Include(x => x.Address!).ThenInclude(x => x.StreetType)
+            .Include(x => x.Address!).ThenInclude(x => x.Neighborhood).ThenInclude(x => x.City)
             .Include(x => x.Emails).ThenInclude(x => x.EmailDomain)
             .Include(x => x.Phones)
             .Include(x => x.PersonRoles).ThenInclude(x => x.Role)
             .Include(x => x.VehicleHistory)
-            .Where(x => !x.PersonRoles.Any(role =>
-                role.RoleId == 1 ||
-                role.RoleId == 3 ||
-                role.RoleId == 4 ||
-                role.RoleId == 5 ||
-                role.RoleId == 6 ||
-                role.RoleId == 7));
+            .Where(x => x.PersonRoles.Any(role => role.IsActive && role.Role.RoleName == "Client"));
         if (string.IsNullOrWhiteSpace(search)) return query;
         var term = search.Trim().ToLower();
         return query.Where(x => x.DocumentNumber.ToLower().Contains(term) || x.FirstName.ToLower().Contains(term) || x.LastName.ToLower().Contains(term) || x.Emails.Any(email => (email.EmailUser + "@" + email.EmailDomain.Domain).ToLower().Contains(term)));
@@ -300,7 +297,13 @@ public sealed class ReceptionController : OperationalControllerBase
         person.Emails.FirstOrDefault(x => x.IsPrimary) is { } email ? $"{email.EmailUser}@{email.EmailDomain.Domain}" : "",
         person.Phones.FirstOrDefault(x => x.IsPrimary)?.PhoneNumber ?? "",
         person.VehicleHistory.Count(x => x.EndDate == null),
-        person.IsActive ? "Activo" : "Inactivo");
+        person.IsActive ? "Activo" : "Inactivo",
+        "Client",
+        person.Gender?.Name,
+        person.BirthDate,
+        person.Address is null
+            ? null
+            : string.Join(' ', new[] { person.Address.Complement, person.Address.Neighborhood?.City?.Name }.Where(x => !string.IsNullOrWhiteSpace(x))));
 
     private static ReceptionVehicleDto ToVehicleDto(Vehicle vehicle)
     {
@@ -361,7 +364,7 @@ public sealed class ReceptionController : OperationalControllerBase
 public sealed record CreateReceptionCustomerRequest(int DocumentTypeId, string DocumentNumber, string FirstName, string? MiddleName, string LastName, string? SecondLastName, string? Email, string? Phone, int? PhoneCountryId);
 public sealed record CreateReceptionVehicleRequest(int OwnerPersonId, int ModelId, int VehicleTypeId, string Vin, int Year, string? Color, int Mileage, DateTime? StartDate);
 public sealed record TransferVehicleOwnerRequest(int NewOwnerPersonId, DateTime? TransferDate, string? Observation);
-public sealed record ReceptionCustomerDto(int Id, string DocumentType, string DocumentNumber, string FullName, string PrimaryEmail, string PrimaryPhone, int VehiclesCount, string Status);
+public sealed record ReceptionCustomerDto(int Id, string DocumentType, string DocumentNumber, string FullName, string PrimaryEmail, string PrimaryPhone, int VehiclesCount, string Status, string Role, string? Gender, DateOnly? BirthDate, string? Address);
 public sealed record ReceptionVehicleDto(int Id, string Vin, string Brand, string Model, string Type, int Year, string? Color, int Mileage, int? CurrentOwnerId, string CurrentOwner, int ActiveOrders, bool IsActive);
 public sealed record ReceptionOwnerHistoryDto(int Id, int VehicleId, int PersonId, string Owner, DateTime StartDate, DateTime? EndDate, bool IsCurrent);
 public sealed record ReceptionPaymentDto(int Id, int InvoiceId, int ServiceOrderId, int? ClientPersonId, string Customer, string? ClientDocument, string Vehicle, decimal Amount, decimal Total, decimal Balance, string Method, string Status, DateTime Date, string Reference);

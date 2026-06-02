@@ -26,6 +26,7 @@ public static class DevelopmentDataSeeder
         await SeedInventoryAsync(context);
         await SeedWorkshopServicesAsync(context);
         await SeedOperationalScenarioAsync(context);
+        await EnsureSeedPanelRolesAsync(context);
 
         await transaction.CommitAsync();
     }
@@ -523,7 +524,10 @@ public static class DevelopmentDataSeeder
             MiddleName: "Andres",
             LastName: "Ramirez",
             SecondLastName: "Torres",
-            PhoneNumber: "3001112233"));
+            PhoneNumber: "3001112233",
+            GenderName: "Masculino",
+            BirthDate: new DateOnly(1990, 4, 12),
+            AddressText: "Calle 45 # 18-25"));
 
         var laura = await EnsureCustomerAsync(context, new SeedCustomer(
             Email: "laura.gomez@test.com",
@@ -533,7 +537,10 @@ public static class DevelopmentDataSeeder
             MiddleName: "Marcela",
             LastName: "Gomez",
             SecondLastName: "Rios",
-            PhoneNumber: "3004445566"));
+            PhoneNumber: "3004445566",
+            GenderName: "Femenino",
+            BirthDate: new DateOnly(1993, 9, 22),
+            AddressText: "Carrera 27 # 35-40"));
 
         await EnsurePaymentMethodAsync(context, "Efectivo");
         await EnsurePaymentMethodAsync(context, "Transferencia");
@@ -563,11 +570,12 @@ public static class DevelopmentDataSeeder
             context,
             "SEED-OT-CARLOS-DIAG",
             abc123.Id,
-            ServiceOrderStatus.Assigned,
+            ServiceOrderStatus.InProgress,
             DateTime.UtcNow.AddDays(-8),
             "Vehiculo ingresa por ruido extrano en motor y revision general.",
             admin.Id);
-        await EnsureOrderServiceAsync(context, order1.Id, "Diagnóstico general", "Diagnostics", OrderServiceStatus.Pending, diagnosticMechanic.PersonId, "Revision inicial por testigo de motor.");
+        await EnsureOrderServiceAsync(context, order1.Id, "Diagnóstico general", "Diagnostics", OrderServiceStatus.InProgress, diagnosticMechanic.PersonId, "Revision inicial por testigo de motor.");
+        await EnsureOrderServiceAsync(context, order1.Id, "Revisión de frenos", "Mechanical Repair", OrderServiceStatus.InProgress, brakesMechanic.PersonId, "Revision de frenos por ruido durante frenado.");
 
         var order2 = await EnsureServiceOrderAsync(
             context,
@@ -654,6 +662,8 @@ public static class DevelopmentDataSeeder
         var documentType = await EnsureDocumentTypeAsync(context, "CC", "Cedula de Ciudadania");
         var country = await EnsureCountryAsync(context, "Colombia", "+57");
         var domain = await EnsureEmailDomainAsync(context, emailParts.Domain);
+        var gender = await EnsureGenderAsync(context, seed.GenderName);
+        var address = await EnsureSeedAddressAsync(context, country.Id, seed.AddressText);
 
         var existingEmail = await context.PersonEmails
             .AsTracking()
@@ -684,6 +694,10 @@ public static class DevelopmentDataSeeder
         person.SecondLastName = seed.SecondLastName;
         person.DocumentTypeId = documentType.Id;
         person.DocumentNumber = seed.DocumentNumber;
+        person.GenderId = gender.Id;
+        person.BirthDate = seed.BirthDate;
+        person.AddressId = address.Id;
+        person.IsActive = true;
 
         if (existingEmail is null)
         {
@@ -716,6 +730,11 @@ public static class DevelopmentDataSeeder
         {
             phone.IsPrimary = true;
         }
+        else
+        {
+            phone.PersonId = person.Id;
+            phone.IsPrimary = true;
+        }
 
         await EnsurePersonRoleAsync(context, person.Id, clientRole.Id);
 
@@ -739,6 +758,115 @@ public static class DevelopmentDataSeeder
         }
 
         return new SeedPersonResult(person.Id, user.Id);
+    }
+
+    private static async Task EnsureSeedPanelRolesAsync(AppDbContext context)
+    {
+        var panelRoles = new[]
+        {
+            "Admin",
+            "Receptionist",
+            "Mechanic",
+            "WorkshopChief",
+            "WarehouseChief",
+            "InventoryManager",
+            "Client"
+        };
+
+        var assignments = new (string Email, string[] Roles)[]
+        {
+            ("admin@autotaller.com", new[] { "Admin" }),
+            ("recepcionista@autotaller.com", new[] { "Receptionist" }),
+            ("jefe.mecanicos@autotaller.com", new[] { "WorkshopChief" }),
+            ("jefebodega@autotaller.com", new[] { "WarehouseChief" }),
+            ("jefealmacen@autotaller.com", new[] { "InventoryManager" }),
+            ("mecanico@autotaller.com", new[] { "Mechanic" }),
+            ("diagnostico@autotaller.com", new[] { "Mechanic" }),
+            ("mantenimiento@autotaller.com", new[] { "Mechanic" }),
+            ("electricista@autotaller.com", new[] { "Mechanic" }),
+            ("frenos@autotaller.com", new[] { "Mechanic" }),
+            ("carlos.ramirez@test.com", new[] { "Client" }),
+            ("laura.gomez@test.com", new[] { "Client" })
+        };
+
+        foreach (var roleName in panelRoles)
+        {
+            await EnsureRoleAsync(context, roleName);
+        }
+
+        foreach (var assignment in assignments)
+        {
+            var normalizedEmail = assignment.Email.Trim().ToLowerInvariant();
+            var emailParts = SplitEmail(normalizedEmail);
+            if (emailParts is null)
+            {
+                continue;
+            }
+
+            var domain = await EnsureEmailDomainAsync(context, emailParts.Value.Domain);
+            var personEmail = await context.PersonEmails
+                .AsTracking()
+                .FirstOrDefaultAsync(x => x.EmailDomainId == domain.Id && x.EmailUser == emailParts.Value.User);
+
+            if (personEmail is null)
+            {
+                continue;
+            }
+
+            var person = await context.Persons.AsTracking().FirstOrDefaultAsync(x => x.Id == personEmail.PersonId);
+            if (person is null)
+            {
+                continue;
+            }
+
+            person.IsActive = true;
+
+            var personRoles = await context.PersonRoles
+                .AsTracking()
+                .Include(x => x.Role)
+                .Where(x => x.PersonId == person.Id)
+                .ToListAsync();
+
+            foreach (var personRole in personRoles.Where(x => panelRoles.Contains(x.Role.RoleName)))
+            {
+                personRole.IsActive = assignment.Roles.Contains(personRole.Role.RoleName);
+            }
+
+            foreach (var roleName in assignment.Roles)
+            {
+                var role = await EnsureRoleAsync(context, roleName);
+                var personRole = personRoles.FirstOrDefault(x => x.RoleId == role.Id);
+                if (personRole is null)
+                {
+                    await context.PersonRoles.AddAsync(new PersonRole
+                    {
+                        PersonId = person.Id,
+                        RoleId = role.Id,
+                        IsActive = true
+                    });
+                }
+                else
+                {
+                    personRole.IsActive = true;
+                }
+            }
+
+            var user = await context.Users.AsTracking().FirstOrDefaultAsync(x => x.PersonId == person.Id);
+            if (user is null)
+            {
+                user = new User
+                {
+                    PersonId = person.Id,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await context.Users.AddAsync(user);
+            }
+
+            user.IsActive = true;
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(DefaultPassword);
+        }
+
+        await context.SaveChangesAsync();
     }
 
     private static async Task<Role> EnsureRoleAsync(AppDbContext context, string roleName)
@@ -781,6 +909,75 @@ public static class DevelopmentDataSeeder
         await context.Countries.AddAsync(country);
         await context.SaveChangesAsync();
         return country;
+    }
+
+    private static async Task<Gender> EnsureGenderAsync(AppDbContext context, string name)
+    {
+        var gender = await context.Genders.AsTracking().FirstOrDefaultAsync(x => x.Name == name);
+        if (gender is not null)
+        {
+            return gender;
+        }
+
+        gender = new Gender { Name = name };
+        await context.Genders.AddAsync(gender);
+        await context.SaveChangesAsync();
+        return gender;
+    }
+
+    private static async Task<Address> EnsureSeedAddressAsync(AppDbContext context, int countryId, string addressText)
+    {
+        var department = await context.Departments.AsTracking().FirstOrDefaultAsync(x => x.CountryId == countryId && x.Name == "Santander");
+        if (department is null)
+        {
+            department = new Department { CountryId = countryId, Name = "Santander" };
+            await context.Departments.AddAsync(department);
+            await context.SaveChangesAsync();
+        }
+
+        var city = await context.Cities.AsTracking().FirstOrDefaultAsync(x => x.DepartmentId == department.Id && x.Name == "Bucaramanga");
+        if (city is null)
+        {
+            city = new City { DepartmentId = department.Id, Name = "Bucaramanga" };
+            await context.Cities.AddAsync(city);
+            await context.SaveChangesAsync();
+        }
+
+        var neighborhood = await context.Neighborhoods.AsTracking().FirstOrDefaultAsync(x => x.CityId == city.Id && x.Name == "Centro");
+        if (neighborhood is null)
+        {
+            neighborhood = new Neighborhood { CityId = city.Id, Name = "Centro" };
+            await context.Neighborhoods.AddAsync(neighborhood);
+            await context.SaveChangesAsync();
+        }
+
+        var streetTypeName = addressText.StartsWith("Carrera", StringComparison.OrdinalIgnoreCase) ? "Carrera" : "Calle";
+        var streetType = await context.StreetTypes.AsTracking().FirstOrDefaultAsync(x => x.Name == streetTypeName);
+        if (streetType is null)
+        {
+            streetType = new StreetType { Name = streetTypeName };
+            await context.StreetTypes.AddAsync(streetType);
+            await context.SaveChangesAsync();
+        }
+
+        var address = await context.Addresses.AsTracking().FirstOrDefaultAsync(x =>
+            x.NeighborhoodId == neighborhood.Id &&
+            x.StreetTypeId == streetType.Id &&
+            x.Complement == addressText);
+        if (address is not null)
+        {
+            return address;
+        }
+
+        address = new Address
+        {
+            NeighborhoodId = neighborhood.Id,
+            StreetTypeId = streetType.Id,
+            Complement = addressText
+        };
+        await context.Addresses.AddAsync(address);
+        await context.SaveChangesAsync();
+        return address;
     }
 
     private static async Task<EmailDomain> EnsureEmailDomainAsync(AppDbContext context, string domainName)
@@ -1170,7 +1367,10 @@ public static class DevelopmentDataSeeder
         string? MiddleName,
         string LastName,
         string? SecondLastName,
-        string PhoneNumber);
+        string PhoneNumber,
+        string GenderName,
+        DateOnly BirthDate,
+        string AddressText);
 
     private sealed record SeedPersonResult(int PersonId, int UserId);
 }

@@ -22,13 +22,9 @@ public sealed class AdminController : ControllerBase
     {
         var clientsQuery = _context.Persons
             .AsNoTracking()
-            .Where(person => !person.PersonRoles.Any(personRole =>
-                personRole.Role.RoleName == "Admin" ||
-                personRole.Role.RoleName == "Mechanic" ||
-                personRole.Role.RoleName == "Receptionist" ||
-                personRole.Role.RoleName == "WorkshopChief" ||
-                personRole.Role.RoleName == "WarehouseChief" ||
-                personRole.Role.RoleName == "InventoryManager"));
+            .Where(person => person.PersonRoles.Any(personRole =>
+                personRole.IsActive &&
+                personRole.Role.RoleName == "Client"));
 
         var totalClients = await clientsQuery.CountAsync(ct);
         var totalVehicles = await _context.Vehicles.AsNoTracking().CountAsync(ct);
@@ -203,61 +199,280 @@ public sealed class AdminController : ControllerBase
         });
     }
 
+    [HttpGet("clients")]
+    public async Task<IActionResult> GetClients([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null, CancellationToken ct = default)
+    {
+        var people = await _context.Persons
+            .AsNoTracking()
+            .Include(person => person.DocumentType)
+            .Include(person => person.Emails).ThenInclude(email => email.EmailDomain)
+            .Include(person => person.Phones)
+            .Include(person => person.PersonRoles).ThenInclude(personRole => personRole.Role)
+            .Include(person => person.VehicleHistory)
+            .ToListAsync(ct);
+
+        var filtered = people.Where(person =>
+            (person.PersonRoles.Any(personRole => personRole.IsActive && personRole.Role.RoleName == "Client") ||
+             person.VehicleHistory.Any()) &&
+            !person.PersonRoles.Any(personRole =>
+                personRole.IsActive && IsInternalPanelRole(personRole.Role.RoleName)));
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim().ToLower();
+            filtered = filtered.Where(person =>
+                person.DocumentNumber.ToLowerInvariant().Contains(term) ||
+                person.FirstName.ToLowerInvariant().Contains(term) ||
+                person.LastName.ToLowerInvariant().Contains(term) ||
+                person.Emails.Any(email => $"{email.EmailUser}@{email.EmailDomain.Domain}".ToLowerInvariant().Contains(term)));
+        }
+
+        var clientEntities = filtered
+            .OrderByDescending(person => person.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var clients = clientEntities.Select(person => new
+        {
+            id = person.Id,
+            documentType = person.DocumentType.Code,
+            documentNumber = person.DocumentNumber,
+            fullName = string.Join(' ', new[] { person.FirstName, person.MiddleName, person.LastName, person.SecondLastName }.Where(value => !string.IsNullOrWhiteSpace(value))),
+            roles = person.PersonRoles
+                .Where(personRole => personRole.IsActive)
+                .Select(personRole => personRole.Role.RoleName)
+                .DefaultIfEmpty("Client")
+                .ToArray(),
+            primaryEmail = person.Emails
+                .OrderByDescending(email => email.IsPrimary)
+                .Select(email => email.EmailUser + "@" + email.EmailDomain.Domain)
+                .FirstOrDefault() ?? "Sin correo",
+            primaryPhone = person.Phones
+                .OrderByDescending(phone => phone.IsPrimary)
+                .Select(phone => phone.PhoneNumber)
+                .FirstOrDefault() ?? "Sin telefono",
+            vehiclesCount = person.VehicleHistory.Count(history => history.EndDate == null),
+            status = person.IsActive ? "Activo" : "Inactivo",
+            role = "Client"
+        });
+
+        Response.Headers["X-Total-Count"] = filtered.Count().ToString();
+        return Ok(clients);
+    }
+
+    [HttpGet("clients/{id:int}")]
+    public async Task<IActionResult> GetClient(int id, CancellationToken ct)
+    {
+        var person = await _context.Persons
+            .AsNoTracking()
+            .Include(client => client.DocumentType)
+            .Include(client => client.Gender)
+            .Include(client => client.Address!).ThenInclude(address => address.Neighborhood).ThenInclude(neighborhood => neighborhood.City)
+            .Include(client => client.Emails).ThenInclude(email => email.EmailDomain)
+            .Include(client => client.Phones)
+            .Include(client => client.PersonRoles).ThenInclude(personRole => personRole.Role)
+            .Include(client => client.VehicleHistory)
+            .FirstOrDefaultAsync(client => client.Id == id, ct);
+
+        if (person is null || !IsAdminClient(person))
+        {
+            return NotFound(new { message = "El cliente no existe." });
+        }
+
+        return Ok(ToAdminClientDto(person));
+    }
+
+    [HttpGet("clients/{id:int}/vehicles")]
+    public async Task<IActionResult> GetClientVehicles(int id, CancellationToken ct)
+    {
+        var person = await _context.Persons
+            .AsNoTracking()
+            .Include(client => client.PersonRoles).ThenInclude(personRole => personRole.Role)
+            .Include(client => client.VehicleHistory)
+            .FirstOrDefaultAsync(client => client.Id == id, ct);
+
+        if (person is null || !IsAdminClient(person))
+        {
+            return NotFound(new { message = "El cliente no existe." });
+        }
+
+        var vehicles = await _context.Vehicles
+            .AsNoTracking()
+            .Include(vehicle => vehicle.VehicleModel).ThenInclude(model => model.VehicleBrand)
+            .Include(vehicle => vehicle.VehicleType)
+            .Include(vehicle => vehicle.OwnerHistory)
+            .Where(vehicle => vehicle.OwnerHistory.Any(owner => owner.PersonId == id && owner.EndDate == null))
+            .OrderBy(vehicle => vehicle.VehicleModel.VehicleBrand.BrandName)
+            .Select(vehicle => new
+            {
+                id = vehicle.Id,
+                vin = vehicle.Vin,
+                brand = vehicle.VehicleModel.VehicleBrand.BrandName,
+                model = vehicle.VehicleModel.ModelName,
+                type = vehicle.VehicleType.Name,
+                year = vehicle.Year,
+                color = vehicle.Color,
+                mileage = vehicle.Mileage,
+                isActive = vehicle.IsActive
+            })
+            .ToListAsync(ct);
+
+        return Ok(vehicles);
+    }
+
+    private static bool IsInternalPanelRole(string roleName)
+    {
+        return roleName == "Admin" ||
+            roleName == "Mechanic" ||
+            roleName == "Receptionist" ||
+            roleName == "WorkshopChief" ||
+            roleName == "WarehouseChief" ||
+            roleName == "InventoryManager";
+    }
+
+    private static bool IsAdminClient(Domain.Entities.Person person)
+    {
+        return (person.PersonRoles.Any(personRole => personRole.IsActive && personRole.Role.RoleName == "Client") ||
+                person.VehicleHistory.Any()) &&
+            !person.PersonRoles.Any(personRole => personRole.IsActive && IsInternalPanelRole(personRole.Role.RoleName));
+    }
+
+    private static object ToAdminClientDto(Domain.Entities.Person person)
+    {
+        return new
+        {
+            id = person.Id,
+            documentType = person.DocumentType.Code,
+            documentNumber = person.DocumentNumber,
+            fullName = string.Join(' ', new[] { person.FirstName, person.MiddleName, person.LastName, person.SecondLastName }.Where(value => !string.IsNullOrWhiteSpace(value))),
+            roles = person.PersonRoles
+                .Where(personRole => personRole.IsActive)
+                .Select(personRole => personRole.Role.RoleName)
+                .DefaultIfEmpty("Client")
+                .ToArray(),
+            primaryEmail = person.Emails
+                .OrderByDescending(email => email.IsPrimary)
+                .Select(email => email.EmailUser + "@" + email.EmailDomain.Domain)
+                .FirstOrDefault() ?? "Sin correo",
+            primaryPhone = person.Phones
+                .OrderByDescending(phone => phone.IsPrimary)
+                .Select(phone => phone.PhoneNumber)
+                .FirstOrDefault() ?? "Sin telefono",
+            vehiclesCount = person.VehicleHistory.Count(history => history.EndDate == null),
+            status = person.IsActive ? "Activo" : "Inactivo",
+            role = "Client",
+            gender = person.Gender?.Name,
+            birthDate = person.BirthDate,
+            address = person.Address is null
+                ? null
+                : string.Join(' ', new[] { person.Address.Complement, person.Address.Neighborhood?.City?.Name }.Where(value => !string.IsNullOrWhiteSpace(value)))
+        };
+    }
+
     [HttpGet("users")]
     public async Task<IActionResult> GetUsers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null, CancellationToken ct = default)
     {
-        var query = _context.Users
+        var userEntities = await _context.Users
             .AsNoTracking()
             .Include(user => user.Person).ThenInclude(person => person.Emails).ThenInclude(email => email.EmailDomain)
             .Include(user => user.Person).ThenInclude(person => person.PersonRoles).ThenInclude(personRole => personRole.Role)
             .Include(user => user.Person).ThenInclude(person => person.Phones)
             .Include(user => user.Person).ThenInclude(person => person.DocumentType)
-            .Include(user => user.Person).ThenInclude(person => person.User)
-            .Include(user => user.Person)
-            .AsQueryable();
+            .ToListAsync(ct);
+
+        var filteredUsers = userEntities
+            .Select(user =>
+            {
+                var email = user.Person.Emails
+                    .OrderByDescending(personEmail => personEmail.IsPrimary)
+                    .Select(personEmail => $"{personEmail.EmailUser}@{personEmail.EmailDomain.Domain}")
+                    .FirstOrDefault() ?? "";
+                var roles = user.Person.PersonRoles
+                    .Where(personRole => personRole.IsActive)
+                    .Select(personRole => personRole.Role.RoleName)
+                    .Distinct()
+                    .ToList();
+
+                var seedRole = GetSeedRoleForEmail(email);
+                if (roles.Count == 0 && seedRole is not null)
+                {
+                    roles.Add(seedRole);
+                }
+
+                if (roles.Count == 0)
+                {
+                    roles.Add("Client");
+                }
+
+                return new
+                {
+                    User = user,
+                    Email = email,
+                    Roles = roles
+                };
+            });
 
         if (!string.IsNullOrWhiteSpace(search))
         {
             var term = search.Trim().ToLower();
-            query = query.Where(user =>
-                user.Person.DocumentNumber.ToLower().Contains(term) ||
-                user.Person.FirstName.ToLower().Contains(term) ||
-                user.Person.LastName.ToLower().Contains(term) ||
-                user.Person.Emails.Any(email => (email.EmailUser + "@" + email.EmailDomain.Domain).ToLower().Contains(term)) ||
-                user.Person.PersonRoles.Any(personRole => personRole.Role.RoleName.ToLower().Contains(term)));
+            filteredUsers = filteredUsers.Where(user =>
+                user.User.Person.DocumentNumber.ToLowerInvariant().Contains(term) ||
+                user.User.Person.FirstName.ToLowerInvariant().Contains(term) ||
+                user.User.Person.LastName.ToLowerInvariant().Contains(term) ||
+                user.Email.ToLowerInvariant().Contains(term) ||
+                user.Roles.Any(role => role.ToLowerInvariant().Contains(term)));
         }
 
-        var total = await query.CountAsync(ct);
-        var users = await query
-            .OrderByDescending(user => user.CreatedAt)
+        var total = filteredUsers.Count();
+        var users = filteredUsers
+            .OrderByDescending(user => user.User.CreatedAt)
             .Skip((Math.Max(1, pageNumber) - 1) * Math.Max(1, pageSize))
             .Take(Math.Max(1, pageSize))
             .Select(user => new
             {
-                id = user.Id,
-                personId = user.PersonId,
-                name = user.Person.FirstName + " " + (user.Person.MiddleName ?? "") + " " + user.Person.LastName + " " + (user.Person.SecondLastName ?? ""),
-                document = user.Person.DocumentType.Code + " " + user.Person.DocumentNumber,
-                email = user.Person.Emails
-                    .OrderByDescending(email => email.IsPrimary)
-                    .Select(email => email.EmailUser + "@" + email.EmailDomain.Domain)
+                id = user.User.Id,
+                personId = user.User.PersonId,
+                name = string.Join(' ', new[] { user.User.Person.FirstName, user.User.Person.MiddleName, user.User.Person.LastName, user.User.Person.SecondLastName }.Where(value => !string.IsNullOrWhiteSpace(value))),
+                document = user.User.Person.DocumentType.Code + " " + user.User.Person.DocumentNumber,
+                email = user.Email,
+                phone = user.User.Person.Phones
+                    .OrderByDescending(personPhone => personPhone.IsPrimary)
+                    .Select(personPhone => personPhone.PhoneNumber)
                     .FirstOrDefault() ?? "",
-                phone = user.Person.Phones
-                    .OrderByDescending(phone => phone.IsPrimary)
-                    .Select(phone => phone.PhoneNumber)
-                    .FirstOrDefault() ?? "",
-                roles = user.Person.PersonRoles
-                    .Where(personRole => personRole.IsActive)
-                    .Select(personRole => personRole.Role.RoleName)
-                    .ToArray(),
-                status = user.IsActive ? "Activo" : "Inactivo",
-                createdAt = user.CreatedAt,
-                lastAccess = user.CreatedAt
+                roles = user.Roles.ToArray(),
+                status = user.User.IsActive ? "Activo" : "Inactivo",
+                createdAt = user.User.CreatedAt,
+                lastAccess = user.User.CreatedAt
             })
-            .ToListAsync(ct);
+            .ToList();
 
         Response.Headers["X-Total-Count"] = total.ToString();
         return Ok(users);
+    }
+
+    private static string? GetSeedRoleForEmail(string email)
+    {
+        return email.ToLowerInvariant() switch
+        {
+            "admin@autotaller.com" => "Admin",
+            "recepcionista@autotaller.com" => "Receptionist",
+            "jefe.mecanicos@autotaller.com" => "WorkshopChief",
+            "jefebodega@autotaller.com" => "WarehouseChief",
+            "jefealmacen@autotaller.com" => "InventoryManager",
+            "mecanico@autotaller.com" => "Mechanic",
+            "diagnostico@autotaller.com" => "Mechanic",
+            "mantenimiento@autotaller.com" => "Mechanic",
+            "electricista@autotaller.com" => "Mechanic",
+            "frenos@autotaller.com" => "Mechanic",
+            "carlos.ramirez@test.com" => "Client",
+            "laura.gomez@test.com" => "Client",
+            "client@mail.com" => "Client",
+            "admin@mail.com" => "Admin",
+            "mechanic@mail.com" => "Mechanic",
+            "receptionist@mail.com" => "Receptionist",
+            _ => null
+        };
     }
 
     [HttpPost("users")]

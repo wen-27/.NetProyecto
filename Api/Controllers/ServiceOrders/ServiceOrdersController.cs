@@ -45,8 +45,84 @@ public sealed class ServiceOrdersController : BaseApiController
         var result = await Sender.Send(
             new GetServiceOrdersPaged(pageNumber, pageSize, search, clientPersonId, vin, fromDate, toDate, statusId, mechanicPersonId),
             ct);
+        var orderIds = result.Items.Select(order => order.Id).ToList();
+        if (orderIds.Count == 0)
+        {
+            Response.Headers["X-Total-Count"] = result.TotalCount.ToString();
+            return Ok(new
+            {
+                items = Array.Empty<object>(),
+                result.TotalCount,
+                result.Page,
+                result.PageSize,
+                result.TotalPages,
+                result.HasPreviousPage,
+                result.HasNextPage
+            });
+        }
+
+        var assignmentRows = await _dbContext.MechanicAssignments
+            .AsNoTracking()
+            .Where(assignment => orderIds.Contains(assignment.OrderService.ServiceOrderId))
+            .Select(assignment => new
+            {
+                assignment.OrderService.ServiceOrderId,
+                ServiceName = assignment.OrderService.WorkshopService != null
+                    ? assignment.OrderService.WorkshopService.Name
+                    : assignment.OrderService.Description ?? assignment.OrderService.ServiceType.Name,
+                assignment.MechanicPerson.FirstName,
+                assignment.MechanicPerson.MiddleName,
+                assignment.MechanicPerson.LastName,
+                assignment.MechanicPerson.SecondLastName
+            })
+            .ToListAsync(ct);
+
+        var assignmentLookup = assignmentRows
+            .GroupBy(row => row.ServiceOrderId)
+            .ToDictionary(group => group.Key, group => new
+            {
+                services = group.Select(row => row.ServiceName).Where(value => !string.IsNullOrWhiteSpace(value)).Distinct().ToArray(),
+                assignedMechanics = group
+                    .Select(row => string.Join(' ', new[] { row.FirstName, row.MiddleName, row.LastName, row.SecondLastName }.Where(value => !string.IsNullOrWhiteSpace(value))))
+                    .Where(value => !string.IsNullOrWhiteSpace(value))
+                    .Distinct()
+                    .ToArray()
+            });
+
+        var items = result.Items.Select(order =>
+        {
+            assignmentLookup.TryGetValue(order.Id, out var assignments);
+            var mechanics = assignments?.assignedMechanics ?? Array.Empty<string>();
+            return new
+            {
+                order.Id,
+                order.VehicleId,
+                order.OrderStatusId,
+                order.EntryDate,
+                order.EstimatedDeliveryDate,
+                order.WorkPerformed,
+                order.EstimatedTotal,
+                order.Customer,
+                order.Vehicle,
+                order.Status,
+                order.GeneralDescription,
+                mechanic = mechanics.Length == 0 ? "Sin asignar" : string.Join(", ", mechanics),
+                services = assignments?.services ?? Array.Empty<string>(),
+                assignedMechanics = mechanics
+            };
+        }).ToArray();
+
         Response.Headers["X-Total-Count"] = result.TotalCount.ToString();
-        return Ok(result);
+        return Ok(new
+        {
+            items,
+            result.TotalCount,
+            result.Page,
+            result.PageSize,
+            result.TotalPages,
+            result.HasPreviousPage,
+            result.HasNextPage
+        });
     }
 
     [HttpGet("{id:int}")]
