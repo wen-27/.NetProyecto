@@ -20,10 +20,16 @@ public sealed class CreateVehicleHandler : IRequestHandler<CreateVehicle, int>
     {
         var modelId = new VehicleModelId(request.ModelId);
         var vehicleTypeId = new VehicleTypeId(request.VehicleTypeId);
+        var plate = new VehiclePlate(request.Plate);
         var vin = new VehicleVin(request.Vin);
         var year = new VehicleYear(request.Year);
         var color = new VehicleColor(request.Color);
         var mileage = new VehicleMileage(request.Mileage);
+
+        if (await _vehicles.ExistsPlateAsync(plate, ct))
+        {
+            throw new InvalidOperationException("Ya existe un vehículo con esa placa.");
+        }
 
         if (await _vehicles.ExistsVinAsync(vin, ct))
         {
@@ -34,6 +40,7 @@ public sealed class CreateVehicleHandler : IRequestHandler<CreateVehicle, int>
         {
             ModelId = modelId.Value,
             VehicleTypeId = vehicleTypeId.Value,
+            Plate = plate.Value,
             Vin = vin.Value,
             Year = year.Value,
             Color = color.Value,

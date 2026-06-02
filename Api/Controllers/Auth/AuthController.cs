@@ -85,7 +85,7 @@ public sealed class AuthController : ControllerBase
         }
 
         return normalizedEmail.EndsWith("@autotaller.com", StringComparison.OrdinalIgnoreCase) ||
-            normalizedEmail is "carlos.ramirez@test.com" or "laura.gomez@test.com" or "client@mail.com" or "admin@mail.com" or "mechanic@mail.com" or "receptionist@mail.com";
+            normalizedEmail is "carlos.ramirez@test.com" or "laura.gomez@test.com" or "natalia.suarez@test.com" or "miguel.perez@test.com" or "client@mail.com" or "admin@mail.com" or "mechanic@mail.com" or "receptionist@mail.com";
     }
 
     [HttpPost("register-client")]
@@ -158,6 +158,7 @@ public sealed class AuthController : ControllerBase
         }
 
         await using var transaction = await _context.Database.BeginTransactionAsync(ct);
+        var addressId = request.AddressId ?? await ResolveOptionalAddressIdAsync(request.AddressText, ct);
 
         var person = new Person
         {
@@ -169,7 +170,7 @@ public sealed class AuthController : ControllerBase
             SecondLastName = string.IsNullOrWhiteSpace(request.SecondLastName) ? null : request.SecondLastName.Trim(),
             BirthDate = request.BirthDate,
             GenderId = request.GenderId,
-            AddressId = request.AddressId
+            AddressId = addressId
         };
 
         await _context.Persons.AddAsync(person, ct);
@@ -225,6 +226,74 @@ public sealed class AuthController : ControllerBase
     }
 
     private static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
+
+    private async Task<int?> ResolveOptionalAddressIdAsync(string? addressText, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(addressText))
+        {
+            return null;
+        }
+
+        var country = await _context.Countries.FirstOrDefaultAsync(x => x.Name == "Colombia", ct);
+        if (country is null)
+        {
+            country = new Country { Name = "Colombia", PhoneCode = "+57" };
+            await _context.Countries.AddAsync(country, ct);
+            await _context.SaveChangesAsync(ct);
+        }
+
+        var department = await _context.Departments.FirstOrDefaultAsync(x => x.CountryId == country.Id && x.Name == "Santander", ct);
+        if (department is null)
+        {
+            department = new Department { CountryId = country.Id, Name = "Santander" };
+            await _context.Departments.AddAsync(department, ct);
+            await _context.SaveChangesAsync(ct);
+        }
+
+        var city = await _context.Cities.FirstOrDefaultAsync(x => x.DepartmentId == department.Id && x.Name == "Bucaramanga", ct);
+        if (city is null)
+        {
+            city = new City { DepartmentId = department.Id, Name = "Bucaramanga" };
+            await _context.Cities.AddAsync(city, ct);
+            await _context.SaveChangesAsync(ct);
+        }
+
+        var neighborhood = await _context.Neighborhoods.FirstOrDefaultAsync(x => x.CityId == city.Id && x.Name == "Centro", ct);
+        if (neighborhood is null)
+        {
+            neighborhood = new Neighborhood { CityId = city.Id, Name = "Centro" };
+            await _context.Neighborhoods.AddAsync(neighborhood, ct);
+            await _context.SaveChangesAsync(ct);
+        }
+
+        var streetType = await _context.StreetTypes.FirstOrDefaultAsync(x => x.Name == "Calle", ct);
+        if (streetType is null)
+        {
+            streetType = new StreetType { Name = "Calle" };
+            await _context.StreetTypes.AddAsync(streetType, ct);
+            await _context.SaveChangesAsync(ct);
+        }
+
+        var normalized = addressText.Trim();
+        var address = await _context.Addresses.FirstOrDefaultAsync(x =>
+            x.NeighborhoodId == neighborhood.Id &&
+            x.StreetTypeId == streetType.Id &&
+            x.Complement == normalized, ct);
+        if (address is not null)
+        {
+            return address.Id;
+        }
+
+        address = new Address
+        {
+            NeighborhoodId = neighborhood.Id,
+            StreetTypeId = streetType.Id,
+            Complement = normalized
+        };
+        await _context.Addresses.AddAsync(address, ct);
+        await _context.SaveChangesAsync(ct);
+        return address.Id;
+    }
 
     private static (string User, string Domain)? SplitEmail(string email)
     {

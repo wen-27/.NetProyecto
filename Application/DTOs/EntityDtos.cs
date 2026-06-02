@@ -75,7 +75,7 @@ public sealed record UserRoleDto(int UserId, int RoleId);
 
 public sealed record VehicleBrandDto(int Id, string BrandName);
 
-public sealed record VehicleDto(int Id, int ModelId, int VehicleTypeId, string Vin, int Year, string? Color, int Mileage, bool IsActive);
+public sealed record VehicleDto(int Id, int ModelId, int VehicleTypeId, string Plate, string Vin, int Year, string? Color, int Mileage, bool IsActive);
 
 public sealed record VehicleModelDto(int Id, int BrandId, string ModelName);
 
@@ -184,7 +184,7 @@ public static class EntityDtoMapper
 
     public static VehicleBrandDto ToDto(this VehicleBrand entity) => new(entity.Id, entity.BrandName);
 
-    public static VehicleDto ToDto(this Vehicle entity) => new(entity.Id, entity.ModelId, entity.VehicleTypeId, entity.Vin, entity.Year, entity.Color, entity.Mileage, entity.IsActive);
+    public static VehicleDto ToDto(this Vehicle entity) => new(entity.Id, entity.ModelId, entity.VehicleTypeId, entity.Plate, entity.Vin, entity.Year, entity.Color, entity.Mileage, entity.IsActive);
 
     public static VehicleModelDto ToDto(this VehicleModel entity) => new(entity.Id, entity.BrandId, entity.ModelName);
 

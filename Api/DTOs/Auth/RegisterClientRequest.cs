@@ -13,4 +13,5 @@ public sealed record RegisterClientRequest(
     string Email,
     string Password,
     int? PhoneCountryId,
-    string? PhoneNumber);
+    string? PhoneNumber,
+    string? AddressText = null);

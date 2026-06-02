@@ -20,6 +20,11 @@ public sealed class VehicleRepository : IVehicleRepository
         return _context.Vehicles.FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
+    public Task<Vehicle?> GetByPlateAsync(VehiclePlate plate, CancellationToken ct = default)
+    {
+        return _context.Vehicles.FirstOrDefaultAsync(x => x.Plate == plate.Value, ct);
+    }
+
     public Task<Vehicle?> GetByVinAsync(VehicleVin vin, CancellationToken ct = default)
     {
         return _context.Vehicles.FirstOrDefaultAsync(x => x.Vin == vin.Value, ct);
@@ -100,6 +105,11 @@ public sealed class VehicleRepository : IVehicleRepository
         return _context.Vehicles.AnyAsync(x => x.Vin == vin.Value, ct);
     }
 
+    public Task<bool> ExistsPlateAsync(VehiclePlate plate, CancellationToken ct = default)
+    {
+        return _context.Vehicles.AnyAsync(x => x.Plate == plate.Value, ct);
+    }
+
     private static IQueryable<Vehicle> ApplySearch(IQueryable<Vehicle> query, string? search)
     {
         if (string.IsNullOrWhiteSpace(search))
@@ -108,7 +118,7 @@ public sealed class VehicleRepository : IVehicleRepository
         }
 
         var term = search.Trim();
-        return query.Where(x => x.Vin.Contains(term) || (x.Color != null && x.Color.Contains(term)));
+        return query.Where(x => x.Plate.Contains(term) || x.Vin.Contains(term) || (x.Color != null && x.Color.Contains(term)));
     }
 
     private static IQueryable<Vehicle> ApplyFilters(IQueryable<Vehicle> query, string? search, string? vin, int? clientPersonId)
@@ -118,7 +128,7 @@ public sealed class VehicleRepository : IVehicleRepository
         if (!string.IsNullOrWhiteSpace(vin))
         {
             var vinTerm = vin.Trim();
-            query = query.Where(x => x.Vin.Contains(vinTerm));
+            query = query.Where(x => x.Plate.Contains(vinTerm) || x.Vin.Contains(vinTerm));
         }
 
         if (clientPersonId.HasValue)

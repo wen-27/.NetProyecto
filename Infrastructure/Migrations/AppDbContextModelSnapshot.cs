@@ -2048,6 +2048,11 @@ namespace Infrastructure.Migrations
                     b.Property<int>("ModelId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Plate")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
                     b.Property<int>("VehicleTypeId")
                         .HasColumnType("int");
 
@@ -2065,6 +2070,9 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ModelId");
 
                     b.HasIndex("VehicleTypeId");
+
+                    b.HasIndex("Plate")
+                        .IsUnique();
 
                     b.HasIndex("Vin")
                         .IsUnique();

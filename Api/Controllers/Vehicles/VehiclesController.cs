@@ -45,7 +45,7 @@ public sealed class VehiclesController : BaseApiController
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateVehicleRequest request, CancellationToken ct)
     {
-        await Sender.Send(new UpdateVehicle(id, request.ModelId, request.VehicleTypeId, request.Vin, request.Year, request.Color, request.Mileage, request.IsActive), ct);
+        await Sender.Send(new UpdateVehicle(id, request.ModelId, request.VehicleTypeId, request.Plate, request.Vin, request.Year, request.Color, request.Mileage, request.IsActive), ct);
         return NoContent();
     }
 

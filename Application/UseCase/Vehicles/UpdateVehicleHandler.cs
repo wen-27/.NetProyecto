@@ -22,6 +22,7 @@ public sealed class UpdateVehicleHandler : IRequestHandler<UpdateVehicle>
 
         var modelId = new VehicleModelId(request.ModelId);
         var vehicleTypeId = new VehicleTypeId(request.VehicleTypeId);
+        var plate = new VehiclePlate(request.Plate);
         var vin = new VehicleVin(request.Vin);
         var year = new VehicleYear(request.Year);
         var color = new VehicleColor(request.Color);
@@ -29,6 +30,7 @@ public sealed class UpdateVehicleHandler : IRequestHandler<UpdateVehicle>
 
         vehicle.ModelId = modelId.Value;
         vehicle.VehicleTypeId = vehicleTypeId.Value;
+        vehicle.Plate = plate.Value;
         vehicle.Vin = vin.Value;
         vehicle.Year = year.Value;
         vehicle.Color = color.Value;

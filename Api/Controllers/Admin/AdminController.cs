@@ -89,7 +89,7 @@ public sealed class AdminController : ControllerBase
                     .OrderByDescending(owner => owner.StartDate)
                     .Select(owner => owner.Person.FirstName + " " + (owner.Person.MiddleName ?? "") + " " + owner.Person.LastName + " " + (owner.Person.SecondLastName ?? ""))
                     .FirstOrDefault() ?? "Sin propietario",
-                vehicle = order.Vehicle.VehicleModel.VehicleBrand.BrandName + " " + order.Vehicle.VehicleModel.ModelName + " " + order.Vehicle.Vin,
+                vehicle = order.Vehicle.VehicleModel.VehicleBrand.BrandName + " " + order.Vehicle.VehicleModel.ModelName + " " + order.Vehicle.Plate,
                 status = order.OrderStatus.Name,
                 entryDate = order.EntryDate,
                 estimatedTotal = order.EstimatedTotal
@@ -112,7 +112,7 @@ public sealed class AdminController : ControllerBase
                 customer = payment.ClientPerson == null
                     ? "Cliente"
                     : payment.ClientPerson.FirstName + " " + (payment.ClientPerson.MiddleName ?? "") + " " + payment.ClientPerson.LastName + " " + (payment.ClientPerson.SecondLastName ?? ""),
-                vehicle = payment.Invoice.ServiceOrder.Vehicle.VehicleModel.VehicleBrand.BrandName + " " + payment.Invoice.ServiceOrder.Vehicle.VehicleModel.ModelName + " " + payment.Invoice.ServiceOrder.Vehicle.Vin,
+                vehicle = payment.Invoice.ServiceOrder.Vehicle.VehicleModel.VehicleBrand.BrandName + " " + payment.Invoice.ServiceOrder.Vehicle.VehicleModel.ModelName + " " + payment.Invoice.ServiceOrder.Vehicle.Plate,
                 amount = payment.Amount,
                 method = payment.PaymentMethod.Name,
                 status = payment.PaymentStatus.Name,
@@ -148,6 +148,7 @@ public sealed class AdminController : ControllerBase
             .Select(vehicle => new
             {
                 id = vehicle.Id,
+                plate = vehicle.Plate,
                 vin = vehicle.Vin,
                 vehicle = vehicle.VehicleModel.VehicleBrand.BrandName + " " + vehicle.VehicleModel.ModelName + " " + vehicle.Year,
                 owner = vehicle.OwnerHistory
@@ -307,6 +308,7 @@ public sealed class AdminController : ControllerBase
             .Select(vehicle => new
             {
                 id = vehicle.Id,
+                plate = vehicle.Plate,
                 vin = vehicle.Vin,
                 brand = vehicle.VehicleModel.VehicleBrand.BrandName,
                 model = vehicle.VehicleModel.ModelName,

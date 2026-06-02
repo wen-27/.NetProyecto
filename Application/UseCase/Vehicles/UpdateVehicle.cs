@@ -6,6 +6,7 @@ public sealed record UpdateVehicle(
     int Id,
     int ModelId,
     int VehicleTypeId,
+    string Plate,
     string Vin,
     int Year,
     string? Color,

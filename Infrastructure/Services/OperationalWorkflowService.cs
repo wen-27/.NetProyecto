@@ -478,8 +478,8 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
                 x.Id,
                 OrderCode(x),
                 x.OrderStatus.Name,
-                x.Vehicle.Vin,
-                x.Vehicle.Vin,
+                x.Vehicle.Plate,
+                VehicleDisplayName(x.Vehicle),
                 CurrentOwnerName(x),
                 x.EstimatedTotal,
                 x.EntryDate,
@@ -1432,7 +1432,7 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
         var model = vehicle.VehicleModel;
         var brand = model?.VehicleBrand?.BrandName;
         var name = string.Join(' ', new[] { brand, model?.ModelName, vehicle.Year > 0 ? vehicle.Year.ToString() : null }.Where(x => !string.IsNullOrWhiteSpace(x)));
-        return string.IsNullOrWhiteSpace(name) ? vehicle.Vin : $"{name} · {vehicle.Vin}";
+        return string.IsNullOrWhiteSpace(name) ? vehicle.Plate : $"{name} · {vehicle.Plate}";
     }
 
     private static string PersonDisplayName(Person? person, int? personId = null)
@@ -1467,7 +1467,7 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
             order.Id,
             OrderCode(order),
             order.OrderStatus.Name,
-            order.Vehicle.Vin,
+            order.Vehicle.Plate,
             VehicleDisplayName(order.Vehicle),
             CurrentOwnerName(order),
             order.EstimatedTotal,
@@ -1502,8 +1502,8 @@ public sealed class OperationalWorkflowService : IOperationalWorkflowService
             order.Id,
             OrderCode(order),
             order.OrderStatus.Name,
-            order.Vehicle.Vin,
-            order.Vehicle.Vin,
+            order.Vehicle.Plate,
+            VehicleDisplayName(order.Vehicle),
             CurrentOwnerName(order),
             order.EstimatedTotal,
             order.EntryDate,

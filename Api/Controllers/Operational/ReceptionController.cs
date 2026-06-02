@@ -91,7 +91,7 @@ public sealed class ReceptionController : OperationalControllerBase
         };
 
         var clientRole = await _context.Roles.FirstAsync(x => x.RoleName == "Client", ct);
-        person.PersonRoles.Add(new PersonRole { RoleId = clientRole.Id });
+        person.PersonRoles.Add(new PersonRole { RoleId = clientRole.Id, IsActive = true });
 
         if (!string.IsNullOrWhiteSpace(request.Email))
         {
@@ -155,8 +155,12 @@ public sealed class ReceptionController : OperationalControllerBase
     public async Task<IActionResult> CreateVehicle(CreateReceptionVehicleRequest request, CancellationToken ct)
     {
         if (request.OwnerPersonId <= 0) return BadRequest(new { message = "El propietario es obligatorio." });
-        if (string.IsNullOrWhiteSpace(request.Vin)) return BadRequest(new { message = "La placa/VIN es obligatoria." });
-        if (await _context.Vehicles.AnyAsync(x => x.Vin == request.Vin.Trim(), ct)) return Conflict(new { message = "Ya existe un vehículo con esa placa/VIN." });
+        if (string.IsNullOrWhiteSpace(request.Plate)) return BadRequest(new { message = "La placa es obligatoria." });
+        if (string.IsNullOrWhiteSpace(request.Vin)) return BadRequest(new { message = "El VIN es obligatorio." });
+        var plate = request.Plate.Trim().ToUpperInvariant();
+        var vin = request.Vin.Trim().ToUpperInvariant();
+        if (await _context.Vehicles.AnyAsync(x => x.Plate == plate, ct)) return Conflict(new { message = "Ya existe un vehículo con esa placa." });
+        if (await _context.Vehicles.AnyAsync(x => x.Vin == vin, ct)) return Conflict(new { message = "Ya existe un vehículo con ese VIN." });
         if (!await _context.Persons.AnyAsync(x => x.Id == request.OwnerPersonId, ct)) return BadRequest(new { message = "El cliente propietario no existe." });
         if (!await _context.VehicleModels.AnyAsync(x => x.Id == request.ModelId, ct)) return BadRequest(new { message = "El modelo no existe." });
         if (!await _context.VehicleTypes.AnyAsync(x => x.Id == request.VehicleTypeId, ct)) return BadRequest(new { message = "El tipo de vehículo no existe." });
@@ -165,7 +169,8 @@ public sealed class ReceptionController : OperationalControllerBase
         {
             ModelId = request.ModelId,
             VehicleTypeId = request.VehicleTypeId,
-            Vin = request.Vin.Trim(),
+            Plate = plate,
+            Vin = vin,
             Year = request.Year,
             Color = request.Color?.Trim(),
             Mileage = request.Mileage,
@@ -264,7 +269,16 @@ public sealed class ReceptionController : OperationalControllerBase
             .Include(x => x.Phones)
             .Include(x => x.PersonRoles).ThenInclude(x => x.Role)
             .Include(x => x.VehicleHistory)
-            .Where(x => x.PersonRoles.Any(role => role.IsActive && role.Role.RoleName == "Client"));
+            .Where(x =>
+                (x.PersonRoles.Any(role => role.Role.RoleName == "Client") || x.VehicleHistory.Any()) &&
+                !x.PersonRoles.Any(role =>
+                    role.IsActive &&
+                    (role.Role.RoleName == "Admin" ||
+                     role.Role.RoleName == "Mechanic" ||
+                     role.Role.RoleName == "Receptionist" ||
+                     role.Role.RoleName == "WorkshopChief" ||
+                     role.Role.RoleName == "WarehouseChief" ||
+                     role.Role.RoleName == "InventoryManager")));
         if (string.IsNullOrWhiteSpace(search)) return query;
         var term = search.Trim().ToLower();
         return query.Where(x => x.DocumentNumber.ToLower().Contains(term) || x.FirstName.ToLower().Contains(term) || x.LastName.ToLower().Contains(term) || x.Emails.Any(email => (email.EmailUser + "@" + email.EmailDomain.Domain).ToLower().Contains(term)));
@@ -279,7 +293,7 @@ public sealed class ReceptionController : OperationalControllerBase
             .Include(x => x.ServiceOrders);
         if (string.IsNullOrWhiteSpace(search)) return query;
         var term = search.Trim().ToLower();
-        return query.Where(x => x.Vin.ToLower().Contains(term) || x.VehicleModel.ModelName.ToLower().Contains(term) || x.VehicleModel.VehicleBrand.BrandName.ToLower().Contains(term) || x.OwnerHistory.Any(owner => owner.EndDate == null && (owner.Person.FirstName.ToLower().Contains(term) || owner.Person.LastName.ToLower().Contains(term) || owner.Person.DocumentNumber.ToLower().Contains(term))));
+        return query.Where(x => x.Plate.ToLower().Contains(term) || x.Vin.ToLower().Contains(term) || x.VehicleModel.ModelName.ToLower().Contains(term) || x.VehicleModel.VehicleBrand.BrandName.ToLower().Contains(term) || x.OwnerHistory.Any(owner => owner.EndDate == null && (owner.Person.FirstName.ToLower().Contains(term) || owner.Person.LastName.ToLower().Contains(term) || owner.Person.DocumentNumber.ToLower().Contains(term))));
     }
 
     private IQueryable<Payment> PaymentQuery() => _context.Payments
@@ -310,6 +324,7 @@ public sealed class ReceptionController : OperationalControllerBase
         var owner = vehicle.OwnerHistory.Where(x => x.EndDate == null).OrderByDescending(x => x.StartDate).FirstOrDefault()?.Person;
         return new ReceptionVehicleDto(
             vehicle.Id,
+            vehicle.Plate,
             vehicle.Vin,
             vehicle.VehicleModel.VehicleBrand.BrandName,
             vehicle.VehicleModel.ModelName,
@@ -335,7 +350,7 @@ public sealed class ReceptionController : OperationalControllerBase
     private static ReceptionPaymentDto ToReceptionPaymentDto(Payment payment)
     {
         var vehicle = payment.Invoice.ServiceOrder.Vehicle;
-        var vehicleName = $"{vehicle.VehicleModel.VehicleBrand.BrandName} {vehicle.VehicleModel.ModelName} {vehicle.Vin}";
+        var vehicleName = $"{vehicle.VehicleModel.VehicleBrand.BrandName} {vehicle.VehicleModel.ModelName} {vehicle.Plate}";
         var client = payment.ClientPerson;
         return new ReceptionPaymentDto(
             payment.Id,
@@ -362,9 +377,9 @@ public sealed class ReceptionController : OperationalControllerBase
 }
 
 public sealed record CreateReceptionCustomerRequest(int DocumentTypeId, string DocumentNumber, string FirstName, string? MiddleName, string LastName, string? SecondLastName, string? Email, string? Phone, int? PhoneCountryId);
-public sealed record CreateReceptionVehicleRequest(int OwnerPersonId, int ModelId, int VehicleTypeId, string Vin, int Year, string? Color, int Mileage, DateTime? StartDate);
+public sealed record CreateReceptionVehicleRequest(int OwnerPersonId, int ModelId, int VehicleTypeId, string Plate, string Vin, int Year, string? Color, int Mileage, DateTime? StartDate);
 public sealed record TransferVehicleOwnerRequest(int NewOwnerPersonId, DateTime? TransferDate, string? Observation);
 public sealed record ReceptionCustomerDto(int Id, string DocumentType, string DocumentNumber, string FullName, string PrimaryEmail, string PrimaryPhone, int VehiclesCount, string Status, string Role, string? Gender, DateOnly? BirthDate, string? Address);
-public sealed record ReceptionVehicleDto(int Id, string Vin, string Brand, string Model, string Type, int Year, string? Color, int Mileage, int? CurrentOwnerId, string CurrentOwner, int ActiveOrders, bool IsActive);
+public sealed record ReceptionVehicleDto(int Id, string Plate, string Vin, string Brand, string Model, string Type, int Year, string? Color, int Mileage, int? CurrentOwnerId, string CurrentOwner, int ActiveOrders, bool IsActive);
 public sealed record ReceptionOwnerHistoryDto(int Id, int VehicleId, int PersonId, string Owner, DateTime StartDate, DateTime? EndDate, bool IsCurrent);
 public sealed record ReceptionPaymentDto(int Id, int InvoiceId, int ServiceOrderId, int? ClientPersonId, string Customer, string? ClientDocument, string Vehicle, decimal Amount, decimal Total, decimal Balance, string Method, string Status, DateTime Date, string Reference);

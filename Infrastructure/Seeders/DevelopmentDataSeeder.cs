@@ -19,6 +19,7 @@ public static class DevelopmentDataSeeder
 
         await context.Database.MigrateAsync();
         await EnsureMechanicDiagnosticsTableAsync(context);
+        await EnsureVehiclePlateColumnAsync(context);
 
         await using var transaction = await context.Database.BeginTransactionAsync();
 
@@ -58,7 +59,52 @@ public static class DevelopmentDataSeeder
                 CONSTRAINT `FK_MechanicDiagnostics_ServiceOrders_ServiceOrderId`
                     FOREIGN KEY (`ServiceOrderId`) REFERENCES `ServiceOrders` (`ServiceOrderId`) ON DELETE RESTRICT
             ) CHARACTER SET utf8mb4;
+        """);
+    }
+
+    private static async Task EnsureVehiclePlateColumnAsync(AppDbContext context)
+    {
+        var hasPlateColumn = await context.Database
+            .SqlQueryRaw<int>("""
+                SELECT COUNT(*) AS `Value`
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'Vehicles'
+                  AND COLUMN_NAME = 'Plate'
+                """)
+            .SingleAsync();
+
+        if (hasPlateColumn == 0)
+        {
+            await context.Database.ExecuteSqlRawAsync("""
+                ALTER TABLE `Vehicles`
+                ADD COLUMN `Plate` varchar(10) NOT NULL DEFAULT ''
+                """);
+        }
+
+        await context.Database.ExecuteSqlRawAsync("""
+            UPDATE `Vehicles`
+            SET `Plate` = LEFT(`VIN`, 10)
+            WHERE `Plate` = ''
             """);
+
+        var hasPlateIndex = await context.Database
+            .SqlQueryRaw<int>("""
+                SELECT COUNT(*) AS `Value`
+                FROM INFORMATION_SCHEMA.STATISTICS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = 'Vehicles'
+                  AND INDEX_NAME = 'IX_Vehicles_Plate'
+                """)
+            .SingleAsync();
+
+        if (hasPlateIndex == 0)
+        {
+            await context.Database.ExecuteSqlRawAsync("""
+                CREATE UNIQUE INDEX `IX_Vehicles_Plate`
+                ON `Vehicles` (`Plate`)
+                """);
+        }
     }
 
     private static async Task SeedUsersAsync(AppDbContext context, IConfiguration configuration)
@@ -543,6 +589,32 @@ public static class DevelopmentDataSeeder
             BirthDate: new DateOnly(1993, 9, 22),
             AddressText: "Carrera 27 # 35-40"));
 
+        var natalia = await EnsureCustomerAsync(context, new SeedCustomer(
+            Email: "natalia.suarez@test.com",
+            Password: DefaultPassword,
+            DocumentNumber: "1003003003",
+            FirstName: "Natalia",
+            MiddleName: "Andrea",
+            LastName: "Suarez",
+            SecondLastName: "Vega",
+            PhoneNumber: "3005557788",
+            GenderName: "Femenino",
+            BirthDate: new DateOnly(1988, 7, 18),
+            AddressText: "Calle 18 # 22-11"));
+
+        var miguel = await EnsureCustomerAsync(context, new SeedCustomer(
+            Email: "miguel.perez@test.com",
+            Password: DefaultPassword,
+            DocumentNumber: "1004004004",
+            FirstName: "Miguel",
+            MiddleName: "Angel",
+            LastName: "Perez",
+            SecondLastName: "Lopez",
+            PhoneNumber: "3012223344",
+            GenderName: "Masculino",
+            BirthDate: new DateOnly(1985, 11, 6),
+            AddressText: "Carrera 12 # 44-20"));
+
         await EnsurePaymentMethodAsync(context, "Efectivo");
         await EnsurePaymentMethodAsync(context, "Transferencia");
         await EnsurePaymentMethodAsync(context, "Tarjeta");
@@ -557,15 +629,21 @@ public static class DevelopmentDataSeeder
         var electricMechanic = await GetRequiredUserByEmailAsync(context, "electricista@autotaller.com");
         var brakesMechanic = await GetRequiredUserByEmailAsync(context, "frenos@autotaller.com");
 
-        var abc123 = await EnsureVehicleAsync(context, "ABC123", "Toyota", "Corolla", "Sedan", 2020, "Gris", 45000);
+        var abc123 = await EnsureVehicleAsync(context, "ABC123", "JTDBR32E720123456", "Toyota", "Corolla", "Sedan", 2020, "Gris", 45000);
         await EnsureCurrentOwnerAsync(context, abc123.Id, carlos.PersonId, new DateTime(2024, 1, 10));
 
-        var def456 = await EnsureVehicleAsync(context, "DEF456", "Chevrolet", "Onix", "Sedan", 2022, "Blanco", 28000);
+        var def456 = await EnsureVehicleAsync(context, "DEF456", "KL1TD5DE9NB123456", "Chevrolet", "Onix", "Sedan", 2022, "Blanco", 28000);
         await EnsureCurrentOwnerAsync(context, def456.Id, carlos.PersonId, new DateTime(2024, 6, 5));
 
-        var ghi789 = await EnsureVehicleAsync(context, "GHI789", "Mazda", "CX-30", "SUV", 2021, "Rojo", 36000);
+        var ghi789 = await EnsureVehicleAsync(context, "GHI789", "3MVDMBBL8MM123456", "Mazda", "CX-30", "SUV", 2021, "Rojo", 36000);
         await EnsureClosedOwnerHistoryAsync(context, ghi789.Id, carlos.PersonId, new DateTime(2023, 3, 1), new DateTime(2025, 2, 15));
         await EnsureCurrentOwnerAsync(context, ghi789.Id, laura.PersonId, new DateTime(2025, 2, 15));
+
+        var jkl321 = await EnsureVehicleAsync(context, "JKL321", "93YHSR7F5PJ123456", "Renault", "Duster", "SUV", 2023, "Azul", 12000);
+        await EnsureCurrentOwnerAsync(context, jkl321.Id, natalia.PersonId, new DateTime(2025, 9, 1));
+
+        var mno654 = await EnsureVehicleAsync(context, "MNO654", "KNAB2512BNT123456", "Kia", "Picanto", "Hatchback", 2022, "Plata", 18500);
+        await EnsureCurrentOwnerAsync(context, mno654.Id, miguel.PersonId, new DateTime(2025, 10, 14));
 
         var order1 = await EnsureServiceOrderAsync(
             context,
@@ -622,6 +700,28 @@ public static class DevelopmentDataSeeder
         await EnsureOrderServiceAsync(context, order5.Id, "Cambio de aceite", "Preventive Maintenance", OrderServiceStatus.Completed, maintenanceMechanic.PersonId, "Cambio de aceite completado; requiere aprobacion del cliente para trabajo adicional.");
         await EnsureOrderServiceAsync(context, order5.Id, "Cambio de filtro de aire", "Preventive Maintenance", OrderServiceStatus.Completed, maintenanceMechanic.PersonId, "Cambio de filtro sugerido por mantenimiento preventivo.");
 
+        var order6 = await EnsureServiceOrderAsync(
+            context,
+            "SEED-OT-CARLOS-APPROVAL-BRAKES",
+            abc123.Id,
+            ServiceOrderStatus.PendingClientApproval,
+            DateTime.UtcNow.AddDays(-1),
+            "Orden de Carlos con trabajos de frenos y encendido pendientes de aprobacion del cliente para Toyota Corolla ABC123.",
+            admin.Id);
+        await EnsureOrderServiceAsync(context, order6.Id, "Revisión de frenos", "Mechanical Repair", OrderServiceStatus.Completed, brakesMechanic.PersonId, "Revision de frenos completada; se recomiendan repuestos adicionales.");
+        await EnsureOrderServiceAsync(context, order6.Id, "Diagnóstico general", "Diagnostics", OrderServiceStatus.Completed, diagnosticMechanic.PersonId, "Diagnostico general finalizado con recomendacion de encendido.");
+
+        var order7 = await EnsureServiceOrderAsync(
+            context,
+            "SEED-OT-LAURA-APPROVAL-ELECTRICAL",
+            ghi789.Id,
+            ServiceOrderStatus.PendingClientApproval,
+            DateTime.UtcNow.AddHours(-18),
+            "Orden de Laura con reparaciones electricas adicionales pendientes de aprobacion del cliente para Mazda CX-30 GHI789.",
+            admin.Id);
+        await EnsureOrderServiceAsync(context, order7.Id, "Revisión eléctrica", "Electrical", OrderServiceStatus.Completed, electricMechanic.PersonId, "Revision electrica completada; se recomienda reparacion adicional.");
+        await EnsureOrderServiceAsync(context, order7.Id, "Mantenimiento preventivo", "Preventive Maintenance", OrderServiceStatus.Completed, maintenanceMechanic.PersonId, "Mantenimiento preventivo completado con recomendacion de filtros.");
+
         var chiefDiagnosticOrder1 = await EnsureServiceOrderAsync(
             context,
             "SEED-CHIEF-ORDER-DIAG-CARLOS",
@@ -645,6 +745,8 @@ public static class DevelopmentDataSeeder
         await RefreshServiceOrderTotalAsync(context, order3.Id);
         await RefreshServiceOrderTotalAsync(context, order4.Id);
         await RefreshServiceOrderTotalAsync(context, order5.Id);
+        await RefreshServiceOrderTotalAsync(context, order6.Id);
+        await RefreshServiceOrderTotalAsync(context, order7.Id);
         await RefreshServiceOrderTotalAsync(context, chiefDiagnosticOrder1.Id);
         await RefreshServiceOrderTotalAsync(context, chiefDiagnosticOrder2.Id);
 
@@ -775,6 +877,70 @@ public static class DevelopmentDataSeeder
             "Mensaje para cliente: se sugirio reparacion electrica preventiva por lectura de voltaje irregular.",
             "Aprobado tecnicamente, pero requiere autorizacion del cliente.",
             "Carlos rechazo esta solicitud por ahora.");
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order6.Id,
+            brakesMechanic.PersonId,
+            carlos.PersonId,
+            workshopChief.PersonId,
+            AdditionalRequestStatus.PendingClientApproval,
+            AdditionalRequestType.ServiceWithParts,
+            "Cambio de pastillas de freno",
+            "REF-PAS-FRE-DEL",
+            1,
+            "SEED-REQ-CARLOS-APPROVAL-BRAKE-PADS",
+            "Las pastillas delanteras estan cerca del limite de seguridad. Se solicita aprobacion del cliente para cambio.",
+            "Aprobado por jefe de taller. Enviar a Carlos para aprobacion.",
+            null);
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order6.Id,
+            diagnosticMechanic.PersonId,
+            carlos.PersonId,
+            workshopChief.PersonId,
+            AdditionalRequestStatus.PendingClientApproval,
+            AdditionalRequestType.Part,
+            null,
+            "REF-BUJ-STD",
+            4,
+            "SEED-REQ-CARLOS-APPROVAL-SPARK-PLUGS",
+            "El diagnostico detecta bujias con desgaste irregular. Se solicita aprobacion para reemplazo preventivo.",
+            "Aprobado tecnicamente. Pendiente respuesta de Carlos.",
+            null);
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order7.Id,
+            electricMechanic.PersonId,
+            laura.PersonId,
+            workshopChief.PersonId,
+            AdditionalRequestStatus.PendingClientApproval,
+            AdditionalRequestType.Service,
+            "Reparación sistema eléctrico",
+            null,
+            null,
+            "SEED-REQ-LAURA-APPROVAL-ELECTRICAL-REPAIR",
+            "Se detecta caida de voltaje en circuito de luces. Se solicita aprobacion para reparacion electrica.",
+            "Aprobado por jefe de taller. Enviar a Laura para aprobacion.",
+            null);
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order7.Id,
+            maintenanceMechanic.PersonId,
+            laura.PersonId,
+            workshopChief.PersonId,
+            AdditionalRequestStatus.PendingClientApproval,
+            AdditionalRequestType.Part,
+            null,
+            "REF-FIL-AIR",
+            1,
+            "SEED-REQ-LAURA-APPROVAL-AIR-FILTER",
+            "El filtro de aire presenta acumulacion de polvo por uso urbano. Se solicita aprobacion para reemplazo.",
+            "Aprobado tecnicamente. Pendiente autorizacion de Laura.",
+            null);
 
         await EnsureAdditionalServiceRequestAsync(
             context,
@@ -1007,7 +1173,9 @@ public static class DevelopmentDataSeeder
             ("electricista@autotaller.com", new[] { "Mechanic" }),
             ("frenos@autotaller.com", new[] { "Mechanic" }),
             ("carlos.ramirez@test.com", new[] { "Client" }),
-            ("laura.gomez@test.com", new[] { "Client" })
+            ("laura.gomez@test.com", new[] { "Client" }),
+            ("natalia.suarez@test.com", new[] { "Client" }),
+            ("miguel.perez@test.com", new[] { "Client" })
         };
 
         foreach (var roleName in panelRoles)
@@ -1215,18 +1383,22 @@ public static class DevelopmentDataSeeder
         return domain;
     }
 
-    private static async Task<Vehicle> EnsureVehicleAsync(AppDbContext context, string vin, string brandName, string modelName, string typeName, int year, string color, int mileage)
+    private static async Task<Vehicle> EnsureVehicleAsync(AppDbContext context, string plate, string vin, string brandName, string modelName, string typeName, int year, string color, int mileage)
     {
         var model = await EnsureVehicleModelAsync(context, brandName, modelName);
         var type = await EnsureVehicleTypeAsync(context, typeName);
-        var vehicle = await context.Vehicles.AsTracking().FirstOrDefaultAsync(x => x.Vin == vin);
+        var normalizedPlate = plate.Trim().ToUpperInvariant();
+        var normalizedVin = vin.Trim().ToUpperInvariant();
+        var vehicle = await context.Vehicles.AsTracking().FirstOrDefaultAsync(x => x.Plate == normalizedPlate || x.Vin == normalizedVin);
 
         if (vehicle is null)
         {
-            vehicle = new Vehicle { Vin = vin };
+            vehicle = new Vehicle { Plate = normalizedPlate, Vin = normalizedVin };
             await context.Vehicles.AddAsync(vehicle);
         }
 
+        vehicle.Plate = normalizedPlate;
+        vehicle.Vin = normalizedVin;
         vehicle.ModelId = model.Id;
         vehicle.VehicleTypeId = type.Id;
         vehicle.Year = year;

@@ -6,6 +6,7 @@ public class Vehicle : BaseEntity
 {
     public int ModelId { get; set; }
     public int VehicleTypeId { get; set; }
+    public string Plate { get; set; } = string.Empty;
     public string Vin { get; set; } = string.Empty;
     public int Year { get; set; }
     public string? Color { get; set; }
