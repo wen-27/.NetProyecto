@@ -27,6 +27,7 @@ public static class DevelopmentDataSeeder
         await SeedWorkshopServicesAsync(context);
         await SeedOperationalScenarioAsync(context);
         await EnsureSeedPanelRolesAsync(context);
+        await SeedAuditTrailAsync(context);
 
         await transaction.CommitAsync();
     }
@@ -599,9 +600,229 @@ public static class DevelopmentDataSeeder
         await EnsureOrderServiceAsync(context, order3.Id, "Revisión eléctrica", "Electrical", OrderServiceStatus.Completed, electricMechanic.PersonId, "Revision electrica completada.");
         await EnsureOrderServiceAsync(context, order3.Id, "Revisión de frenos", "Mechanical Repair", OrderServiceStatus.Completed, brakesMechanic.PersonId, "Revision de frenos completada.");
 
+        var order4 = await EnsureServiceOrderAsync(
+            context,
+            "SEED-OT-LAURA-CLIENT-APPROVAL",
+            ghi789.Id,
+            ServiceOrderStatus.PendingClientApproval,
+            DateTime.UtcNow.AddDays(-3),
+            "Orden completada con trabajos adicionales pendientes de aprobacion del cliente para Mazda CX-30 GHI789.",
+            admin.Id);
+        await EnsureOrderServiceAsync(context, order4.Id, "Mantenimiento preventivo", "Preventive Maintenance", OrderServiceStatus.Completed, maintenanceMechanic.PersonId, "Mantenimiento preventivo completado y listo para validacion del cliente.");
+        await EnsureOrderServiceAsync(context, order4.Id, "Cambio de pastillas de freno", "Mechanical Repair", OrderServiceStatus.Completed, brakesMechanic.PersonId, "Cambio de pastillas recomendado tras prueba de frenado.");
+
+        var order5 = await EnsureServiceOrderAsync(
+            context,
+            "SEED-OT-CARLOS-CLIENT-APPROVAL",
+            def456.Id,
+            ServiceOrderStatus.PendingClientApproval,
+            DateTime.UtcNow.AddDays(-2),
+            "Orden completa con solicitudes adicionales pendientes de aprobacion del cliente Carlos para Chevrolet Onix DEF456.",
+            admin.Id);
+        await EnsureOrderServiceAsync(context, order5.Id, "Cambio de aceite", "Preventive Maintenance", OrderServiceStatus.Completed, maintenanceMechanic.PersonId, "Cambio de aceite completado; requiere aprobacion del cliente para trabajo adicional.");
+        await EnsureOrderServiceAsync(context, order5.Id, "Cambio de filtro de aire", "Preventive Maintenance", OrderServiceStatus.Completed, maintenanceMechanic.PersonId, "Cambio de filtro sugerido por mantenimiento preventivo.");
+
+        var chiefDiagnosticOrder1 = await EnsureServiceOrderAsync(
+            context,
+            "SEED-CHIEF-ORDER-DIAG-CARLOS",
+            abc123.Id,
+            ServiceOrderStatus.Created,
+            DateTime.UtcNow.AddDays(-1),
+            "Orden creada por Jefe de Taller para que diagnostico revise ruido en motor de Toyota Corolla ABC123.",
+            workshopChief.Id);
+
+        var chiefDiagnosticOrder2 = await EnsureServiceOrderAsync(
+            context,
+            "SEED-CHIEF-ORDER-DIAG-LAURA",
+            ghi789.Id,
+            ServiceOrderStatus.Created,
+            DateTime.UtcNow.AddHours(-10),
+            "Orden creada por Jefe de Taller para diagnostico preventivo de Mazda CX-30 GHI789.",
+            workshopChief.Id);
+
         await RefreshServiceOrderTotalAsync(context, order1.Id);
         await RefreshServiceOrderTotalAsync(context, order2.Id);
         await RefreshServiceOrderTotalAsync(context, order3.Id);
+        await RefreshServiceOrderTotalAsync(context, order4.Id);
+        await RefreshServiceOrderTotalAsync(context, order5.Id);
+        await RefreshServiceOrderTotalAsync(context, chiefDiagnosticOrder1.Id);
+        await RefreshServiceOrderTotalAsync(context, chiefDiagnosticOrder2.Id);
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order1.Id,
+            diagnosticMechanic.PersonId,
+            carlos.PersonId,
+            null,
+            AdditionalRequestStatus.PendingWorkshopChiefApproval,
+            AdditionalRequestType.Service,
+            "Reparación sistema eléctrico",
+            null,
+            null,
+            "SEED-REQ-CHIEF-ELECTRICAL",
+            "Durante el diagnostico se detectan variaciones de voltaje en alternador y cableado principal. Se solicita aprobacion tecnica para reparar sistema electrico.",
+            null,
+            null);
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order2.Id,
+            maintenanceMechanic.PersonId,
+            carlos.PersonId,
+            null,
+            AdditionalRequestStatus.PendingWorkshopChiefApproval,
+            AdditionalRequestType.Part,
+            null,
+            "REF-FIL-AIR",
+            1,
+            "SEED-REQ-CHIEF-AIR-FILTER",
+            "El filtro de aire presenta saturacion alta y afecta el flujo de admision. Se solicita autorizacion para reemplazarlo.",
+            null,
+            null);
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order4.Id,
+            brakesMechanic.PersonId,
+            laura.PersonId,
+            workshopChief.PersonId,
+            AdditionalRequestStatus.PendingClientApproval,
+            AdditionalRequestType.ServiceWithParts,
+            "Cambio de pastillas de freno",
+            "REF-PAS-FRE-DEL",
+            1,
+            "SEED-REQ-CLIENT-BRAKES",
+            "La prueba de ruta confirma vibracion al frenar y desgaste en pastillas delanteras. Se requiere cambio para entregar el vehiculo seguro.",
+            "Aprobado tecnicamente. Enviar al cliente para autorizacion.",
+            null);
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order4.Id,
+            electricMechanic.PersonId,
+            laura.PersonId,
+            workshopChief.PersonId,
+            AdditionalRequestStatus.PendingClientApproval,
+            AdditionalRequestType.Service,
+            "Revisión eléctrica",
+            null,
+            null,
+            "SEED-REQ-LAURA-ELECTRICAL",
+            "Se recomienda una revision electrica complementaria por variacion intermitente en luces del tablero.",
+            "Aprobado por jefe de taller. Solicitar autorizacion de Laura antes de continuar.",
+            null);
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order4.Id,
+            maintenanceMechanic.PersonId,
+            laura.PersonId,
+            workshopChief.PersonId,
+            AdditionalRequestStatus.ApprovedByClient,
+            AdditionalRequestType.Part,
+            null,
+            "REF-FIL-AIR",
+            1,
+            "SEED-MSG-LAURA-APPROVED-FILTER",
+            "Mensaje para cliente: filtro de aire recomendado por mantenimiento preventivo.",
+            "Aprobado por jefe de taller. El repuesto mejora el flujo de admision.",
+            "Aprobado por Laura para continuar con el mantenimiento.");
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order5.Id,
+            maintenanceMechanic.PersonId,
+            carlos.PersonId,
+            workshopChief.PersonId,
+            AdditionalRequestStatus.PendingClientApproval,
+            AdditionalRequestType.ServiceWithParts,
+            "Cambio de filtro de aire",
+            "REF-FIL-AIR",
+            1,
+            "SEED-REQ-CARLOS-AIR-FILTER",
+            "El filtro de aire del Onix esta saturado y afecta el rendimiento. Se solicita aprobacion del cliente para reemplazo.",
+            "Aprobado tecnicamente por jefe de taller. Enviar a Carlos para aprobacion.",
+            null);
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order5.Id,
+            brakesMechanic.PersonId,
+            carlos.PersonId,
+            workshopChief.PersonId,
+            AdditionalRequestStatus.PendingClientApproval,
+            AdditionalRequestType.Part,
+            null,
+            "REF-LIQ-FRE",
+            1,
+            "SEED-REQ-CARLOS-BRAKE-FLUID",
+            "Nivel y color del liquido de frenos fuera de rango recomendado. Se solicita autorizacion para cambio.",
+            "Aprobado por jefe de taller. Pendiente decision del cliente.",
+            null);
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order5.Id,
+            diagnosticMechanic.PersonId,
+            carlos.PersonId,
+            workshopChief.PersonId,
+            AdditionalRequestStatus.RejectedByClient,
+            AdditionalRequestType.Service,
+            "Reparación sistema eléctrico",
+            null,
+            null,
+            "SEED-MSG-CARLOS-REJECTED-ELECTRICAL",
+            "Mensaje para cliente: se sugirio reparacion electrica preventiva por lectura de voltaje irregular.",
+            "Aprobado tecnicamente, pero requiere autorizacion del cliente.",
+            "Carlos rechazo esta solicitud por ahora.");
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order1.Id,
+            diagnosticMechanic.PersonId,
+            carlos.PersonId,
+            null,
+            AdditionalRequestStatus.PendingWorkshopChiefApproval,
+            AdditionalRequestType.Service,
+            "Diagnóstico general",
+            null,
+            null,
+            "SEED-DIAG-MYREQ-PENDING-SCAN",
+            "Solicitud de diagnostico: se requiere escaneo avanzado por codigo intermitente en sensor de oxigeno.",
+            null,
+            null);
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order2.Id,
+            diagnosticMechanic.PersonId,
+            carlos.PersonId,
+            workshopChief.PersonId,
+            AdditionalRequestStatus.PendingClientApproval,
+            AdditionalRequestType.ServiceWithParts,
+            "Reparación sistema eléctrico",
+            "REF-BUJ-STD",
+            2,
+            "SEED-DIAG-MYREQ-CLIENT-ELECTRICAL",
+            "Solicitud de diagnostico: lectura electrica irregular recomienda ajuste de cableado y reemplazo de bujias.",
+            "Aprobado por Jefe de Taller. Enviar a Carlos para autorizacion.",
+            null);
+
+        await EnsureAdditionalServiceRequestAsync(
+            context,
+            order3.Id,
+            diagnosticMechanic.PersonId,
+            laura.PersonId,
+            workshopChief.PersonId,
+            AdditionalRequestStatus.RejectedByWorkshopChief,
+            AdditionalRequestType.Service,
+            "Revisión eléctrica",
+            null,
+            null,
+            "SEED-DIAG-MYREQ-REJECTED-ELECTRICAL",
+            "Solicitud de diagnostico: prueba adicional electrica completa para descartar consumo parasitario.",
+            "Rechazado por Jefe de Taller: con la revision actual es suficiente.",
+            null);
 
         await EnsureMechanicDiagnosticAsync(
             context,
@@ -1242,6 +1463,81 @@ public static class DevelopmentDataSeeder
         diagnostic.ReviewedAt = reviewed ? DateTime.UtcNow.AddDays(-1) : null;
     }
 
+    private static async Task EnsureAdditionalServiceRequestAsync(
+        AppDbContext context,
+        int serviceOrderId,
+        int mechanicPersonId,
+        int clientPersonId,
+        int? workshopChiefPersonId,
+        AdditionalRequestStatus status,
+        AdditionalRequestType requestType,
+        string? workshopServiceName,
+        string? partCode,
+        int? quantity,
+        string seedCode,
+        string technicalComment,
+        string? workshopChiefComment,
+        string? clientComment)
+    {
+        var request = await context.AdditionalServiceRequests
+            .AsTracking()
+            .FirstOrDefaultAsync(x => x.ServiceOrderId == serviceOrderId && x.TechnicalComment.Contains(seedCode));
+
+        var workshopService = string.IsNullOrWhiteSpace(workshopServiceName)
+            ? null
+            : await context.WorkshopServices.AsTracking().FirstOrDefaultAsync(x => x.Name == workshopServiceName);
+        var part = string.IsNullOrWhiteSpace(partCode)
+            ? null
+            : await context.Parts.AsTracking().FirstOrDefaultAsync(x => x.Code == partCode);
+
+        var effectiveQuantity = quantity ?? (part is null ? null : 1);
+        var estimatedPrice = 0m;
+        if (workshopService is not null)
+        {
+            estimatedPrice += workshopService.FinalPrice;
+        }
+
+        if (part is not null && effectiveQuantity.HasValue)
+        {
+            estimatedPrice += part.UnitPrice * effectiveQuantity.Value;
+        }
+
+        if (estimatedPrice <= 0m)
+        {
+            estimatedPrice = 50000m;
+        }
+
+        var reviewedByChief = status is not AdditionalRequestStatus.PendingWorkshopChiefApproval and not AdditionalRequestStatus.Draft;
+        var reviewedByClient = status is AdditionalRequestStatus.ApprovedByClient or AdditionalRequestStatus.RejectedByClient or AdditionalRequestStatus.AddedToOrder;
+
+        if (request is null)
+        {
+            request = new AdditionalServiceRequest
+            {
+                ServiceOrderId = serviceOrderId,
+                CreatedAt = DateTime.UtcNow.AddDays(-2)
+            };
+            await context.AdditionalServiceRequests.AddAsync(request);
+        }
+
+        request.MechanicPersonId = mechanicPersonId;
+        request.ClientPersonId = clientPersonId;
+        request.WorkshopChiefPersonId = reviewedByChief ? workshopChiefPersonId : null;
+        request.Status = status;
+        request.RequestType = requestType;
+        request.WorkshopServiceId = workshopService?.Id;
+        request.PartId = part?.Id;
+        request.Quantity = effectiveQuantity;
+        request.TechnicalComment = $"{technicalComment} [{seedCode}]";
+        request.WorkshopChiefComment = workshopChiefComment;
+        request.ClientComment = clientComment;
+        request.EstimatedPrice = estimatedPrice;
+        request.WorkshopChiefReviewedAt = reviewedByChief ? DateTime.UtcNow.AddDays(-1) : null;
+        request.ClientReviewedAt = reviewedByClient ? DateTime.UtcNow : null;
+        request.AddedToOrderAt = status == AdditionalRequestStatus.AddedToOrder ? DateTime.UtcNow : null;
+        request.IsActive = true;
+    }
+
     private static async Task<Invoice> EnsureInvoiceAsync(AppDbContext context, int serviceOrderId, string statusName, DateTime invoiceDate)
     {
         var status = await context.InvoiceStatuses.FirstAsync(x => x.Name == statusName);
@@ -1317,6 +1613,65 @@ public static class DevelopmentDataSeeder
         await context.PaymentMethods.AddAsync(method);
         await context.SaveChangesAsync();
         return method;
+    }
+
+    private static async Task SeedAuditTrailAsync(AppDbContext context)
+    {
+        var admin = await GetRequiredUserByEmailAsync(context, "admin@autotaller.com");
+        var receptionist = await GetRequiredUserByEmailAsync(context, "recepcionista@autotaller.com");
+        var warehouseChief = await GetRequiredUserByEmailAsync(context, "jefebodega@autotaller.com");
+        var inventoryManager = await GetRequiredUserByEmailAsync(context, "jefealmacen@autotaller.com");
+        var workshopChief = await GetRequiredUserByEmailAsync(context, "jefe.mecanicos@autotaller.com");
+
+        var createActionId = await EnsureAuditActionTypeAsync(context, "CREATE");
+        var updateActionId = await EnsureAuditActionTypeAsync(context, "UPDATE");
+
+        await EnsureAuditAsync(context, admin.Id, createActionId, "Users", admin.Id, "Seeder: creación de usuarios base del sistema.", DateTime.UtcNow.AddDays(-5));
+        await EnsureAuditAsync(context, receptionist.Id, createActionId, "ServiceOrders", 1, "Seeder: registro de orden de servicio inicial.", DateTime.UtcNow.AddDays(-4));
+        await EnsureAuditAsync(context, workshopChief.Id, updateActionId, "MechanicAssignments", 1, "Seeder: asignación de mecánico a servicio.", DateTime.UtcNow.AddDays(-3));
+        await EnsureAuditAsync(context, warehouseChief.Id, createActionId, "StockSubmissions", 1, "Seeder: envío de stock desde bodega.", DateTime.UtcNow.AddDays(-2));
+        await EnsureAuditAsync(context, inventoryManager.Id, updateActionId, "InventoryHistory", 1, "Seeder: aprobación de inventario inicial.", DateTime.UtcNow.AddDays(-1));
+    }
+
+    private static async Task<int> EnsureAuditActionTypeAsync(AppDbContext context, string name)
+    {
+        var actionType = await context.AuditActionTypes.AsTracking().FirstOrDefaultAsync(x => x.Name == name);
+        if (actionType is not null)
+        {
+            return actionType.Id;
+        }
+
+        actionType = new AuditActionType { Name = name };
+        await context.AuditActionTypes.AddAsync(actionType);
+        await context.SaveChangesAsync();
+        return actionType.Id;
+    }
+
+    private static async Task EnsureAuditAsync(AppDbContext context, int userId, int actionTypeId, string entity, int recordId, string description, DateTime createdAt)
+    {
+        var exists = await context.Audits.AnyAsync(x =>
+            x.UserId == userId &&
+            x.AuditActionTypeId == actionTypeId &&
+            x.AffectedEntity == entity &&
+            x.AffectedRecordId == recordId &&
+            x.Description == description);
+
+        if (exists)
+        {
+            return;
+        }
+
+        await context.Audits.AddAsync(new Audit
+        {
+            UserId = userId,
+            AuditActionTypeId = actionTypeId,
+            AffectedEntity = entity,
+            AffectedRecordId = recordId,
+            Description = description,
+            CreatedAt = createdAt
+        });
+
+        await context.SaveChangesAsync();
     }
 
     private static async Task<User> GetRequiredUserByEmailAsync(AppDbContext context, string email)

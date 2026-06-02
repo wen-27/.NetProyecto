@@ -623,6 +623,99 @@ public sealed class AdminController : ControllerBase
         return NoContent();
     }
 
+    [HttpPut("users/{id:int}/roles")]
+    public async Task<IActionResult> UpdateUserRoles(int id, UpdateAdminUserRolesRequest request, CancellationToken ct)
+    {
+        var user = await _context.Users.AsTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
+        if (user is null)
+        {
+            return NotFound(new { message = "El usuario no existe." });
+        }
+
+        var roleNames = (request.RoleNames ?? Array.Empty<string>())
+            .Select(NormalizePanelRoleName)
+            .Where(roleName => roleName is not null)
+            .Select(roleName => roleName!)
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+
+        if (roleNames.Length == 0)
+        {
+            return BadRequest(new { message = "El usuario debe tener al menos un rol." });
+        }
+
+        var selectedRoles = await _context.Roles
+            .AsTracking()
+            .Where(role => roleNames.Contains(role.RoleName))
+            .ToListAsync(ct);
+
+        var missingRoleNames = roleNames.Except(selectedRoles.Select(role => role.RoleName)).ToArray();
+        foreach (var roleName in missingRoleNames)
+        {
+            var role = new Domain.Entities.Role { RoleName = roleName, IsActive = true };
+            await _context.Roles.AddAsync(role, ct);
+            selectedRoles.Add(role);
+        }
+
+        if (missingRoleNames.Length > 0)
+        {
+            await _context.SaveChangesAsync(ct);
+        }
+
+        var personRoles = await _context.PersonRoles
+            .AsTracking()
+            .Include(personRole => personRole.Role)
+            .Where(personRole => personRole.PersonId == user.PersonId)
+            .ToListAsync(ct);
+
+        foreach (var personRole in personRoles.Where(personRole => NormalizePanelRoleName(personRole.Role.RoleName) is not null))
+        {
+            personRole.IsActive = roleNames.Contains(personRole.Role.RoleName);
+        }
+
+        foreach (var role in selectedRoles)
+        {
+            var personRole = personRoles.FirstOrDefault(x => x.RoleId == role.Id);
+            if (personRole is null)
+            {
+                await _context.PersonRoles.AddAsync(new Domain.Entities.PersonRole
+                {
+                    PersonId = user.PersonId,
+                    RoleId = role.Id,
+                    IsActive = true
+                }, ct);
+            }
+            else
+            {
+                personRole.IsActive = true;
+            }
+        }
+
+        await _context.SaveChangesAsync(ct);
+        return NoContent();
+    }
+
+    private static string? NormalizePanelRoleName(string? roleName)
+    {
+        if (string.IsNullOrWhiteSpace(roleName))
+        {
+            return null;
+        }
+
+        var normalized = roleName.Trim();
+        return normalized switch
+        {
+            "Admin" => "Admin",
+            "Receptionist" => "Receptionist",
+            "Mechanic" => "Mechanic",
+            "Client" => "Client",
+            "WorkshopChief" => "WorkshopChief",
+            "WarehouseChief" => "WarehouseChief",
+            "InventoryManager" => "InventoryManager",
+            _ => null
+        };
+    }
+
     private Task<int> CountPeopleByRoleAsync(string roleName, CancellationToken ct)
     {
         return _context.PersonRoles
@@ -661,3 +754,4 @@ public sealed record CreateAdminUserRequest(
     bool IsActive);
 
 public sealed record ChangeAdminUserStatusRequest(bool IsActive);
+public sealed record UpdateAdminUserRolesRequest(string[]? RoleNames);
