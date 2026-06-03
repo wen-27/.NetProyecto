@@ -1,8 +1,27 @@
-# AutoTallerManager Backend
+# 🚗 AutoTallerManager Backend
 
 Backend ASP.NET Core con arquitectura por proyectos `Api`, `Application`, `Domain` e `Infrastructure`, EF Core y MySQL.
 
-## Roles disponibles
+## 📚 Documentacion importante
+
+- Documentacion completa del proyecto: [docs/PROYECTO_COMPLETO.md](docs/PROYECTO_COMPLETO.md)
+- Credenciales de prueba: [README-CREDENCIALES.md](README-CREDENCIALES.md)
+- Repo frontend: [wen-27/.netFrontend.git](https://github.com/wen-27/.netFrontend.git)
+- Swagger local: `http://localhost:5213/swagger`
+- Frontend local: `http://localhost:5173`
+
+## ⚠️ Importante antes de ejecutar
+
+- MySQL debe estar encendido.
+- Configura `ConnectionStrings:MySql` y `Jwt:Key` con `dotnet user-secrets` o variables de entorno.
+- No guardar password real de MySQL ni `Jwt:Key` real en `appsettings.json`.
+- En macOS se recomienda usar `server=127.0.0.1` en vez de `server=localhost`.
+- Al correr en `Development`, se ejecutan seeders automaticamente.
+- Si recibes `401`, falta token o expiro.
+- Si recibes `403`, el rol del usuario no tiene permiso.
+- Si recibes `429`, se activo el rate limit.
+
+## 👥 Roles disponibles
 
 - `Admin`
 - `Receptionist`
@@ -14,7 +33,7 @@ Backend ASP.NET Core con arquitectura por proyectos `Api`, `Application`, `Domai
 
 En la interfaz pueden mostrarse en español, pero el backend usa estos nombres exactos para JWT y autorización.
 
-## Usuarios seed de desarrollo
+## 🔑 Usuarios seed de desarrollo
 
 Estos usuarios son solo para ambiente de desarrollo. La contraseña seed comun es `DevPass123!` y queda hasheada en la base de datos.
 
@@ -31,29 +50,29 @@ Estos usuarios son solo para ambiente de desarrollo. La contraseña seed comun e
 - `jefebodega@autotaller.com`
 - `jefealmacen@autotaller.com`
 
-## Flujos implementados
+## 🧭 Flujos implementados
 
-### Solicitudes técnicas adicionales
+### 🛠️ Solicitudes técnicas adicionales
 
 El mecánico asignado crea una solicitud adicional para una orden. La solicitud inicia en `PendingWorkshopChiefApproval`. El Jefe de Taller puede aprobarla y enviarla al cliente como `PendingClientApproval`, o rechazarla como `RejectedByWorkshopChief`. El cliente dueño de la orden puede aprobar o rechazar. Al aprobar, el backend valida stock, añade el servicio o repuesto a la orden y pasa la solicitud a `AddedToOrder`.
 
-### Aprobación del cliente
+### ✅ Aprobación del cliente
 
 El cliente solo puede consultar sus propias órdenes, aprobaciones y mensajes. Las solicitudes rechazadas por el Jefe de Taller no se exponen al cliente.
 
-### Bodega y almacén
+### 📦 Bodega y almacén
 
 El Jefe de Bodega crea `StockSubmission`, calcula precio de venta y envía a revisión. El Jefe de Almacén aprueba o rechaza. Al aprobar, se crea o actualiza el repuesto oficial (`Part`) y se registra historial de inventario.
 
-### Inventario oficial
+### 🧾 Inventario oficial
 
 El inventario oficial solo cambia cuando `InventoryManager` aprueba una solicitud de stock. El flujo registra la decisión y el movimiento en `InventoryHistory`.
 
-### Pagos por recepción
+### 💳 Pagos por recepción
 
 El cliente registra pagos de facturas propias. El pago queda en `PendingReceptionVerification`. `Receptionist` o `Admin` aprueba o rechaza. Al aprobar se actualiza factura, orden y fecha de entrega.
 
-## Fórmulas
+## 🧮 Fórmulas
 
 Precio de producto:
 
@@ -69,9 +88,9 @@ Valor mano de obra = subtotal repuestos * porcentaje mano de obra / 100
 Precio final = subtotal repuestos + valor mano de obra
 ```
 
-## Endpoints nuevos
+## 🌐 Endpoints nuevos
 
-### Mecánico
+### 🔧 Mecánico
 
 - `GET /api/mechanic/orders`
 - `GET /api/mechanic/orders/{orderId}`
