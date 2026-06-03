@@ -1,3 +1,5 @@
+// Responsabilidad: Servicio de seguridad encargado de crear o validar elementos relacionados con autenticacion y autorizacion.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;

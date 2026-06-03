@@ -1,3 +1,5 @@
+// Responsabilidad: Configuracion de Entity Framework Core para mapear OrderService a la base de datos: tabla, claves, columnas, relaciones e indices.
+// Nota de mantenimiento: Cambios aqui pueden modificar el modelo relacional y requerir una migracion.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Domain.Enums;
@@ -15,7 +17,7 @@ public class OrderServiceConfiguration : IEntityTypeConfiguration<Domain.Entitie
         entity.Property(x => x.WorkPerformed).HasColumnType("text");
         entity.Property(x => x.LaborCost).HasPrecision(10, 2).IsRequired();
         entity.Property(x => x.Price).HasPrecision(18, 2).IsRequired();
-        entity.Property(x => x.Status).HasConversion<int>().HasDefaultValue(OrderServiceStatus.Pending).IsRequired();
+        entity.Property(x => x.Status).HasConversion<int>().IsRequired();
         entity.HasOne(x => x.ServiceOrder).WithMany(x => x.OrderServices).HasForeignKey(x => x.ServiceOrderId).OnDelete(DeleteBehavior.Restrict);
         entity.HasOne(x => x.ServiceType).WithMany(x => x.OrderServices).HasForeignKey(x => x.ServiceTypeId).OnDelete(DeleteBehavior.Restrict);
         entity.HasOne(x => x.WorkshopService).WithMany(x => x.OrderServices).HasForeignKey(x => x.WorkshopServiceId).OnDelete(DeleteBehavior.Restrict);

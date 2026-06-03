@@ -1,3 +1,5 @@
+// Responsabilidad: Middleware de ASP.NET Core que participa en la tuberia HTTP para manejar una preocupacion transversal antes o despues del controlador.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using System.Security.Claims;
 using Domain.Entities;
 using Infrastructure.Context;

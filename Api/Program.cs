@@ -1,3 +1,5 @@
+// Responsabilidad: Punto de entrada de la API; registra servicios, middlewares, Swagger, seguridad, CORS, rate limit y rutas HTTP.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Api.Extensions;
 using Api.Middleware;
 using Application;
@@ -27,6 +29,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseCors(CorsServiceExtensions.PolicyName);
 app.UseRateLimiter();

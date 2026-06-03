@@ -1,3 +1,5 @@
+// Responsabilidad: Implementacion de repositorio para persistencia y consultas de GenericRepository; encapsula acceso a DbContext y detalles de EF Core.
+// Nota de mantenimiento: Debe evitar reglas de negocio; su responsabilidad principal es consultar y persistir datos.
 using System.Linq.Expressions;
 using Application.Abstractions;
 using Domain.Common;

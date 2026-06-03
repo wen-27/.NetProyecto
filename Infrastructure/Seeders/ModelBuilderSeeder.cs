@@ -1,3 +1,5 @@
+// Responsabilidad: Seeder de datos iniciales/desarrollo; prepara catalogos, usuarios y escenarios necesarios para probar la API localmente.
+// Nota de mantenimiento: Debe ser idempotente para poder ejecutarse varias veces en desarrollo sin duplicar informacion.
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 

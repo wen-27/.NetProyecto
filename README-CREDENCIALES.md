@@ -63,6 +63,23 @@ Body recomendado:
 
 ## Comandos para levantar
 
+Configura primero los secretos locales del backend. Estos valores no deben guardarse en `appsettings.json`.
+
+Opcion recomendada en desarrollo:
+
+```bash
+cd /Users/wen/.NetProyecto-1/Api
+dotnet user-secrets set "ConnectionStrings:MySql" "server=localhost;port=3306;database=AutoTallerManager;user=TU_USUARIO;password=TU_PASSWORD;"
+dotnet user-secrets set "Jwt:Key" "TU_CLAVE_LOCAL_DE_MINIMO_32_CARACTERES"
+```
+
+Alternativa con variables de entorno:
+
+```bash
+export ConnectionStrings__MySql="server=localhost;port=3306;database=AutoTallerManager;user=TU_USUARIO;password=TU_PASSWORD;"
+export Jwt__Key="TU_CLAVE_LOCAL_DE_MINIMO_32_CARACTERES"
+```
+
 Backend:
 
 ```bash
@@ -79,9 +96,15 @@ pnpm run dev
 
 ## Reiniciar base de datos local y volver a sembrar
 
-Usa esto solo en ambiente de desarrollo. `database drop` elimina la base de datos local configurada en `Api/appsettings.json`, por lo que perderas los datos guardados manualmente.
+Usa esto solo en ambiente de desarrollo. `database drop` elimina la base de datos local configurada por `ConnectionStrings:MySql`, por lo que perderas los datos guardados manualmente.
 
 Ejecuta desde la raiz del repositorio (`/Users/wen/.NetProyecto-1`):
+
+Si usas `dotnet ef`, exporta la cadena de conexion para que el factory de EF pueda leerla:
+
+```bash
+export ConnectionStrings__MySql="server=localhost;port=3306;database=AutoTallerManager;user=TU_USUARIO;password=TU_PASSWORD;"
+```
 
 ```bash
 dotnet ef database drop --project Infrastructure/Infrastructure.csproj --startup-project Api/Api.csproj
@@ -108,3 +131,4 @@ dotnet tool update --global dotnet-ef
 Si cambias credenciales en el seeder, reinicia el backend en ambiente `Development` para que se reparen los hashes de los usuarios existentes.
 
 Si una cuenta no deja entrar desde la interfaz pero si entra desde Swagger, borra el token/sesion del navegador y vuelve a iniciar sesion.
+ necesito que tu me realices una prueba de endpoint por endpoint para saber que todos los endpoint funcionan bien y me haces ub kistadi de cuabtos nataron 

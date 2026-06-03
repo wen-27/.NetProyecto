@@ -1,3 +1,5 @@
+// Responsabilidad: Configuracion de Entity Framework Core para mapear MechanicDiagnostic a la base de datos: tabla, claves, columnas, relaciones e indices.
+// Nota de mantenimiento: Cambios aqui pueden modificar el modelo relacional y requerir una migracion.
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -11,7 +13,7 @@ public class MechanicDiagnosticConfiguration : IEntityTypeConfiguration<Domain.E
         entity.ToTable("MechanicDiagnostics");
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("MechanicDiagnosticId");
-        entity.Property(x => x.Status).HasConversion<int>().HasDefaultValue(MechanicDiagnosticStatus.PendingWorkshopChiefApproval).IsRequired();
+        entity.Property(x => x.Status).HasConversion<int>().IsRequired();
         entity.Property(x => x.Findings).HasColumnType("text").IsRequired();
         entity.Property(x => x.RecommendedWork).HasColumnType("text").IsRequired();
         entity.Property(x => x.WorkshopChiefComment).HasColumnType("text");

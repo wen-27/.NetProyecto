@@ -1,3 +1,5 @@
+// Responsabilidad: Servicio de Infrastructure que implementa flujos de negocio con acceso a persistencia y dependencias tecnicas.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Application.Abstractions.OperationalWorkflow;
 using Application.DTOs;
 using Domain.Entities;

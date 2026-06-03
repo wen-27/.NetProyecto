@@ -1,3 +1,5 @@
+// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con Stock. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
+// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Domain.Entities;
 using Infrastructure.Context;
 using Microsoft.AspNetCore.Authorization;
@@ -22,14 +24,14 @@ public sealed class StockController : ControllerBase
     public async Task<IActionResult> GetDashboard(CancellationToken ct)
     {
         var parts = await PartsQuery().ToListAsync(ct);
-        var movements = await MovementsQuery().Take(10).ToListAsync(ct);
+        var movements = await MovementsBaseQuery().Take(10).ToListAsync(ct);
         return Ok(new
         {
             totalParts = parts.Count,
             availableParts = parts.Count(x => x.Stock > x.MinimumStock),
             lowStockParts = parts.Count(x => x.Stock > 0 && x.Stock <= x.MinimumStock),
             outOfStockParts = parts.Count(x => x.Stock <= 0),
-            recentMovements = movements
+            recentMovements = movements.Select(ToStockMovementDto)
         });
     }
 
@@ -86,13 +88,18 @@ public sealed class StockController : ControllerBase
     [HttpGet("movements")]
     public async Task<IActionResult> GetMovements(CancellationToken ct)
     {
-        return Ok(await MovementsQuery().ToListAsync(ct));
+        var movements = await MovementsBaseQuery().ToListAsync(ct);
+        return Ok(movements.Select(ToStockMovementDto));
     }
 
     [HttpGet("parts/{id:int}/movements")]
     public async Task<IActionResult> GetPartMovements(int id, CancellationToken ct)
     {
-        return Ok(await MovementsQuery().Where(x => x.PartId == id).ToListAsync(ct));
+        var movements = await MovementsBaseQuery()
+            .Where(x => x.PartId == id)
+            .ToListAsync(ct);
+
+        return Ok(movements.Select(ToStockMovementDto));
     }
 
     [HttpPost("movements/in")]
@@ -109,22 +116,11 @@ public sealed class StockController : ControllerBase
             .Include(x => x.PartCategory)
             .Include(x => x.PartBrand);
 
-    private IQueryable<StockMovementDto> MovementsQuery() =>
+    private IQueryable<InventoryHistory> MovementsBaseQuery() =>
         _context.InventoryHistory
             .AsNoTracking()
             .Include(x => x.Part)
-            .OrderByDescending(x => x.CreatedAt)
-            .Select(x => new StockMovementDto(
-                x.Id,
-                x.PartId,
-                x.Part.Code,
-                x.Part.Description,
-                x.QuantityChange,
-                x.ResultingStock,
-                x.UnitPrice,
-                x.Action,
-                x.Comment,
-                x.CreatedAt));
+            .OrderByDescending(x => x.CreatedAt);
 
     private async Task<IActionResult> RegisterMovementAsync(StockMovementRequest request, bool isEntry, CancellationToken ct)
     {
@@ -211,6 +207,19 @@ public sealed class StockController : ControllerBase
             part.IsActive,
             status);
     }
+
+    private static StockMovementDto ToStockMovementDto(InventoryHistory movement) =>
+        new(
+            movement.Id,
+            movement.PartId,
+            movement.Part.Code,
+            movement.Part.Description,
+            movement.QuantityChange,
+            movement.ResultingStock,
+            movement.UnitPrice,
+            movement.Action,
+            movement.Comment,
+            movement.CreatedAt);
 }
 
 public sealed record StockMovementRequest(int PartId, int Quantity, string? Comment);

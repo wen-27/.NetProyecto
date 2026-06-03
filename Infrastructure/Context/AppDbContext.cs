@@ -1,3 +1,5 @@
+// Responsabilidad: Contexto de Entity Framework Core o fabrica de diseno; define el acceso principal a la base de datos y sus DbSet.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Domain.Entities;
 using Infrastructure.Seeders;
 using Microsoft.EntityFrameworkCore;

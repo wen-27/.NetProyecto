@@ -1,3 +1,5 @@
+// Responsabilidad: Utilidad de paginacion que normaliza parametros y respuestas de listados.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 namespace Application.Common.Pagination;
 
 public sealed record PaginationRequest(int Page = 1, int PageSize = 10, string? Search = null)

@@ -1,3 +1,5 @@
+// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con Crud. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
+// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Application.UseCase.CommonCrud;
 using Domain.Common;
 using Mapster;
@@ -48,7 +50,8 @@ public abstract class CrudController<TEntity, TCreateRequest, TUpdateRequest, TR
     [HttpPost]
     public async Task<IActionResult> Create(TCreateRequest request, CancellationToken ct)
     {
-        var entity = request.Adapt<TEntity>();
+        var entity = request.Adapt<TEntity>()
+            ?? throw new InvalidOperationException($"No se pudo mapear {typeof(TCreateRequest).Name} a {typeof(TEntity).Name}.");
         var id = await Sender.Send(new CreateEntity<TEntity>(entity), ct);
         return Created($"{Request.Path}/{id}", new { id });
     }
@@ -57,7 +60,8 @@ public abstract class CrudController<TEntity, TCreateRequest, TUpdateRequest, TR
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, TUpdateRequest request, CancellationToken ct)
     {
-        var entity = request.Adapt<TEntity>();
+        var entity = request.Adapt<TEntity>()
+            ?? throw new InvalidOperationException($"No se pudo mapear {typeof(TUpdateRequest).Name} a {typeof(TEntity).Name}.");
         await Sender.Send(new UpdateEntity<TEntity>(id, entity), ct);
         return NoContent();
     }

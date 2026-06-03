@@ -1,3 +1,5 @@
+// Extension de configuracion usada para mantener Program.cs legible y centralizar registro de servicios o politicas de la API.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -12,7 +14,7 @@ public static class RateLimitExtension
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
             options.AddFixedWindowLimiter("service-orders", limiter =>
             {
-                limiter.PermitLimit = 60;
+                limiter.PermitLimit = 15;
                 limiter.Window = TimeSpan.FromMinutes(1);
                 limiter.QueueLimit = 0;
                 limiter.AutoReplenishment = true;
@@ -20,7 +22,7 @@ public static class RateLimitExtension
 
             options.AddFixedWindowLimiter("parts", limiter =>
             {
-                limiter.PermitLimit = 30;
+                limiter.PermitLimit = 15;
                 limiter.Window = TimeSpan.FromMinutes(1);
                 limiter.QueueLimit = 0;
                 limiter.AutoReplenishment = true;
@@ -31,7 +33,7 @@ public static class RateLimitExtension
                     context.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
                     _ => new FixedWindowRateLimiterOptions
                     {
-                        PermitLimit = 100,
+                        PermitLimit = 15,
                         Window = TimeSpan.FromMinutes(1),
                         QueueLimit = 0,
                         AutoReplenishment = true

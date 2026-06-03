@@ -1,3 +1,5 @@
+// Responsabilidad: Contrato de Application que define lo que la capa de negocio necesita de servicios externos o persistencia para IServiceTypeRepository.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Domain.Entities;
 using Domain.ValueObjects.ServiceType;
 

@@ -1,3 +1,5 @@
+// Responsabilidad: Extension de configuracion usada para mantener Program.cs legible y centralizar registro de servicios o politicas de la API.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using System.Text;
 using Api.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -9,7 +11,12 @@ public static class AuthServiceExtensions
 {
     public static IServiceCollection AddJwtAuthService(this IServiceCollection services, IConfiguration configuration)
     {
-        var key = configuration["Jwt:Key"]!;
+        var key = configuration["Jwt:Key"];
+        if (string.IsNullOrWhiteSpace(key) || key.Length < 32)
+        {
+            throw new InvalidOperationException(
+                "Jwt:Key must be configured with a value of at least 32 characters. Use user-secrets locally or Jwt__Key in the environment.");
+        }
 
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

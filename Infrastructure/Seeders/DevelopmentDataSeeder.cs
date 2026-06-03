@@ -1,3 +1,5 @@
+// Responsabilidad: Seeder de datos iniciales/desarrollo; prepara catalogos, usuarios y escenarios necesarios para probar la API localmente.
+// Nota de mantenimiento: Debe ser idempotente para poder ejecutarse varias veces en desarrollo sin duplicar informacion.
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Enums.OrderStatus;
@@ -28,6 +30,7 @@ public static class DevelopmentDataSeeder
         await SeedWorkshopServicesAsync(context);
         await SeedOperationalScenarioAsync(context);
         await SeedInventoryManagerScenarioAsync(context);
+        await SeedEndpointSmokeDataAsync(context);
         await EnsureSeedPanelRolesAsync(context);
         await SeedAuditTrailAsync(context);
 
@@ -1959,6 +1962,129 @@ public static class DevelopmentDataSeeder
         payment.VerifiedByReceptionistPersonId = verifierPersonId;
         payment.VerifiedAt = verifierPersonId.HasValue ? paymentDate.AddHours(3) : null;
         payment.RejectedReason = rejectedReason;
+    }
+
+    private static async Task SeedEndpointSmokeDataAsync(AppDbContext context)
+    {
+        await EnsureSmokeOrderServicePartAsync(context);
+        await EnsureSmokePaymentCardAsync(context);
+        await EnsureSmokeUserRoleAsync(context);
+        await EnsureSmokeVehicleEntryInventoryAsync(context);
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task EnsureSmokeOrderServicePartAsync(AppDbContext context)
+    {
+        if (await context.OrderServiceParts.AnyAsync())
+        {
+            return;
+        }
+
+        var orderService = await context.OrderServices
+            .AsTracking()
+            .OrderBy(x => x.Id)
+            .FirstOrDefaultAsync();
+        var part = await context.Parts
+            .AsTracking()
+            .OrderBy(x => x.Id)
+            .FirstOrDefaultAsync();
+
+        if (orderService is null || part is null)
+        {
+            return;
+        }
+
+        await context.OrderServiceParts.AddAsync(new OrderServicePart
+        {
+            OrderServiceId = orderService.Id,
+            PartId = part.Id,
+            Quantity = 1,
+            AppliedUnitPrice = part.UnitPrice,
+            CustomerApproved = true,
+            ApprovalDate = DateTime.UtcNow.AddDays(-1)
+        });
+    }
+
+    private static async Task EnsureSmokePaymentCardAsync(AppDbContext context)
+    {
+        if (await context.PaymentCards.AnyAsync())
+        {
+            return;
+        }
+
+        var payment = await context.Payments
+            .AsTracking()
+            .OrderBy(x => x.Id)
+            .FirstOrDefaultAsync(x => x.PaymentCard == null);
+        if (payment is null)
+        {
+            return;
+        }
+
+        var cardType = await context.CardTypes.AsTracking().FirstOrDefaultAsync(x => x.Name == "Visa");
+        if (cardType is null)
+        {
+            cardType = new CardType { Name = "Visa" };
+            await context.CardTypes.AddAsync(cardType);
+            await context.SaveChangesAsync();
+        }
+
+        await context.PaymentCards.AddAsync(new PaymentCard
+        {
+            PaymentId = payment.Id,
+            CardTypeId = cardType.Id,
+            LastFourDigits = "4242",
+            CardHolder = "Cliente Demo",
+            AuthorizationCode = "AUTH-SEED-4242"
+        });
+    }
+
+    private static async Task EnsureSmokeUserRoleAsync(AppDbContext context)
+    {
+        var adminUser = await GetRequiredUserByEmailAsync(context, "admin@autotaller.com");
+        var adminRole = await context.Roles.FirstAsync(x => x.RoleName == "Admin");
+
+        var exists = await context.UserRoles.AnyAsync(x => x.UserId == adminUser.Id && x.RoleId == adminRole.Id);
+        if (exists)
+        {
+            return;
+        }
+
+        await context.UserRoles.AddAsync(new UserRole
+        {
+            UserId = adminUser.Id,
+            RoleId = adminRole.Id
+        });
+    }
+
+    private static async Task EnsureSmokeVehicleEntryInventoryAsync(AppDbContext context)
+    {
+        if (await context.VehicleEntryInventory.AnyAsync())
+        {
+            return;
+        }
+
+        var serviceOrder = await context.ServiceOrders
+            .AsTracking()
+            .OrderBy(x => x.Id)
+            .FirstOrDefaultAsync();
+        if (serviceOrder is null)
+        {
+            return;
+        }
+
+        await context.VehicleEntryInventory.AddAsync(new VehicleEntryInventory
+        {
+            ServiceOrderId = serviceOrder.Id,
+            HasScratches = true,
+            ScratchesDescription = "Rayón leve en puerta derecha registrado por seeder.",
+            HasToolbox = true,
+            ToolboxDescription = "Kit básico de herramientas entregado.",
+            OwnershipCardDelivered = true,
+            Observations = "Registro de inventario de entrada creado para pruebas de endpoints.",
+            RegisteredAt = DateTime.UtcNow.AddDays(-2)
+        });
     }
 
     private static async Task<PaymentMethod> EnsurePaymentMethodAsync(AppDbContext context, string name)

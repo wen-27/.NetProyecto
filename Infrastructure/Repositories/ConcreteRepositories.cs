@@ -1,3 +1,5 @@
+// Responsabilidad: Implementacion de repositorio para persistencia y consultas de ConcreteRepositories; encapsula acceso a DbContext y detalles de EF Core.
+// Nota de mantenimiento: Debe evitar reglas de negocio; su responsabilidad principal es consultar y persistir datos.
 using Application.Abstractions;
 using Domain.Entities;
 using Domain.ValueObjects.Audit;

@@ -1,3 +1,5 @@
+// Responsabilidad: Archivo de backend DependencyInjection; forma parte de la capa Infrastructure y participa en la estructura general de la aplicacion.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Application.Abstractions;
 using Application.Abstractions.OperationalWorkflow;
 using Infrastructure.Context;
@@ -5,6 +7,7 @@ using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Infrastructure.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -17,16 +20,24 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("MySql")!;
+        var connectionString = configuration.GetConnectionString("MySql");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException(
+                "ConnectionStrings:MySql must be configured. Use user-secrets locally or ConnectionStrings__MySql in the environment.");
+        }
 
         services.AddDbContext<AppDbContext>(options =>
         {
             options.UseMySql(
                 connectionString,
-                ServerVersion.AutoDetect(connectionString)
+                ServerVersion.AutoDetect(connectionString),
+                mySqlOptions => mySqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
             );
 
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            options.ConfigureWarnings(warnings =>
+                warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();

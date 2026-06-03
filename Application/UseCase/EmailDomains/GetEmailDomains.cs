@@ -1,3 +1,5 @@
+// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetEmailDomains. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
+// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;

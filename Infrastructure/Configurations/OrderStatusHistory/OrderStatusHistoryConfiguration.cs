@@ -1,3 +1,5 @@
+// Responsabilidad: Configuracion de Entity Framework Core para mapear OrderStatusHistory a la base de datos: tabla, claves, columnas, relaciones e indices.
+// Nota de mantenimiento: Cambios aqui pueden modificar el modelo relacional y requerir una migracion.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

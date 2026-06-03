@@ -1,3 +1,5 @@
+// Responsabilidad: Implementacion de Unit of Work para agrupar cambios de repositorios y confirmar transacciones de persistencia.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Application.Abstractions;
 using Infrastructure.Context;
 

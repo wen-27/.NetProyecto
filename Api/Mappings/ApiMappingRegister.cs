@@ -1,3 +1,5 @@
+// Responsabilidad: Registro de mapeos entre DTOs, entidades y respuestas para mantener las conversiones en un solo lugar.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Api.DTOs.Addresses;
 using Api.DTOs.AuditActionTypes;
 using Api.DTOs.Audits;

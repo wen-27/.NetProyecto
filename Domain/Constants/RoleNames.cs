@@ -1,3 +1,5 @@
+// Responsabilidad: Constantes de dominio compartidas por varias capas para evitar duplicacion de nombres y valores importantes.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 namespace Domain.Constants;
 
 public static class RoleNames

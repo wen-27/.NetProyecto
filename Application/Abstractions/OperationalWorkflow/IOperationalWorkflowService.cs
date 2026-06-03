@@ -1,3 +1,5 @@
+// Responsabilidad: Contrato de Application que define lo que la capa de negocio necesita de servicios externos o persistencia para IOperationalWorkflowService.
+// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Application.DTOs;
 
 namespace Application.Abstractions.OperationalWorkflow;
