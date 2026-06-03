@@ -33,16 +33,6 @@ Credenciales para probar los paneles del sistema en ambiente `Development`.
 | Jefe de stock / bodega | `WarehouseChief` | `jefebodega@autotaller.com` | `DevPass123!` | `/dashboard/warehouse-chief` o `/stock-manager` |
 | Jefe de inventario / almacen | `InventoryManager` | `jefealmacen@autotaller.com` | `DevPass123!` | `/dashboard/inventory-manager` o `/inventory-manager` |
 
-## Credenciales legacy
-
-Estas cuentas pueden existir en bases locales antiguas por `Api/appsettings.Development.json`. En `Development`, el login acepta `Password123*` para repararlas si ya estaban creadas:
-
-| Rol | Email | Password |
-| --- | --- | --- |
-| Admin legacy | `admin@mail.com` | `Password123*` |
-| Mechanic legacy | `mechanic@mail.com` | `Password123*` |
-| Receptionist legacy | `receptionist@mail.com` | `Password123*` |
-| Client legacy | `client@mail.com` | `Password123*` |
 
 ## Probar login en Swagger
 
