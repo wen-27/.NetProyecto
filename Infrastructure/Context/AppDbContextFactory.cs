@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Context;
 
@@ -9,11 +10,24 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
     // El contenido de este tipo se mantiene agrupado alrededor de una unica responsabilidad.
     public AppDbContext CreateDbContext(string[] args)
     {
-        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__MySql");
+        var apiSettingsPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "Api"));
+        if (!Directory.Exists(apiSettingsPath))
+        {
+            apiSettingsPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "../Api"));
+        }
+
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(apiSettingsPath)
+            .AddJsonFile("appsettings.json", optional: false)
+            .AddJsonFile("appsettings.Development.json", optional: true)
+            .AddEnvironmentVariables()
+            .Build();
+
+        var connectionString = configuration.GetConnectionString("MySql");
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             throw new InvalidOperationException(
-                "ConnectionStrings__MySql must be set before running design-time EF commands.");
+                "ConnectionStrings:MySql must be configured in Api/appsettings.json.");
         }
 
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
