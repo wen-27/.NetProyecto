@@ -1,9 +1,9 @@
-// Responsabilidad: Excepcion de aplicacion usada para expresar errores esperados del negocio sin acoplarlos a detalles HTTP.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 namespace Application.Common.Exceptions;
 
+// Tipo comun del dominio reutilizado por entidades u objetos de valor.
 public sealed class NotFoundException : Exception
 {
+    // El contenido de este tipo se mantiene agrupado alrededor de una unica responsabilidad.
     public NotFoundException(string message)
         : base(message)
     {

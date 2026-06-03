@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetServiceOrders. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;
@@ -8,8 +6,10 @@ using MediatR;
 
 namespace Application.UseCase.ServiceOrders;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetServiceOrderById.
 public sealed record GetServiceOrderById(int Id) : IRequest<ServiceOrderDto>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetServiceOrdersPaged.
 public sealed record GetServiceOrdersPaged(
     int Page = 1,
     int PageSize = 10,
@@ -21,8 +21,10 @@ public sealed record GetServiceOrdersPaged(
     int? StatusId = null,
     int? MechanicPersonId = null) : IRequest<PagedResult<ServiceOrderDto>>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetServiceOrderById.
 public sealed class GetServiceOrderByIdHandler : IRequestHandler<GetServiceOrderById, ServiceOrderDto>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IServiceOrderRepository _repository;
 
     public GetServiceOrderByIdHandler(IServiceOrderRepository repository) => _repository = repository;
@@ -34,8 +36,10 @@ public sealed class GetServiceOrderByIdHandler : IRequestHandler<GetServiceOrder
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetServiceOrdersPaged.
 public sealed class GetServiceOrdersPagedHandler : IRequestHandler<GetServiceOrdersPaged, PagedResult<ServiceOrderDto>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IServiceOrderRepository _repository;
 
     public GetServiceOrdersPagedHandler(IServiceOrderRepository repository) => _repository = repository;

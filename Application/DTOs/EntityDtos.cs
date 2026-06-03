@@ -1,59 +1,83 @@
-// Responsabilidad: Contrato de datos usado por la API para recibir o responder informacion de EntityDtos. Mantiene separada la forma publica del endpoint frente al modelo interno.
-// Nota de mantenimiento: Cambios aqui impactan el contrato consumido por frontend, Swagger y clientes externos.
 using Domain.Entities;
 
 namespace Application.DTOs;
 
+// DTO usado para transportar datos de AuditActionTypeDto entre la API y sus consumidores.
 public sealed record AuditActionTypeDto(int Id, string Name);
 
+// DTO usado para transportar datos de AuditDto entre la API y sus consumidores.
 public sealed record AuditDto(int Id, int UserId, int AuditActionTypeId, string AffectedEntity, int AffectedRecordId, string? Description, DateTime CreatedAt, string? Action, string? User);
 
+// DTO usado para transportar datos de CardTypeDto entre la API y sus consumidores.
 public sealed record CardTypeDto(int Id, string Name);
 
+// DTO usado para transportar datos de CityDto entre la API y sus consumidores.
 public sealed record CityDto(int Id, int DepartmentId, string Name);
 
+// DTO usado para transportar datos de DepartmentDto entre la API y sus consumidores.
 public sealed record DepartmentDto(int Id, string Name);
 
+// DTO usado para transportar datos de DocumentTypeDto entre la API y sus consumidores.
 public sealed record DocumentTypeDto(int Id, string Code, string Name);
 
+// DTO usado para transportar datos de EmailDomainDto entre la API y sus consumidores.
 public sealed record EmailDomainDto(int Id, string Domain);
 
+// DTO usado para transportar datos de InvoiceDto entre la API y sus consumidores.
 public sealed record InvoiceDto(int Id, int ServiceOrderId, int InvoiceStatusId, DateTime InvoiceDate, decimal LaborCost, decimal Total);
 
+// DTO usado para transportar datos de InvoiceDetailDto entre la API y sus consumidores.
 public sealed record InvoiceDetailDto(int Id, int InvoiceId, string Concept, int Quantity, decimal UnitPrice);
 
+// DTO usado para transportar datos de InvoiceStatusDto entre la API y sus consumidores.
 public sealed record InvoiceStatusDto(int Id, string Name);
 
+// DTO usado para transportar datos de OrderStatusDto entre la API y sus consumidores.
 public sealed record OrderStatusDto(int Id, string Name);
 
+// DTO usado para transportar datos de OrderStatusHistoryDto entre la API y sus consumidores.
 public sealed record OrderStatusHistoryDto(int Id, int ServiceOrderId, int? PreviousOrderStatusId, int NewOrderStatusId, int UserId, DateTime ChangeDate, string? Observation);
 
+// DTO usado para transportar datos de PartCategoryDto entre la API y sus consumidores.
 public sealed record PartCategoryDto(int Id, string Name);
 
+// DTO usado para transportar datos de PartBrandDto entre la API y sus consumidores.
 public sealed record PartBrandDto(int Id, string Name);
 
+// DTO usado para transportar datos de PartDto entre la API y sus consumidores.
 public sealed record PartDto(int Id, int PartCategoryId, int? PartBrandId, string Code, string Description, int Stock, int MinimumStock, decimal UnitPrice, bool IsActive);
 
+// DTO usado para transportar datos de PartPurchaseDto entre la API y sus consumidores.
 public sealed record PartPurchaseDto(int Id, int SupplierId, DateTime PurchaseDate, decimal Total);
 
+// DTO usado para transportar datos de PartPurchaseDetailDto entre la API y sus consumidores.
 public sealed record PartPurchaseDetailDto(int Id, int PartPurchaseId, int PartId, int Quantity, decimal UnitPrice);
 
+// DTO usado para transportar datos de PaymentDto entre la API y sus consumidores.
 public sealed record PaymentDto(int Id, int InvoiceId, int PaymentMethodId, int PaymentStatusId, DateTime PaymentDate, decimal Amount, string? Reference);
 
+// DTO usado para transportar datos de PaymentCardDto entre la API y sus consumidores.
 public sealed record PaymentCardDto(int Id, int PaymentId, int CardTypeId, string LastFourDigits, string CardHolder, string? AuthorizationCode);
 
+// DTO usado para transportar datos de PaymentMethodDto entre la API y sus consumidores.
 public sealed record PaymentMethodDto(int Id, string Name);
 
+// DTO usado para transportar datos de PaymentStatusDto entre la API y sus consumidores.
 public sealed record PaymentStatusDto(int Id, string Name);
 
+// DTO usado para transportar datos de PersonDto entre la API y sus consumidores.
 public sealed record PersonDto(int Id, string FirstNames, string LastNames, DateTime RegistrationDate);
 
+// DTO usado para transportar datos de PersonEmailDto entre la API y sus consumidores.
 public sealed record PersonEmailDto(int Id, int PersonId, int EmailDomainId, string EmailUser, bool IsPrimary);
 
+// DTO usado para transportar datos de PersonPhoneDto entre la API y sus consumidores.
 public sealed record PersonPhoneDto(int Id, int PersonId, int CountryId, string PhoneNumber, bool IsPrimary);
 
+// DTO usado para transportar datos de RoleDto entre la API y sus consumidores.
 public sealed record RoleDto(int Id, string RoleName);
 
+// DTO usado para transportar datos de ServiceOrderDto entre la API y sus consumidores.
 public sealed record ServiceOrderDto(
     int Id,
     int VehicleId,
@@ -67,26 +91,37 @@ public sealed record ServiceOrderDto(
     string? Status,
     string? GeneralDescription);
 
+// DTO usado para transportar datos de ServiceTypeDto entre la API y sus consumidores.
 public sealed record ServiceTypeDto(int Id, string Name, int EstimatedDays);
 
+// DTO usado para transportar datos de SupplierDto entre la API y sus consumidores.
 public sealed record SupplierDto(int Id, string Name, string? TaxId, string? Phone, string? Email, bool Status);
 
+// DTO usado para transportar datos de UserDto entre la API y sus consumidores.
 public sealed record UserDto(int Id, int PersonId, bool Status);
 
+// DTO usado para transportar datos de UserRoleDto entre la API y sus consumidores.
 public sealed record UserRoleDto(int UserId, int RoleId);
 
+// DTO usado para transportar datos de VehicleBrandDto entre la API y sus consumidores.
 public sealed record VehicleBrandDto(int Id, string BrandName);
 
+// DTO usado para transportar datos de VehicleDto entre la API y sus consumidores.
 public sealed record VehicleDto(int Id, int ModelId, int VehicleTypeId, string Plate, string Vin, int Year, string? Color, int Mileage, bool IsActive);
 
+// DTO usado para transportar datos de VehicleModelDto entre la API y sus consumidores.
 public sealed record VehicleModelDto(int Id, int BrandId, string ModelName);
 
+// DTO usado para transportar datos de VehicleOwnerHistoryDto entre la API y sus consumidores.
 public sealed record VehicleOwnerHistoryDto(int Id, int VehicleId, int PersonId, DateTime StartDate, DateTime? EndDate);
 
+// DTO usado para transportar datos de VehicleTypeDto entre la API y sus consumidores.
 public sealed record VehicleTypeDto(int Id, string Name);
 
+// DTO usado para transportar datos de EntityDtoMapper entre la API y sus consumidores.
 public static class EntityDtoMapper
 {
+    // Estas propiedades forman el contrato publico o interno que se serializa entre capas.
     public static AuditActionTypeDto ToDto(this AuditActionType entity) => new(entity.Id, entity.Name);
 
     public static AuditDto ToDto(this Audit entity) => new(

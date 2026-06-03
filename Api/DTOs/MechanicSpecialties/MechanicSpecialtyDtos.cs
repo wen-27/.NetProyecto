@@ -1,7 +1,8 @@
-// Responsabilidad: Contrato de datos usado por la API para recibir o responder informacion de MechanicSpecialtyDtos. Mantiene separada la forma publica del endpoint frente al modelo interno.
-// Nota de mantenimiento: Cambios aqui impactan el contrato consumido por frontend, Swagger y clientes externos.
 namespace Api.DTOs.MechanicSpecialties;
 
+// DTO usado para transportar datos de CreateMechanicSpecialtyRequest entre la API y sus consumidores.
 public sealed record CreateMechanicSpecialtyRequest(string Name);
+// DTO usado para transportar datos de UpdateMechanicSpecialtyRequest entre la API y sus consumidores.
 public sealed record UpdateMechanicSpecialtyRequest(string Name);
+// DTO usado para transportar datos de MechanicSpecialtyResponse entre la API y sus consumidores.
 public sealed record MechanicSpecialtyResponse(int Id, string Name);

@@ -1,11 +1,11 @@
-// Responsabilidad: Entidad de dominio Role; representa datos y relaciones principales del taller dentro del modelo de negocio.
-// Nota de mantenimiento: Cambios aqui pueden requerir revisar configuraciones EF Core, migraciones y seeders.
 using Domain.Common;
 
 namespace Domain.Entities;
 
+// Entidad de dominio que representa Role dentro del modelo principal del taller.
 public class Role : BaseEntity
 {
+    // Las propiedades describen el estado persistido; las colecciones representan relaciones navegables del dominio.
     public string RoleName { get; set; } = string.Empty;
 
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();

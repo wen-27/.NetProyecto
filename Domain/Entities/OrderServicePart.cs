@@ -1,11 +1,11 @@
-// Responsabilidad: Entidad de dominio OrderServicePart; representa datos y relaciones principales del taller dentro del modelo de negocio.
-// Nota de mantenimiento: Cambios aqui pueden requerir revisar configuraciones EF Core, migraciones y seeders.
 using Domain.Common;
 
 namespace Domain.Entities;
 
+// Entidad de dominio que representa OrderServicePart dentro del modelo principal del taller.
 public class OrderServicePart : BaseEntity
 {
+    // Las propiedades describen el estado persistido; las colecciones representan relaciones navegables del dominio.
     public int OrderServiceId { get; set; }
     public int PartId { get; set; }
     public int Quantity { get; set; } = 1;

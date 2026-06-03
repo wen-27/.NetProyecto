@@ -1,13 +1,13 @@
-// Responsabilidad: Contrato de datos usado por la API para recibir o responder informacion de OrderServiceDtos. Mantiene separada la forma publica del endpoint frente al modelo interno.
-// Nota de mantenimiento: Cambios aqui impactan el contrato consumido por frontend, Swagger y clientes externos.
 namespace Api.DTOs.OrderServices;
 
+// DTO usado para transportar datos de CreateOrderServiceRequest entre la API y sus consumidores.
 public sealed record CreateOrderServiceRequest(
     int ServiceOrderId,
     int ServiceTypeId,
     string? Description,
     decimal LaborCost);
 
+// DTO usado para transportar datos de UpdateOrderServiceRequest entre la API y sus consumidores.
 public sealed record UpdateOrderServiceRequest(
     int ServiceTypeId,
     string? Description,
@@ -16,6 +16,7 @@ public sealed record UpdateOrderServiceRequest(
     bool? CustomerApproved,
     DateTime? ApprovalDate);
 
+// DTO usado para transportar datos de OrderServiceResponse entre la API y sus consumidores.
 public sealed record OrderServiceResponse(
     int Id,
     int ServiceOrderId,

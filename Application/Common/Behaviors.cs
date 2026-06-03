@@ -1,13 +1,13 @@
-// Responsabilidad: Componente comun de Application usado por varios casos de uso para mantener reglas compartidas.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using FluentValidation;
 using MediatR;
 
 namespace Application.Common;
 
+// Tipo comun del dominio reutilizado por entidades u objetos de valor.
 public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
+    // El contenido de este tipo se mantiene agrupado alrededor de una unica responsabilidad.
     private readonly IEnumerable<IValidator<TRequest>> _validators;
 
     public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)

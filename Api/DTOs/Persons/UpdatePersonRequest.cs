@@ -1,7 +1,6 @@
-// Responsabilidad: Contrato de datos usado por la API para recibir o responder informacion de UpdatePersonRequest. Mantiene separada la forma publica del endpoint frente al modelo interno.
-// Nota de mantenimiento: Cambios aqui impactan el contrato consumido por frontend, Swagger y clientes externos.
 namespace Api.DTOs.Persons;
 
+// DTO usado para transportar datos de UpdatePersonRequest entre la API y sus consumidores.
 public sealed record UpdatePersonRequest(
     int DocumentTypeId,
     string DocumentNumber,
@@ -13,6 +12,7 @@ public sealed record UpdatePersonRequest(
     int? GenderId,
     int? AddressId)
 {
+    // Estas propiedades forman el contrato publico o interno que se serializa entre capas.
     public string FirstNames => string.Join(' ', new[] { FirstName, MiddleName }.Where(x => !string.IsNullOrWhiteSpace(x)));
     public string LastNames => string.Join(' ', new[] { LastName, SecondLastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
 }

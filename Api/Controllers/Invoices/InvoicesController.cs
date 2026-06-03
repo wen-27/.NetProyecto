@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con Invoices. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using System.Security.Claims;
 using Application.Abstractions.OperationalWorkflow;
 using Application.UseCase.Invoices;
@@ -12,8 +10,10 @@ namespace Api.Controllers.Invoices;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con Invoices.
 public sealed class InvoicesController : ControllerBase
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     private readonly ISender _sender;
     private readonly IOperationalWorkflowService _workflow;
 

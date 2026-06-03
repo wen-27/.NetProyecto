@@ -1,7 +1,6 @@
-// Responsabilidad: Contrato de datos usado por la API para recibir o responder informacion de VehicleEntryInventoryDtos. Mantiene separada la forma publica del endpoint frente al modelo interno.
-// Nota de mantenimiento: Cambios aqui impactan el contrato consumido por frontend, Swagger y clientes externos.
 namespace Api.DTOs.VehicleEntryInventory;
 
+// DTO usado para transportar datos de CreateVehicleEntryInventoryRequest entre la API y sus consumidores.
 public sealed record CreateVehicleEntryInventoryRequest(
     int ServiceOrderId,
     bool HasScratches,
@@ -11,6 +10,7 @@ public sealed record CreateVehicleEntryInventoryRequest(
     bool OwnershipCardDelivered,
     string? Observations);
 
+// DTO usado para transportar datos de UpdateVehicleEntryInventoryRequest entre la API y sus consumidores.
 public sealed record UpdateVehicleEntryInventoryRequest(
     bool HasScratches,
     string? ScratchesDescription,
@@ -19,6 +19,7 @@ public sealed record UpdateVehicleEntryInventoryRequest(
     bool OwnershipCardDelivered,
     string? Observations);
 
+// DTO usado para transportar datos de VehicleEntryInventoryResponse entre la API y sus consumidores.
 public sealed record VehicleEntryInventoryResponse(
     int Id,
     int ServiceOrderId,

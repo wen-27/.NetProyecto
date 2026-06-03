@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con ServiceOrders. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using System.Security.Claims;
 using Api.Controllers;
 using Api.DTOs.OrderServices;
@@ -20,8 +18,10 @@ using Microsoft.EntityFrameworkCore;
 namespace Api.Controllers.ServiceOrders;
 
 [EnableRateLimiting("service-orders")]
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con ServiceOrders.
 public sealed class ServiceOrdersController : BaseApiController
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     private readonly IOrderServiceRepository _orderServiceRepository;
     private readonly AppDbContext _dbContext;
 

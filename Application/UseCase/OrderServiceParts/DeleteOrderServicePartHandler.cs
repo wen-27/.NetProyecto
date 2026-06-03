@@ -1,12 +1,12 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con DeleteOrderServicePartHandler. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using MediatR;
 
 namespace Application.UseCase.OrderServiceParts;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con DeleteOrderServicePart.
 public sealed class DeleteOrderServicePartHandler : IRequestHandler<DeleteOrderServicePart>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IOrderServicePartRepository _orderServiceParts;
     private readonly IPartRepository _parts;
     private readonly IUnitOfWork _unitOfWork;

@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con Roles. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Api.Controllers;
 using Api.DTOs.Roles;
 using Application.UseCase.Roles;
@@ -10,8 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers.Roles;
 
 [Authorize(Policy = "AdminOnly")]
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con Roles.
 public sealed class RolesController : BaseApiController
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     public RolesController(ISender sender) : base(sender)
     {
     }

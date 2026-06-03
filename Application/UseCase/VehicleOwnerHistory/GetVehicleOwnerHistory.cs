@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetVehicleOwnerHistory. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;
@@ -8,12 +6,16 @@ using MediatR;
 
 namespace Application.UseCase.VehicleOwnerHistory;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetVehicleOwnerHistoryById.
 public sealed record GetVehicleOwnerHistoryById(int Id) : IRequest<VehicleOwnerHistoryDto>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetVehicleOwnerHistoryPaged.
 public sealed record GetVehicleOwnerHistoryPaged(int Page = 1, int PageSize = 10, string? Search = null) : IRequest<PagedResult<VehicleOwnerHistoryDto>>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetVehicleOwnerHistoryById.
 public sealed class GetVehicleOwnerHistoryByIdHandler : IRequestHandler<GetVehicleOwnerHistoryById, VehicleOwnerHistoryDto>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IVehicleOwnerHistoryRepository _repository;
 
     public GetVehicleOwnerHistoryByIdHandler(IVehicleOwnerHistoryRepository repository) => _repository = repository;
@@ -25,8 +27,10 @@ public sealed class GetVehicleOwnerHistoryByIdHandler : IRequestHandler<GetVehic
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetVehicleOwnerHistoryPaged.
 public sealed class GetVehicleOwnerHistoryPagedHandler : IRequestHandler<GetVehicleOwnerHistoryPaged, PagedResult<VehicleOwnerHistoryDto>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IVehicleOwnerHistoryRepository _repository;
 
     public GetVehicleOwnerHistoryPagedHandler(IVehicleOwnerHistoryRepository repository) => _repository = repository;

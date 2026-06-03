@@ -1,7 +1,6 @@
-// Responsabilidad: Contrato de datos usado por la API para recibir o responder informacion de OrderStatusHistoryDtos. Mantiene separada la forma publica del endpoint frente al modelo interno.
-// Nota de mantenimiento: Cambios aqui impactan el contrato consumido por frontend, Swagger y clientes externos.
 namespace Api.DTOs.OrderStatusHistory;
 
+// DTO usado para transportar datos de CreateOrderStatusHistoryRequest entre la API y sus consumidores.
 public sealed record CreateOrderStatusHistoryRequest(
     int ServiceOrderId,
     int? PreviousOrderStatusId,
@@ -9,6 +8,7 @@ public sealed record CreateOrderStatusHistoryRequest(
     int ChangedByUserId,
     string? Observation);
 
+// DTO usado para transportar datos de OrderStatusHistoryResponse entre la API y sus consumidores.
 public sealed record OrderStatusHistoryResponse(
     int Id,
     int ServiceOrderId,

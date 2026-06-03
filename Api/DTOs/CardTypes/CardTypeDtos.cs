@@ -1,7 +1,8 @@
-// Responsabilidad: Contrato de datos usado por la API para recibir o responder informacion de CardTypeDtos. Mantiene separada la forma publica del endpoint frente al modelo interno.
-// Nota de mantenimiento: Cambios aqui impactan el contrato consumido por frontend, Swagger y clientes externos.
 namespace Api.DTOs.CardTypes;
 
+// DTO usado para transportar datos de CreateCardTypeRequest entre la API y sus consumidores.
 public sealed record CreateCardTypeRequest(string Name);
+// DTO usado para transportar datos de UpdateCardTypeRequest entre la API y sus consumidores.
 public sealed record UpdateCardTypeRequest(string Name);
+// DTO usado para transportar datos de CardTypeResponse entre la API y sus consumidores.
 public sealed record CardTypeResponse(int Id, string Name);

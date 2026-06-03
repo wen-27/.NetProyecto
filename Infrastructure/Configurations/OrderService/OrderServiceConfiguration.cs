@@ -1,15 +1,16 @@
-// Responsabilidad: Configuracion de Entity Framework Core para mapear OrderService a la base de datos: tabla, claves, columnas, relaciones e indices.
-// Nota de mantenimiento: Cambios aqui pueden modificar el modelo relacional y requerir una migracion.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Domain.Enums;
 
 namespace Infrastructure.Configurations.OrderService;
 
+// Configuracion de EF Core que mapea OrderService a tablas, columnas, relaciones e indices.
 public class OrderServiceConfiguration : IEntityTypeConfiguration<Domain.Entities.OrderService>
 {
+    // La configuracion define como EF Core traduce la entidad al esquema relacional.
     public void Configure(EntityTypeBuilder<Domain.Entities.OrderService> entity)
     {
+        // A partir de aqui se declaran tabla, clave primaria, columnas, restricciones y relaciones de la entidad.
         entity.ToTable("OrderServices");
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("OrderServiceId");

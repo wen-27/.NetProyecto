@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con Reception. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Application.Abstractions.OperationalWorkflow;
 using Application.DTOs;
 using Domain.Entities;
@@ -12,8 +10,10 @@ namespace Api.Controllers.Operational;
 
 [Route("api/reception")]
 [Authorize(Roles = "Receptionist,Admin")]
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con Reception.
 public sealed class ReceptionController : OperationalControllerBase
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     private readonly IOperationalWorkflowService _workflow;
     private readonly AppDbContext _context;
 
@@ -378,10 +378,17 @@ public sealed class ReceptionController : OperationalControllerBase
     }
 }
 
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con CreateReceptionCustomerRequest.
 public sealed record CreateReceptionCustomerRequest(int DocumentTypeId, string DocumentNumber, string FirstName, string? MiddleName, string LastName, string? SecondLastName, string? Email, string? Phone, int? PhoneCountryId);
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con CreateReceptionVehicleRequest.
 public sealed record CreateReceptionVehicleRequest(int OwnerPersonId, int ModelId, int VehicleTypeId, string Plate, string Vin, int Year, string? Color, int Mileage, DateTime? StartDate);
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con TransferVehicleOwnerRequest.
 public sealed record TransferVehicleOwnerRequest(int NewOwnerPersonId, DateTime? TransferDate, string? Observation);
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con ReceptionCustomerDto.
 public sealed record ReceptionCustomerDto(int Id, string DocumentType, string DocumentNumber, string FullName, string PrimaryEmail, string PrimaryPhone, int VehiclesCount, string Status, string Role, string? Gender, DateOnly? BirthDate, string? Address);
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con ReceptionVehicleDto.
 public sealed record ReceptionVehicleDto(int Id, string Plate, string Vin, string Brand, string Model, string Type, int Year, string? Color, int Mileage, int? CurrentOwnerId, string CurrentOwner, int ActiveOrders, bool IsActive);
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con ReceptionOwnerHistoryDto.
 public sealed record ReceptionOwnerHistoryDto(int Id, int VehicleId, int PersonId, string Owner, DateTime StartDate, DateTime? EndDate, bool IsCurrent);
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con ReceptionPaymentDto.
 public sealed record ReceptionPaymentDto(int Id, int InvoiceId, int ServiceOrderId, int? ClientPersonId, string Customer, string? ClientDocument, string Vehicle, decimal Amount, decimal Total, decimal Balance, string Method, string Status, DateTime Date, string Reference);

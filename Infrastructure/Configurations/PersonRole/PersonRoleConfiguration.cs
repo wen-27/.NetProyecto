@@ -1,14 +1,15 @@
-// Responsabilidad: Configuracion de Entity Framework Core para mapear PersonRole a la base de datos: tabla, claves, columnas, relaciones e indices.
-// Nota de mantenimiento: Cambios aqui pueden modificar el modelo relacional y requerir una migracion.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Configurations.PersonRole;
 
+// Configuracion de EF Core que mapea PersonRole a tablas, columnas, relaciones e indices.
 public class PersonRoleConfiguration : IEntityTypeConfiguration<Domain.Entities.PersonRole>
 {
+    // La configuracion define como EF Core traduce la entidad al esquema relacional.
     public void Configure(EntityTypeBuilder<Domain.Entities.PersonRole> entity)
     {
+        // A partir de aqui se declaran tabla, clave primaria, columnas, restricciones y relaciones de la entidad.
         entity.ToTable("PersonRoles");
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("PersonRoleId");

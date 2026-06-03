@@ -1,11 +1,11 @@
-// Responsabilidad: Value Object de dominio para validar y encapsular un valor especifico de UserPasswordHash, evitando datos invalidos en el resto del sistema.
-// Nota de mantenimiento: Debe mantenerse pequeno, inmutable cuando aplique y enfocado en validar una sola idea del dominio.
 using Domain.ValueObjects;
 
 namespace Domain.ValueObjects.User;
 
+// Value Object que encapsula y valida un valor especifico de UserPasswordHash.
 public readonly record struct UserPasswordHash
 {
+    // La validacion se concentra aqui para impedir que valores invalidos circulen por el dominio.
     public UserPasswordHash(string value)
     {
         Value = ValueObjectValidation.Required(value, nameof(UserPasswordHash), 255);

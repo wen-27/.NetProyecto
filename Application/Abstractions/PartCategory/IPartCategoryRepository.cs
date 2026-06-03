@@ -1,12 +1,12 @@
-// Responsabilidad: Contrato de Application que define lo que la capa de negocio necesita de servicios externos o persistencia para IPartCategoryRepository.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Domain.Entities;
 using Domain.ValueObjects.PartCategory;
 
 namespace Application.Abstractions;
 
+// Contrato que Application usa para depender de una capacidad sin conocer su implementacion.
 public interface IPartCategoryRepository
 {
+    // Las firmas declaradas aqui permiten intercambiar implementaciones sin cambiar los casos de uso que las consumen.
     Task<PartCategory?> GetByIdAsync(int id, CancellationToken ct = default);
     Task<PartCategory?> GetByNameAsync(PartCategoryName name, CancellationToken ct = default);
     Task<IReadOnlyList<PartCategory>> GetAllAsync(CancellationToken ct = default);

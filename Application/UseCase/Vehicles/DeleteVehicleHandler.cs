@@ -1,13 +1,13 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con DeleteVehicleHandler. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Domain.ValueObjects.ServiceOrder;
 using MediatR;
 
 namespace Application.UseCase.Vehicles;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con DeleteVehicle.
 public sealed class DeleteVehicleHandler : IRequestHandler<DeleteVehicle>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IServiceOrderRepository _serviceOrders;
     private readonly IVehicleRepository _vehicles;
     private readonly IUnitOfWork _unitOfWork;

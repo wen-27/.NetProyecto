@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetRoles. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;
@@ -8,12 +6,16 @@ using MediatR;
 
 namespace Application.UseCase.Roles;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetRoleById.
 public sealed record GetRoleById(int Id) : IRequest<RoleDto>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetRolesPaged.
 public sealed record GetRolesPaged(int Page = 1, int PageSize = 10, string? Search = null) : IRequest<PagedResult<RoleDto>>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetRoleById.
 public sealed class GetRoleByIdHandler : IRequestHandler<GetRoleById, RoleDto>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IRoleRepository _repository;
 
     public GetRoleByIdHandler(IRoleRepository repository) => _repository = repository;
@@ -25,8 +27,10 @@ public sealed class GetRoleByIdHandler : IRequestHandler<GetRoleById, RoleDto>
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetRolesPaged.
 public sealed class GetRolesPagedHandler : IRequestHandler<GetRolesPaged, PagedResult<RoleDto>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IRoleRepository _repository;
 
     public GetRolesPagedHandler(IRoleRepository repository) => _repository = repository;

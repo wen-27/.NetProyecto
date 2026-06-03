@@ -1,7 +1,6 @@
-// Responsabilidad: Contrato de datos usado por la API para recibir o responder informacion de OperationalWorkflowDtos. Mantiene separada la forma publica del endpoint frente al modelo interno.
-// Nota de mantenimiento: Cambios aqui impactan el contrato consumido por frontend, Swagger y clientes externos.
 namespace Application.DTOs;
 
+// DTO usado para transportar datos de CreateAdditionalRequestDto entre la API y sus consumidores.
 public sealed record CreateAdditionalRequestDto(
     int RequestType,
     int? WorkshopServiceId,
@@ -9,6 +8,7 @@ public sealed record CreateAdditionalRequestDto(
     int? Quantity,
     string TechnicalComment);
 
+// DTO usado para transportar datos de AdditionalRequestResponseDto entre la API y sus consumidores.
 public sealed record AdditionalRequestResponseDto(
     int Id,
     int ServiceOrderId,
@@ -31,11 +31,15 @@ public sealed record AdditionalRequestResponseDto(
     decimal EstimatedPrice,
     DateTime CreatedAt);
 
+// DTO usado para transportar datos de WorkshopChiefReviewRequestDto entre la API y sus consumidores.
 public sealed record WorkshopChiefReviewRequestDto(string? Comment);
+// DTO usado para transportar datos de ClientReviewAdditionalRequestDto entre la API y sus consumidores.
 public sealed record ClientReviewAdditionalRequestDto(string? Comment);
 
+// DTO usado para transportar datos de WorkshopServicePartDto entre la API y sus consumidores.
 public sealed record WorkshopServicePartDto(int PartId, int QuantityRequired);
 
+// DTO usado para transportar datos de CreateWorkshopServiceDto entre la API y sus consumidores.
 public sealed record CreateWorkshopServiceDto(
     string Name,
     string Description,
@@ -43,6 +47,7 @@ public sealed record CreateWorkshopServiceDto(
     decimal LaborPercentage,
     IReadOnlyList<WorkshopServicePartDto> Parts);
 
+// DTO usado para transportar datos de UpdateWorkshopServiceDto entre la API y sus consumidores.
 public sealed record UpdateWorkshopServiceDto(
     string Name,
     string Description,
@@ -50,6 +55,7 @@ public sealed record UpdateWorkshopServiceDto(
     decimal LaborPercentage,
     IReadOnlyList<WorkshopServicePartDto> Parts);
 
+// DTO usado para transportar datos de WorkshopServiceResponseDto entre la API y sus consumidores.
 public sealed record WorkshopServiceResponseDto(
     int Id,
     string Name,
@@ -62,6 +68,7 @@ public sealed record WorkshopServiceResponseDto(
     string Status,
     IReadOnlyList<WorkshopServicePartResponseDto> Parts);
 
+// DTO usado para transportar datos de WorkshopServicePartResponseDto entre la API y sus consumidores.
 public sealed record WorkshopServicePartResponseDto(
     int PartId,
     string PartName,
@@ -69,11 +76,13 @@ public sealed record WorkshopServicePartResponseDto(
     decimal UnitSalePrice,
     decimal LineTotal);
 
+// DTO usado para transportar datos de WorkshopServicePricePreviewDto entre la API y sus consumidores.
 public sealed record WorkshopServicePricePreviewDto(
     decimal PartsSubtotal,
     decimal LaborAmount,
     decimal FinalPrice);
 
+// DTO usado para transportar datos de CreateStockSubmissionDto entre la API y sus consumidores.
 public sealed record CreateStockSubmissionDto(
     string ProductName,
     string ReferenceCode,
@@ -89,6 +98,7 @@ public sealed record CreateStockSubmissionDto(
     string? Description,
     string? WarehouseComment);
 
+// DTO usado para transportar datos de UpdateStockSubmissionDto entre la API y sus consumidores.
 public sealed record UpdateStockSubmissionDto(
     string ProductName,
     string ReferenceCode,
@@ -104,6 +114,7 @@ public sealed record UpdateStockSubmissionDto(
     string? Description,
     string? WarehouseComment);
 
+// DTO usado para transportar datos de StockSubmissionResponseDto entre la API y sus consumidores.
 public sealed record StockSubmissionResponseDto(
     int Id,
     string ProductName,
@@ -119,8 +130,10 @@ public sealed record StockSubmissionResponseDto(
     string? InventoryManagerComment,
     DateTime CreatedAt);
 
+// DTO usado para transportar datos de ReviewStockSubmissionDto entre la API y sus consumidores.
 public sealed record ReviewStockSubmissionDto(string? Comment);
 
+// DTO usado para transportar datos de CreateClientPaymentDto entre la API y sus consumidores.
 public sealed record CreateClientPaymentDto(
     int InvoiceId,
     int PaymentMethodId,
@@ -131,6 +144,7 @@ public sealed record CreateClientPaymentDto(
     string? CardHolderName,
     string? CardBrand);
 
+// DTO usado para transportar datos de PaymentResponseDto entre la API y sus consumidores.
 public sealed record PaymentResponseDto(
     int Id,
     int InvoiceId,
@@ -144,6 +158,7 @@ public sealed record PaymentResponseDto(
     DateTime? DeliveryDate,
     string? Message);
 
+// DTO usado para transportar datos de BillingInvoiceResponseDto entre la API y sus consumidores.
 public sealed record BillingInvoiceResponseDto(
     int Id,
     int ServiceOrderId,
@@ -158,9 +173,12 @@ public sealed record BillingInvoiceResponseDto(
     bool CanPay,
     PaymentResponseDto? LatestPayment);
 
+// DTO usado para transportar datos de ReviewPaymentDto entre la API y sus consumidores.
 public sealed record ReviewPaymentDto(DateTime? DeliveryDate, string? Comment);
+// DTO usado para transportar datos de ConfirmDeliveryDateDto entre la API y sus consumidores.
 public sealed record ConfirmDeliveryDateDto(DateTime DeliveryDate);
 
+// DTO usado para transportar datos de ClientOrderSummaryDto entre la API y sus consumidores.
 public sealed record ClientOrderSummaryDto(
     int Id,
     string Code,
@@ -176,6 +194,7 @@ public sealed record ClientOrderSummaryDto(
     string? PaymentStatus,
     string? PaymentMessage);
 
+// DTO usado para transportar datos de ClientOrderDetailDto entre la API y sus consumidores.
 public sealed record ClientOrderDetailDto(
     int Id,
     string Code,
@@ -192,12 +211,14 @@ public sealed record ClientOrderDetailDto(
     IReadOnlyList<AdditionalRequestResponseDto> PendingApprovals,
     PaymentResponseDto? Payment);
 
+// DTO usado para transportar datos de OrderServiceDetailDto entre la API y sus consumidores.
 public sealed record OrderServiceDetailDto(
     int Id,
     string Name,
     string Status,
     decimal Price);
 
+// DTO usado para transportar datos de MechanicOrderDetailDto entre la API y sus consumidores.
 public sealed record MechanicOrderDetailDto(
     int Id,
     string Code,
@@ -210,16 +231,21 @@ public sealed record MechanicOrderDetailDto(
     DateTime? EstimatedDeliveryDate,
     IReadOnlyList<OrderServiceDetailDto> Services);
 
+// DTO usado para transportar datos de RecordMechanicWorkDto entre la API y sus consumidores.
 public sealed record RecordMechanicWorkDto(string WorkPerformed);
 
+// DTO usado para transportar datos de UpdateMechanicOrderServiceStatusDto entre la API y sus consumidores.
 public sealed record UpdateMechanicOrderServiceStatusDto(string Status);
 
+// DTO usado para transportar datos de CreateMechanicDiagnosticDto entre la API y sus consumidores.
 public sealed record CreateMechanicDiagnosticDto(
     string Findings,
     string RecommendedWork);
 
+// DTO usado para transportar datos de ReviewMechanicDiagnosticDto entre la API y sus consumidores.
 public sealed record ReviewMechanicDiagnosticDto(string? Comment);
 
+// DTO usado para transportar datos de MechanicDiagnosticResponseDto entre la API y sus consumidores.
 public sealed record MechanicDiagnosticResponseDto(
     int Id,
     int ServiceOrderId,

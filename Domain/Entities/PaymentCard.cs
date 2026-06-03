@@ -1,11 +1,11 @@
-// Responsabilidad: Entidad de dominio PaymentCard; representa datos y relaciones principales del taller dentro del modelo de negocio.
-// Nota de mantenimiento: Cambios aqui pueden requerir revisar configuraciones EF Core, migraciones y seeders.
 using Domain.Common;
 
 namespace Domain.Entities;
 
+// Entidad de dominio que representa PaymentCard dentro del modelo principal del taller.
 public class PaymentCard : BaseEntity
 {
+    // Las propiedades describen el estado persistido; las colecciones representan relaciones navegables del dominio.
     public int PaymentId { get; set; }
     public int CardTypeId { get; set; }
     public string LastFourDigits { get; set; } = string.Empty;

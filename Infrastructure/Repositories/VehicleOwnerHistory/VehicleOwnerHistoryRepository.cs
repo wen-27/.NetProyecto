@@ -1,5 +1,3 @@
-// Responsabilidad: Implementacion de repositorio para persistencia y consultas de VehicleOwnerHistoryRepository; encapsula acceso a DbContext y detalles de EF Core.
-// Nota de mantenimiento: Debe evitar reglas de negocio; su responsabilidad principal es consultar y persistir datos.
 using Application.Abstractions;
 using Domain.Entities;
 using Domain.ValueObjects.VehicleOwnerHistory;
@@ -8,8 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories.VehicleOwnerHistory;
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class VehicleOwnerHistoryRepository : IVehicleOwnerHistoryRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     private readonly AppDbContext _context;
 
     public VehicleOwnerHistoryRepository(AppDbContext context)

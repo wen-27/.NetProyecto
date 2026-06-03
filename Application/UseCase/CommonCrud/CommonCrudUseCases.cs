@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con CommonCrudUseCases. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Pagination;
 using Domain.Common;
@@ -7,24 +5,31 @@ using MediatR;
 
 namespace Application.UseCase.CommonCrud;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetEntityById.
 public sealed record GetEntityById<TEntity>(int Id) : IRequest<TEntity>
     where TEntity : BaseEntity;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetEntitiesPaged.
 public sealed record GetEntitiesPaged<TEntity>(int Page = 1, int PageSize = 10, string? Search = null) : IRequest<PagedResult<TEntity>>
     where TEntity : BaseEntity;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con CreateEntity.
 public sealed record CreateEntity<TEntity>(TEntity Entity) : IRequest<int>
     where TEntity : BaseEntity;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con UpdateEntity.
 public sealed record UpdateEntity<TEntity>(int Id, TEntity Entity) : IRequest
     where TEntity : BaseEntity;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con DeleteEntity.
 public sealed record DeleteEntity<TEntity>(int Id) : IRequest
     where TEntity : BaseEntity;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetEntityById.
 public sealed class GetEntityByIdHandler<TEntity> : IRequestHandler<GetEntityById<TEntity>, TEntity>
     where TEntity : BaseEntity
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IGenericRepository<TEntity> _repository;
 
     public GetEntityByIdHandler(IGenericRepository<TEntity> repository) => _repository = repository;
@@ -36,9 +41,11 @@ public sealed class GetEntityByIdHandler<TEntity> : IRequestHandler<GetEntityByI
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetEntitiesPaged.
 public sealed class GetEntitiesPagedHandler<TEntity> : IRequestHandler<GetEntitiesPaged<TEntity>, PagedResult<TEntity>>
     where TEntity : BaseEntity
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IGenericRepository<TEntity> _repository;
 
     public GetEntitiesPagedHandler(IGenericRepository<TEntity> repository) => _repository = repository;
@@ -54,9 +61,11 @@ public sealed class GetEntitiesPagedHandler<TEntity> : IRequestHandler<GetEntiti
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con CreateEntity.
 public sealed class CreateEntityHandler<TEntity> : IRequestHandler<CreateEntity<TEntity>, int>
     where TEntity : BaseEntity
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IGenericRepository<TEntity> _repository;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -74,9 +83,11 @@ public sealed class CreateEntityHandler<TEntity> : IRequestHandler<CreateEntity<
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con UpdateEntity.
 public sealed class UpdateEntityHandler<TEntity> : IRequestHandler<UpdateEntity<TEntity>>
     where TEntity : BaseEntity
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IGenericRepository<TEntity> _repository;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -97,9 +108,11 @@ public sealed class UpdateEntityHandler<TEntity> : IRequestHandler<UpdateEntity<
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con DeleteEntity.
 public sealed class DeleteEntityHandler<TEntity> : IRequestHandler<DeleteEntity<TEntity>>
     where TEntity : BaseEntity
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IGenericRepository<TEntity> _repository;
     private readonly IUnitOfWork _unitOfWork;
 

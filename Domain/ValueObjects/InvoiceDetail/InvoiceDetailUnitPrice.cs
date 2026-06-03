@@ -1,11 +1,11 @@
-// Responsabilidad: Value Object de dominio para validar y encapsular un valor especifico de InvoiceDetailUnitPrice, evitando datos invalidos en el resto del sistema.
-// Nota de mantenimiento: Debe mantenerse pequeno, inmutable cuando aplique y enfocado en validar una sola idea del dominio.
 using Domain.ValueObjects;
 
 namespace Domain.ValueObjects.InvoiceDetail;
 
+// Value Object que encapsula y valida un valor especifico de InvoiceDetailUnitPrice.
 public readonly record struct InvoiceDetailUnitPrice
 {
+    // La validacion se concentra aqui para impedir que valores invalidos circulen por el dominio.
     public decimal Amount { get; }
     public decimal Value => Amount;
 

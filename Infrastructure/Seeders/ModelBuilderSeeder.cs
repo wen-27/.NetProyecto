@@ -1,12 +1,12 @@
-// Responsabilidad: Seeder de datos iniciales/desarrollo; prepara catalogos, usuarios y escenarios necesarios para probar la API localmente.
-// Nota de mantenimiento: Debe ser idempotente para poder ejecutarse varias veces en desarrollo sin duplicar informacion.
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Seeders;
 
+// Seeder encargado de preparar datos iniciales o escenarios de desarrollo.
 public static class ModelBuilderSeeder
 {
+    // Las operaciones de seeding deben ser idempotentes para ejecutarse varias veces sin duplicar datos.
     public static void SeedCoreData(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Role>().HasData(

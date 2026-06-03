@@ -1,5 +1,3 @@
-// Responsabilidad: Registro de mapeos entre DTOs, entidades y respuestas para mantener las conversiones en un solo lugar.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Api.DTOs.Addresses;
 using Api.DTOs.AuditActionTypes;
 using Api.DTOs.Audits;
@@ -51,8 +49,10 @@ using Mapster;
 
 namespace Api.Mappings;
 
+// Registro centralizado de conversiones entre entidades, DTOs y respuestas.
 public sealed class ApiMappingRegister : IRegister
 {
+    // El contenido de este tipo se mantiene agrupado alrededor de una unica responsabilidad.
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<Country, CountryResponse>();

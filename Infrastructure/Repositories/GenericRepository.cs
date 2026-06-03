@@ -1,5 +1,3 @@
-// Responsabilidad: Implementacion de repositorio para persistencia y consultas de GenericRepository; encapsula acceso a DbContext y detalles de EF Core.
-// Nota de mantenimiento: Debe evitar reglas de negocio; su responsabilidad principal es consultar y persistir datos.
 using System.Linq.Expressions;
 using Application.Abstractions;
 using Domain.Common;
@@ -8,9 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public class GenericRepository<TEntity> : IGenericRepository<TEntity>
     where TEntity : BaseEntity
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     protected readonly AppDbContext Context;
 
     public GenericRepository(AppDbContext context)

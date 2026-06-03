@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con Audits. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Api.Controllers;
 using Infrastructure.Context;
 using Application.DTOs;
@@ -12,8 +10,10 @@ using Microsoft.EntityFrameworkCore;
 namespace Api.Controllers.Audits;
 
 [Authorize(Policy = "AdminOnly")]
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con Audits.
 public sealed class AuditsController : BaseApiController
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     private readonly AppDbContext _context;
 
     public AuditsController(ISender sender, AppDbContext context) : base(sender)

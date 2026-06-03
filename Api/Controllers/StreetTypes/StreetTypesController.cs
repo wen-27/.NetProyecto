@@ -1,12 +1,12 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con StreetTypes. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Api.DTOs.StreetTypes;
 using Domain.Entities;
 using MediatR;
 
 namespace Api.Controllers.StreetTypes;
 
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con StreetTypes.
 public sealed class StreetTypesController : CrudController<StreetType, CreateStreetTypeRequest, UpdateStreetTypeRequest, StreetTypeResponse>
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     public StreetTypesController(ISender sender) : base(sender) { }
 }

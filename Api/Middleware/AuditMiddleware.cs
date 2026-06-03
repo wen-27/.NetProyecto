@@ -1,5 +1,3 @@
-// Responsabilidad: Middleware de ASP.NET Core que participa en la tuberia HTTP para manejar una preocupacion transversal antes o despues del controlador.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using System.Security.Claims;
 using Domain.Entities;
 using Infrastructure.Context;
@@ -7,8 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Middleware;
 
+// Middleware que se ejecuta dentro de la tuberia HTTP para aplicar una preocupacion transversal.
 public sealed class AuditMiddleware
 {
+    // El contenido de este tipo se mantiene agrupado alrededor de una unica responsabilidad.
     private readonly RequestDelegate _next;
 
     public AuditMiddleware(RequestDelegate next)

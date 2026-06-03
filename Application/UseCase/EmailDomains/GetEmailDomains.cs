@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetEmailDomains. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;
@@ -8,12 +6,16 @@ using MediatR;
 
 namespace Application.UseCase.EmailDomains;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetEmailDomainById.
 public sealed record GetEmailDomainById(int Id) : IRequest<EmailDomainDto>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetEmailDomainsPaged.
 public sealed record GetEmailDomainsPaged(int Page = 1, int PageSize = 10, string? Search = null) : IRequest<PagedResult<EmailDomainDto>>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetEmailDomainById.
 public sealed class GetEmailDomainByIdHandler : IRequestHandler<GetEmailDomainById, EmailDomainDto>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IEmailDomainRepository _repository;
 
     public GetEmailDomainByIdHandler(IEmailDomainRepository repository) => _repository = repository;
@@ -25,8 +27,10 @@ public sealed class GetEmailDomainByIdHandler : IRequestHandler<GetEmailDomainBy
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetEmailDomainsPaged.
 public sealed class GetEmailDomainsPagedHandler : IRequestHandler<GetEmailDomainsPaged, PagedResult<EmailDomainDto>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IEmailDomainRepository _repository;
 
     public GetEmailDomainsPagedHandler(IEmailDomainRepository repository) => _repository = repository;

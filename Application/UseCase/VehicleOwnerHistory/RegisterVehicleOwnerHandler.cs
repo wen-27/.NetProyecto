@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con RegisterVehicleOwnerHandler. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Domain.Entities;
 using Domain.ValueObjects.VehicleOwnerHistory;
@@ -7,8 +5,10 @@ using MediatR;
 
 namespace Application.UseCase.VehicleOwnerHistory;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con RegisterVehicleOwner.
 public sealed class RegisterVehicleOwnerHandler : IRequestHandler<RegisterVehicleOwner, int>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IVehicleOwnerHistoryRepository _vehicleOwnerHistory;
     private readonly IUnitOfWork _unitOfWork;
 

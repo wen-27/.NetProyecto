@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetUsers. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;
@@ -8,12 +6,16 @@ using MediatR;
 
 namespace Application.UseCase.Users;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetUserById.
 public sealed record GetUserById(int Id) : IRequest<UserDto>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetUsersPaged.
 public sealed record GetUsersPaged(int Page = 1, int PageSize = 10, string? Search = null) : IRequest<PagedResult<UserDto>>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetUserById.
 public sealed class GetUserByIdHandler : IRequestHandler<GetUserById, UserDto>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IUserRepository _repository;
 
     public GetUserByIdHandler(IUserRepository repository) => _repository = repository;
@@ -25,8 +27,10 @@ public sealed class GetUserByIdHandler : IRequestHandler<GetUserById, UserDto>
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetUsersPaged.
 public sealed class GetUsersPagedHandler : IRequestHandler<GetUsersPaged, PagedResult<UserDto>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IUserRepository _repository;
 
     public GetUsersPagedHandler(IUserRepository repository) => _repository = repository;

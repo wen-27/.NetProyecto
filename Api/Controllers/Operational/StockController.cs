@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con Stock. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Domain.Entities;
 using Infrastructure.Context;
 using Microsoft.AspNetCore.Authorization;
@@ -11,8 +9,10 @@ namespace Api.Controllers.Operational;
 [ApiController]
 [Route("api/stock")]
 [Authorize(Roles = "WarehouseChief,Admin")]
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con Stock.
 public sealed class StockController : ControllerBase
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     private readonly AppDbContext _context;
 
     public StockController(AppDbContext context)
@@ -222,8 +222,10 @@ public sealed class StockController : ControllerBase
             movement.CreatedAt);
 }
 
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con StockMovementRequest.
 public sealed record StockMovementRequest(int PartId, int Quantity, string? Comment);
 
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con StockPartDto.
 public sealed record StockPartDto(
     int Id,
     string Code,
@@ -236,6 +238,7 @@ public sealed record StockPartDto(
     bool IsActive,
     string StockStatus);
 
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con StockMovementDto.
 public sealed record StockMovementDto(
     int Id,
     int PartId,

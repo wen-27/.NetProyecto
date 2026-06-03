@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetOrderStatuses. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;
@@ -8,12 +6,16 @@ using MediatR;
 
 namespace Application.UseCase.OrderStatuses;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetOrderStatusById.
 public sealed record GetOrderStatusById(int Id) : IRequest<OrderStatusDto>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetOrderStatusesPaged.
 public sealed record GetOrderStatusesPaged(int Page = 1, int PageSize = 10, string? Search = null) : IRequest<PagedResult<OrderStatusDto>>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetOrderStatusById.
 public sealed class GetOrderStatusByIdHandler : IRequestHandler<GetOrderStatusById, OrderStatusDto>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IOrderStatusRepository _repository;
 
     public GetOrderStatusByIdHandler(IOrderStatusRepository repository) => _repository = repository;
@@ -25,8 +27,10 @@ public sealed class GetOrderStatusByIdHandler : IRequestHandler<GetOrderStatusBy
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetOrderStatusesPaged.
 public sealed class GetOrderStatusesPagedHandler : IRequestHandler<GetOrderStatusesPaged, PagedResult<OrderStatusDto>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IOrderStatusRepository _repository;
 
     public GetOrderStatusesPagedHandler(IOrderStatusRepository repository) => _repository = repository;

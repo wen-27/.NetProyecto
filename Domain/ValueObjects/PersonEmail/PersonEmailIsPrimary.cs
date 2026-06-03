@@ -1,9 +1,9 @@
-// Responsabilidad: Value Object de dominio para validar y encapsular un valor especifico de PersonEmailIsPrimary, evitando datos invalidos en el resto del sistema.
-// Nota de mantenimiento: Debe mantenerse pequeno, inmutable cuando aplique y enfocado en validar una sola idea del dominio.
 namespace Domain.ValueObjects.PersonEmail;
 
+// Value Object que encapsula y valida un valor especifico de PersonEmailIsPrimary.
 public readonly record struct PersonEmailIsPrimary
 {
+    // La validacion se concentra aqui para impedir que valores invalidos circulen por el dominio.
     public bool Value { get; }
 
     public PersonEmailIsPrimary(bool value)

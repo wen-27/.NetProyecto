@@ -1,11 +1,11 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con UpdateRoleValidator. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using FluentValidation;
 
 namespace Application.UseCase.Roles;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con UpdateRole.
 public sealed class UpdateRoleValidator : AbstractValidator<UpdateRole>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     public UpdateRoleValidator()
     {
         RuleFor(x => x.Id)

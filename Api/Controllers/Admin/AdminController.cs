@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con Admin. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Infrastructure.Context;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,8 +8,10 @@ namespace Api.Controllers.Admin;
 [ApiController]
 [Route("api/admin")]
 [Authorize(Policy = "AdminOnly")]
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con Admin.
 public sealed class AdminController : ControllerBase
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     private readonly AppDbContext _context;
 
     public AdminController(AppDbContext context)
@@ -742,6 +742,7 @@ public sealed class AdminController : ControllerBase
     }
 }
 
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con CreateAdminUserRequest.
 public sealed record CreateAdminUserRequest(
     int DocumentTypeId,
     string DocumentNumber,
@@ -757,5 +758,7 @@ public sealed record CreateAdminUserRequest(
     int? MechanicSpecialtyId,
     bool IsActive);
 
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con ChangeAdminUserStatusRequest.
 public sealed record ChangeAdminUserStatusRequest(bool IsActive);
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con UpdateAdminUserRolesRequest.
 public sealed record UpdateAdminUserRolesRequest(string[]? RoleNames);

@@ -1,14 +1,15 @@
-// Responsabilidad: Configuracion de Entity Framework Core para mapear VehicleBrand a la base de datos: tabla, claves, columnas, relaciones e indices.
-// Nota de mantenimiento: Cambios aqui pueden modificar el modelo relacional y requerir una migracion.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Configurations.VehicleBrand;
 
+// Configuracion de EF Core que mapea VehicleBrand a tablas, columnas, relaciones e indices.
 public class VehicleBrandConfiguration : IEntityTypeConfiguration<Domain.Entities.VehicleBrand>
 {
+    // La configuracion define como EF Core traduce la entidad al esquema relacional.
     public void Configure(EntityTypeBuilder<Domain.Entities.VehicleBrand> entity)
     {
+        // A partir de aqui se declaran tabla, clave primaria, columnas, restricciones y relaciones de la entidad.
         entity.ToTable("VehicleBrands");
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("BrandId");

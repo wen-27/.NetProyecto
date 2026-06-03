@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con BaseApi. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,8 +7,10 @@ namespace Api.Controllers;
 [Authorize(Policy = "InternalStaff")]
 [ApiController]
 [Route("api/[controller]")]
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con BaseApi.
 public abstract class BaseApiController : ControllerBase
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     protected BaseApiController(ISender sender)
     {
         Sender = sender;

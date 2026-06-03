@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con Auth. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Api.DTOs.Auth;
 using Api.Security;
 using Domain.Entities;
@@ -13,8 +11,10 @@ namespace Api.Controllers.Auth;
 [ApiController]
 [Route("api/[controller]")]
 [AllowAnonymous]
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con Auth.
 public sealed class AuthController : ControllerBase
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     private const string ClientRoleName = "Client";
     private static readonly HashSet<string> DevelopmentSeedPasswords = new(StringComparer.Ordinal)
     {

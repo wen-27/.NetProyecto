@@ -1,12 +1,12 @@
-// Responsabilidad: Middleware de ASP.NET Core que participa en la tuberia HTTP para manejar una preocupacion transversal antes o despues del controlador.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Application.Common.Exceptions;
 using FluentValidation;
 
 namespace Api.Middleware;
 
+// Middleware que se ejecuta dentro de la tuberia HTTP para aplicar una preocupacion transversal.
 public sealed class ExceptionHandlingMiddleware
 {
+    // El contenido de este tipo se mantiene agrupado alrededor de una unica responsabilidad.
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 

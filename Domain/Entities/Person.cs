@@ -1,11 +1,11 @@
-// Responsabilidad: Entidad de dominio Person; representa datos y relaciones principales del taller dentro del modelo de negocio.
-// Nota de mantenimiento: Cambios aqui pueden requerir revisar configuraciones EF Core, migraciones y seeders.
 using Domain.Common;
 
 namespace Domain.Entities;
 
+// Entidad de dominio que representa Person dentro del modelo principal del taller.
 public class Person : BaseEntity
 {
+    // Las propiedades describen el estado persistido; las colecciones representan relaciones navegables del dominio.
     public int DocumentTypeId { get; set; }
     public string DocumentNumber { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;

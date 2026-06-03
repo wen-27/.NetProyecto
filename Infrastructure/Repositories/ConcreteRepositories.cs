@@ -1,5 +1,3 @@
-// Responsabilidad: Implementacion de repositorio para persistencia y consultas de ConcreteRepositories; encapsula acceso a DbContext y detalles de EF Core.
-// Nota de mantenimiento: Debe evitar reglas de negocio; su responsabilidad principal es consultar y persistir datos.
 using Application.Abstractions;
 using Domain.Entities;
 using Domain.ValueObjects.Audit;
@@ -25,34 +23,58 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class AuditRepository : GenericRepository<Audit>, IAuditRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public AuditRepository(AppDbContext context) : base(context) { }
     public Task<IReadOnlyList<Audit>> GetByUserIdAsync(AuditUserId userId, CancellationToken ct = default) => ListByAsync(nameof(Audit.UserId), userId, ct);
     public Task<IReadOnlyList<Audit>> GetByAffectedEntityAsync(AuditAffectedEntity affectedEntity, CancellationToken ct = default) => ListByAsync(nameof(Audit.AffectedEntity), affectedEntity, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class AuditActionTypeRepository : GenericRepository<AuditActionType>, IAuditActionTypeRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public AuditActionTypeRepository(AppDbContext context) : base(context) { }
     public Task<AuditActionType?> GetByNameAsync(AuditActionTypeName name, CancellationToken ct = default) => FirstByAsync(nameof(AuditActionType.Name), name, ct);
     public Task<bool> ExistsNameAsync(AuditActionTypeName name, CancellationToken ct = default) => ExistsByAsync(nameof(AuditActionType.Name), name, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class CardTypeRepository : GenericRepository<CardType>, ICardTypeRepository { public CardTypeRepository(AppDbContext context) : base(context) { } }
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class CityRepository : GenericRepository<City>, ICityRepository { public CityRepository(AppDbContext context) : base(context) { } }
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class DepartmentRepository : GenericRepository<Department>, IDepartmentRepository { public DepartmentRepository(AppDbContext context) : base(context) { } }
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class InvoiceStatusRepository : GenericRepository<InvoiceStatus>, IInvoiceStatusRepository { public InvoiceStatusRepository(AppDbContext context) : base(context) { } }
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class OrderStatusHistoryRepository : GenericRepository<OrderStatusHistory>, IOrderStatusHistoryRepository { public OrderStatusHistoryRepository(AppDbContext context) : base(context) { } }
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class PartBrandRepository : GenericRepository<PartBrand>, IPartBrandRepository { public PartBrandRepository(AppDbContext context) : base(context) { } }
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class PartPurchaseRepository : GenericRepository<PartPurchase>, IPartPurchaseRepository { public PartPurchaseRepository(AppDbContext context) : base(context) { } }
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class PartPurchaseDetailRepository : GenericRepository<PartPurchaseDetail>, IPartPurchaseDetailRepository { public PartPurchaseDetailRepository(AppDbContext context) : base(context) { } }
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class PaymentRepository : GenericRepository<Payment>, IPaymentRepository { public PaymentRepository(AppDbContext context) : base(context) { } }
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class PaymentCardRepository : GenericRepository<PaymentCard>, IPaymentCardRepository { public PaymentCardRepository(AppDbContext context) : base(context) { } }
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class PaymentMethodRepository : GenericRepository<PaymentMethod>, IPaymentMethodRepository { public PaymentMethodRepository(AppDbContext context) : base(context) { } }
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class PaymentStatusRepository : GenericRepository<PaymentStatus>, IPaymentStatusRepository { public PaymentStatusRepository(AppDbContext context) : base(context) { } }
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class PersonRepository : GenericRepository<Person>, IPersonRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public PersonRepository(AppDbContext context) : base(context) { }
 
     public Task<bool> HasActiveServiceOrdersAsCurrentOwnerAsync(int personId, CancellationToken ct = default)
@@ -80,11 +102,16 @@ public sealed class PersonRepository : GenericRepository<Person>, IPersonReposit
                 assignment.OrderService.ServiceOrder.OrderStatus.Name != "Voided", ct);
     }
 }
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class SupplierRepository : GenericRepository<Supplier>, ISupplierRepository { public SupplierRepository(AppDbContext context) : base(context) { } }
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class VehicleTypeRepository : GenericRepository<VehicleType>, IVehicleTypeRepository { public VehicleTypeRepository(AppDbContext context) : base(context) { } }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class MechanicAssignmentRepository : GenericRepository<MechanicAssignment>, IMechanicAssignmentRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public MechanicAssignmentRepository(AppDbContext context) : base(context) { }
 
     public async Task<bool> HasActiveAssignmentAsync(int mechanicPersonId, int orderServiceId, CancellationToken ct = default)
@@ -113,8 +140,10 @@ public sealed class MechanicAssignmentRepository : GenericRepository<MechanicAss
     }
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class DocumentTypeRepository : GenericRepository<DocumentType>, IDocumentTypeRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public DocumentTypeRepository(AppDbContext context) : base(context) { }
     public Task<DocumentType?> GetByCodeAsync(DocumentTypeCode code, CancellationToken ct = default) => FirstByAsync(nameof(DocumentType.Code), code, ct);
     public Task<DocumentType?> GetByNameAsync(DocumentTypeName name, CancellationToken ct = default) => FirstByAsync(nameof(DocumentType.Name), name, ct);
@@ -122,49 +151,63 @@ public sealed class DocumentTypeRepository : GenericRepository<DocumentType>, ID
     public Task<bool> ExistsNameAsync(DocumentTypeName name, CancellationToken ct = default) => ExistsByAsync(nameof(DocumentType.Name), name, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class EmailDomainRepository : GenericRepository<EmailDomain>, IEmailDomainRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public EmailDomainRepository(AppDbContext context) : base(context) { }
     public Task<EmailDomain?> GetByDomainAsync(EmailDomainValue domain, CancellationToken ct = default) => FirstByAsync(nameof(EmailDomain.Domain), domain, ct);
     public Task<bool> ExistsDomainAsync(EmailDomainValue domain, CancellationToken ct = default) => ExistsByAsync(nameof(EmailDomain.Domain), domain, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class InvoiceRepository : GenericRepository<Invoice>, IInvoiceRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public InvoiceRepository(AppDbContext context) : base(context) { }
     public Task<Invoice?> GetByServiceOrderIdAsync(InvoiceServiceOrderId serviceOrderId, CancellationToken ct = default) => FirstByAsync(nameof(Invoice.ServiceOrderId), serviceOrderId, ct);
     public Task<bool> ExistsServiceOrderIdAsync(InvoiceServiceOrderId serviceOrderId, CancellationToken ct = default) => ExistsByAsync(nameof(Invoice.ServiceOrderId), serviceOrderId, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class InvoiceDetailRepository : GenericRepository<InvoiceDetail>, IInvoiceDetailRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public InvoiceDetailRepository(AppDbContext context) : base(context) { }
     public Task<IReadOnlyList<InvoiceDetail>> GetByInvoiceIdAsync(InvoiceDetailInvoiceId invoiceId, CancellationToken ct = default) => ListByAsync(nameof(InvoiceDetail.InvoiceId), invoiceId, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class OrderServiceRepository : GenericRepository<OrderService>, IOrderServiceRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public OrderServiceRepository(AppDbContext context) : base(context) { }
     public Task<IReadOnlyList<OrderService>> GetByServiceOrderIdAsync(int serviceOrderId, CancellationToken ct = default) => ListByAsync(nameof(OrderService.ServiceOrderId), serviceOrderId, ct);
     public Task<bool> ExistsServiceOrderAndServiceTypeAsync(int serviceOrderId, int serviceTypeId, CancellationToken ct = default) => ExistsByAsync(nameof(OrderService.ServiceOrderId), serviceOrderId, nameof(OrderService.ServiceTypeId), serviceTypeId, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class OrderServicePartRepository : GenericRepository<OrderServicePart>, IOrderServicePartRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public OrderServicePartRepository(AppDbContext context) : base(context) { }
     public Task<IReadOnlyList<OrderServicePart>> GetByOrderServiceIdAsync(int orderServiceId, CancellationToken ct = default) => ListByAsync(nameof(OrderServicePart.OrderServiceId), orderServiceId, ct);
     public Task<bool> ExistsOrderServiceAndPartAsync(int orderServiceId, int partId, CancellationToken ct = default) => ExistsByAsync(nameof(OrderServicePart.OrderServiceId), orderServiceId, nameof(OrderServicePart.PartId), partId, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class OrderStatusRepository : GenericRepository<OrderStatus>, IOrderStatusRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public OrderStatusRepository(AppDbContext context) : base(context) { }
     public Task<OrderStatus?> GetByNameAsync(OrderStatusName name, CancellationToken ct = default) => FirstByAsync(nameof(OrderStatus.Name), name, ct);
     public Task<bool> ExistsNameAsync(OrderStatusName name, CancellationToken ct = default) => ExistsByAsync(nameof(OrderStatus.Name), name, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class PartRepository : GenericRepository<Part>, IPartRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public PartRepository(AppDbContext context) : base(context) { }
     public Task<Part?> GetByCodeAsync(PartCode code, CancellationToken ct = default) => FirstByAsync(nameof(Part.Code), code, ct);
     public Task<IReadOnlyList<Part>> GetByCategoryIdAsync(PartCategoryId categoryId, CancellationToken ct = default) => ListByAsync(nameof(Part.PartCategoryId), categoryId, ct);
@@ -172,38 +215,48 @@ public sealed class PartRepository : GenericRepository<Part>, IPartRepository
     public Task<bool> ExistsCodeAsync(PartCode code, CancellationToken ct = default) => ExistsByAsync(nameof(Part.Code), code, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class PartCategoryRepository : GenericRepository<PartCategory>, IPartCategoryRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public PartCategoryRepository(AppDbContext context) : base(context) { }
     public Task<PartCategory?> GetByNameAsync(PartCategoryName name, CancellationToken ct = default) => FirstByAsync(nameof(PartCategory.Name), name, ct);
     public Task<bool> ExistsNameAsync(PartCategoryName name, CancellationToken ct = default) => ExistsByAsync(nameof(PartCategory.Name), name, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class PersonEmailRepository : GenericRepository<PersonEmail>, IPersonEmailRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public PersonEmailRepository(AppDbContext context) : base(context) { }
     public Task<PersonEmail?> GetByEmailAsync(PersonEmailUser emailUser, PersonEmailDomainId emailDomainId, CancellationToken ct = default) => FirstByAsync(nameof(PersonEmail.EmailUser), emailUser, nameof(PersonEmail.EmailDomainId), emailDomainId, ct);
     public Task<IReadOnlyList<PersonEmail>> GetByPersonIdAsync(PersonEmailPersonId personId, CancellationToken ct = default) => ListByAsync(nameof(PersonEmail.PersonId), personId, ct);
     public Task<bool> ExistsEmailAsync(PersonEmailUser emailUser, PersonEmailDomainId emailDomainId, CancellationToken ct = default) => ExistsByAsync(nameof(PersonEmail.EmailUser), emailUser, nameof(PersonEmail.EmailDomainId), emailDomainId, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class PersonPhoneRepository : GenericRepository<PersonPhone>, IPersonPhoneRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public PersonPhoneRepository(AppDbContext context) : base(context) { }
     public Task<PersonPhone?> GetByPhoneAsync(PersonPhoneCountryId countryId, PersonPhoneNumber phoneNumber, CancellationToken ct = default) => FirstByAsync(nameof(PersonPhone.CountryId), countryId, nameof(PersonPhone.PhoneNumber), phoneNumber, ct);
     public Task<IReadOnlyList<PersonPhone>> GetByPersonIdAsync(PersonPhonePersonId personId, CancellationToken ct = default) => ListByAsync(nameof(PersonPhone.PersonId), personId, ct);
     public Task<bool> ExistsPhoneAsync(PersonPhoneCountryId countryId, PersonPhoneNumber phoneNumber, CancellationToken ct = default) => ExistsByAsync(nameof(PersonPhone.CountryId), countryId, nameof(PersonPhone.PhoneNumber), phoneNumber, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class RoleRepository : GenericRepository<Role>, IRoleRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public RoleRepository(AppDbContext context) : base(context) { }
     public Task<Role?> GetByNameAsync(RoleName name, CancellationToken ct = default) => FirstByAsync(nameof(Role.RoleName), name, ct);
     public Task<bool> ExistsNameAsync(RoleName name, CancellationToken ct = default) => ExistsByAsync(nameof(Role.RoleName), name, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class ServiceOrderRepository : GenericRepository<ServiceOrder>, IServiceOrderRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public ServiceOrderRepository(AppDbContext context) : base(context) { }
     public new Task<ServiceOrder?> GetByIdAsync(int id, CancellationToken ct = default)
     {
@@ -338,22 +391,28 @@ public sealed class ServiceOrderRepository : GenericRepository<ServiceOrder>, IS
     }
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class ServiceTypeRepository : GenericRepository<ServiceType>, IServiceTypeRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public ServiceTypeRepository(AppDbContext context) : base(context) { }
     public Task<ServiceType?> GetByNameAsync(ServiceTypeName name, CancellationToken ct = default) => FirstByAsync(nameof(ServiceType.Name), name, ct);
     public Task<bool> ExistsNameAsync(ServiceTypeName name, CancellationToken ct = default) => ExistsByAsync(nameof(ServiceType.Name), name, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class UserRepository : GenericRepository<User>, IUserRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public UserRepository(AppDbContext context) : base(context) { }
     public Task<User?> GetByPersonIdAsync(UserPersonId personId, CancellationToken ct = default) => FirstByAsync(nameof(User.PersonId), personId, ct);
     public Task<bool> ExistsPersonIdAsync(UserPersonId personId, CancellationToken ct = default) => ExistsByAsync(nameof(User.PersonId), personId, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class UserRoleRepository : IUserRoleRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     private readonly AppDbContext _context;
 
     public UserRoleRepository(AppDbContext context)
@@ -414,15 +473,19 @@ public sealed class UserRoleRepository : IUserRoleRepository
     }
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class VehicleBrandRepository : GenericRepository<VehicleBrand>, IVehicleBrandRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public VehicleBrandRepository(AppDbContext context) : base(context) { }
     public Task<VehicleBrand?> GetByNameAsync(VehicleBrandName name, CancellationToken ct = default) => FirstByAsync(nameof(VehicleBrand.BrandName), name, ct);
     public Task<bool> ExistsNameAsync(VehicleBrandName name, CancellationToken ct = default) => ExistsByAsync(nameof(VehicleBrand.BrandName), name, ct);
 }
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class VehicleModelRepository : GenericRepository<VehicleModel>, IVehicleModelRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     public VehicleModelRepository(AppDbContext context) : base(context) { }
     public Task<VehicleModel?> GetByBrandAndNameAsync(VehicleModelBrandId brandId, VehicleModelName name, CancellationToken ct = default) => FirstByAsync(nameof(VehicleModel.BrandId), brandId, nameof(VehicleModel.ModelName), name, ct);
     public Task<IReadOnlyList<VehicleModel>> GetByBrandIdAsync(VehicleModelBrandId brandId, CancellationToken ct = default) => ListByAsync(nameof(VehicleModel.BrandId), brandId, ct);

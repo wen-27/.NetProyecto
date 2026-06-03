@@ -1,11 +1,11 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con CreateUserValidator. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using FluentValidation;
 
 namespace Application.UseCase.Users;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con CreateUser.
 public sealed class CreateUserValidator : AbstractValidator<CreateUser>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     public CreateUserValidator()
     {
         RuleFor(x => x.PersonId).GreaterThan(0).WithMessage("El identificador de la persona debe ser mayor que cero.");

@@ -1,5 +1,3 @@
-// Responsabilidad: Implementacion de repositorio para persistencia y consultas de VehicleRepository; encapsula acceso a DbContext y detalles de EF Core.
-// Nota de mantenimiento: Debe evitar reglas de negocio; su responsabilidad principal es consultar y persistir datos.
 using Application.Abstractions;
 using Domain.Entities;
 using Domain.ValueObjects.Vehicle;
@@ -8,8 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories.Vehicles;
 
+// Repositorio que encapsula consultas y persistencia de datos usando EF Core.
 public sealed class VehicleRepository : IVehicleRepository
 {
+    // Los metodos de repositorio deben enfocarse en acceso a datos y evitar reglas de negocio.
     private readonly AppDbContext _context;
 
     public VehicleRepository(AppDbContext context)

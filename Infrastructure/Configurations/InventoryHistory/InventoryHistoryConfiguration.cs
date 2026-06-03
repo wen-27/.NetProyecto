@@ -1,14 +1,15 @@
-// Responsabilidad: Configuracion de Entity Framework Core para mapear InventoryHistory a la base de datos: tabla, claves, columnas, relaciones e indices.
-// Nota de mantenimiento: Cambios aqui pueden modificar el modelo relacional y requerir una migracion.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Configurations.InventoryHistory;
 
+// Configuracion de EF Core que mapea InventoryHistory a tablas, columnas, relaciones e indices.
 public class InventoryHistoryConfiguration : IEntityTypeConfiguration<Domain.Entities.InventoryHistory>
 {
+    // La configuracion define como EF Core traduce la entidad al esquema relacional.
     public void Configure(EntityTypeBuilder<Domain.Entities.InventoryHistory> entity)
     {
+        // A partir de aqui se declaran tabla, clave primaria, columnas, restricciones y relaciones de la entidad.
         entity.ToTable("InventoryHistory");
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("InventoryHistoryId");

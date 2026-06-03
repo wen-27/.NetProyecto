@@ -1,5 +1,3 @@
-// Responsabilidad: Servicio de Infrastructure que implementa flujos de negocio con acceso a persistencia y dependencias tecnicas.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Application.Abstractions.OperationalWorkflow;
 using Application.DTOs;
 using Domain.Entities;
@@ -10,8 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
+// Servicio de Infrastructure que implementa flujos tecnicos y persistencia de procesos operativos.
 public sealed class OperationalWorkflowService : IOperationalWorkflowService
 {
+    // Este servicio orquesta pasos de negocio que necesitan persistencia y varias entidades relacionadas.
     private readonly AppDbContext _context;
 
     public OperationalWorkflowService(AppDbContext context)

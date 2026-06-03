@@ -1,9 +1,9 @@
-// Responsabilidad: Extension de configuracion usada para mantener Program.cs legible y centralizar registro de servicios o politicas de la API.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 namespace Api.Extensions;
 
+// Extension que agrupa configuracion de servicios para mantener Program.cs mas claro.
 public static class CorsServiceExtensions
 {
+    // El contenido de este tipo se mantiene agrupado alrededor de una unica responsabilidad.
     public const string PolicyName = "AutoTallerCors";
 
     public static IServiceCollection AddCorsService(this IServiceCollection services, IConfiguration configuration)

@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con MechanicAssignments. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Api.DTOs.MechanicAssignments;
 using Application.UseCase.CommonCrud;
 using Application.UseCase.MechanicAssignments;
@@ -11,8 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.MechanicAssignments;
 
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con MechanicAssignments.
 public sealed class MechanicAssignmentsController : BaseApiController
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     public MechanicAssignmentsController(ISender sender) : base(sender) { }
 
     [HttpGet]

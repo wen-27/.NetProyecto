@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetAuditActionTypes. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;
@@ -8,12 +6,16 @@ using MediatR;
 
 namespace Application.UseCase.AuditActionTypes;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetAuditActionTypeById.
 public sealed record GetAuditActionTypeById(int Id) : IRequest<AuditActionTypeDto>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetAuditActionTypesPaged.
 public sealed record GetAuditActionTypesPaged(int Page = 1, int PageSize = 10, string? Search = null) : IRequest<PagedResult<AuditActionTypeDto>>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetAuditActionTypeById.
 public sealed class GetAuditActionTypeByIdHandler : IRequestHandler<GetAuditActionTypeById, AuditActionTypeDto>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IAuditActionTypeRepository _repository;
 
     public GetAuditActionTypeByIdHandler(IAuditActionTypeRepository repository) => _repository = repository;
@@ -25,8 +27,10 @@ public sealed class GetAuditActionTypeByIdHandler : IRequestHandler<GetAuditActi
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetAuditActionTypesPaged.
 public sealed class GetAuditActionTypesPagedHandler : IRequestHandler<GetAuditActionTypesPaged, PagedResult<AuditActionTypeDto>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IAuditActionTypeRepository _repository;
 
     public GetAuditActionTypesPagedHandler(IAuditActionTypeRepository repository) => _repository = repository;

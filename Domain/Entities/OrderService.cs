@@ -1,12 +1,12 @@
-// Responsabilidad: Entidad de dominio OrderService; representa datos y relaciones principales del taller dentro del modelo de negocio.
-// Nota de mantenimiento: Cambios aqui pueden requerir revisar configuraciones EF Core, migraciones y seeders.
 using Domain.Common;
 using Domain.Enums;
 
 namespace Domain.Entities;
 
+// Entidad de dominio que representa OrderService dentro del modelo principal del taller.
 public class OrderService : BaseEntity
 {
+    // Las propiedades describen el estado persistido; las colecciones representan relaciones navegables del dominio.
     public int ServiceOrderId { get; set; }
     public int ServiceTypeId { get; set; }
     public int? WorkshopServiceId { get; set; }

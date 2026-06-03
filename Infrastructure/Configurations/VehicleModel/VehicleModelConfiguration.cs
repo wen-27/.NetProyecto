@@ -1,14 +1,15 @@
-// Responsabilidad: Configuracion de Entity Framework Core para mapear VehicleModel a la base de datos: tabla, claves, columnas, relaciones e indices.
-// Nota de mantenimiento: Cambios aqui pueden modificar el modelo relacional y requerir una migracion.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Configurations.VehicleModel;
 
+// Configuracion de EF Core que mapea VehicleModel a tablas, columnas, relaciones e indices.
 public class VehicleModelConfiguration : IEntityTypeConfiguration<Domain.Entities.VehicleModel>
 {
+    // La configuracion define como EF Core traduce la entidad al esquema relacional.
     public void Configure(EntityTypeBuilder<Domain.Entities.VehicleModel> entity)
     {
+        // A partir de aqui se declaran tabla, clave primaria, columnas, restricciones y relaciones de la entidad.
         entity.ToTable("VehicleModels");
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("ModelId");

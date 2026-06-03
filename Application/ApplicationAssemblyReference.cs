@@ -1,7 +1,7 @@
-// Responsabilidad: Archivo de backend ApplicationAssemblyReference; forma parte de la capa Application y participa en la estructura general de la aplicacion.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 namespace Application;
 
+// Tipo de backend que concentra una responsabilidad concreta dentro de la solucion.
 public sealed class ApplicationAssemblyReference
 {
+    // El contenido de este tipo se mantiene agrupado alrededor de una unica responsabilidad.
 }

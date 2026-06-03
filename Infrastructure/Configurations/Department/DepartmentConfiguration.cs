@@ -1,14 +1,15 @@
-// Responsabilidad: Configuracion de Entity Framework Core para mapear Department a la base de datos: tabla, claves, columnas, relaciones e indices.
-// Nota de mantenimiento: Cambios aqui pueden modificar el modelo relacional y requerir una migracion.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Configurations.Department;
 
+// Configuracion de EF Core que mapea Department a tablas, columnas, relaciones e indices.
 public class DepartmentConfiguration : IEntityTypeConfiguration<Domain.Entities.Department>
 {
+    // La configuracion define como EF Core traduce la entidad al esquema relacional.
     public void Configure(EntityTypeBuilder<Domain.Entities.Department> entity)
     {
+        // A partir de aqui se declaran tabla, clave primaria, columnas, restricciones y relaciones de la entidad.
         entity.ToTable("Departments");
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("DepartmentId");

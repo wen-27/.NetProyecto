@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con PaymentCards. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Api.Controllers;
 using Application.UseCase.PaymentCards;
 using MediatR;
@@ -7,8 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.PaymentCards;
 
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con PaymentCards.
 public sealed class PaymentCardsController : BaseApiController
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     public PaymentCardsController(ISender sender) : base(sender) { }
 
     [HttpGet]

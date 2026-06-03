@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetCities. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;
@@ -8,19 +6,25 @@ using MediatR;
 
 namespace Application.UseCase.Cities;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetCityById.
 public sealed record GetCityById(int Id) : IRequest<CityDto>;
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetCitiesPaged.
 public sealed record GetCitiesPaged(int Page = 1, int PageSize = 10, string? Search = null) : IRequest<PagedResult<CityDto>>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetCityById.
 public sealed class GetCityByIdHandler : IRequestHandler<GetCityById, CityDto>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly ICityRepository _repository;
     public GetCityByIdHandler(ICityRepository repository) => _repository = repository;
     public async Task<CityDto> Handle(GetCityById request, CancellationToken ct)
         => (await _repository.GetByIdAsync(request.Id, ct))?.ToDto() ?? throw new NotFoundException("Ciudad", request.Id);
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetCitiesPaged.
 public sealed class GetCitiesPagedHandler : IRequestHandler<GetCitiesPaged, PagedResult<CityDto>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly ICityRepository _repository;
     public GetCitiesPagedHandler(ICityRepository repository) => _repository = repository;
     public async Task<PagedResult<CityDto>> Handle(GetCitiesPaged request, CancellationToken ct)

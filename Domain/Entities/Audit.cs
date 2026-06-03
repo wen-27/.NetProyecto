@@ -1,11 +1,11 @@
-// Responsabilidad: Entidad de dominio Audit; representa datos y relaciones principales del taller dentro del modelo de negocio.
-// Nota de mantenimiento: Cambios aqui pueden requerir revisar configuraciones EF Core, migraciones y seeders.
 using Domain.Common;
 
 namespace Domain.Entities;
 
+// Entidad de dominio que representa Audit dentro del modelo principal del taller.
 public class Audit : BaseEntity
 {
+    // Las propiedades describen el estado persistido; las colecciones representan relaciones navegables del dominio.
     public int UserId { get; set; }
     public int AuditActionTypeId { get; set; }
     public string AffectedEntity { get; set; } = string.Empty;

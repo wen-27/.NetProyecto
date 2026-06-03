@@ -1,14 +1,15 @@
-// Responsabilidad: Configuracion de Entity Framework Core para mapear Neighborhood a la base de datos: tabla, claves, columnas, relaciones e indices.
-// Nota de mantenimiento: Cambios aqui pueden modificar el modelo relacional y requerir una migracion.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Configurations.Neighborhood;
 
+// Configuracion de EF Core que mapea Neighborhood a tablas, columnas, relaciones e indices.
 public class NeighborhoodConfiguration : IEntityTypeConfiguration<Domain.Entities.Neighborhood>
 {
+    // La configuracion define como EF Core traduce la entidad al esquema relacional.
     public void Configure(EntityTypeBuilder<Domain.Entities.Neighborhood> entity)
     {
+        // A partir de aqui se declaran tabla, clave primaria, columnas, restricciones y relaciones de la entidad.
         entity.ToTable("Neighborhoods");
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("NeighborhoodId");

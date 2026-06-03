@@ -3,8 +3,10 @@ using Domain.Enums;
 
 namespace Domain.Entities;
 
+// Entidad de dominio que representa WorkshopService dentro del modelo principal del taller.
 public class WorkshopService : BaseEntity
 {
+    // Las propiedades describen el estado persistido; las colecciones representan relaciones navegables del dominio.
     // Nombre comercial del servicio que vera el usuario en catalogos y ordenes.
     public string Name { get; set; } = string.Empty;
 

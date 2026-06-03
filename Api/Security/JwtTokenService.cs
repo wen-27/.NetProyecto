@@ -1,5 +1,3 @@
-// Responsabilidad: Servicio de seguridad encargado de crear o validar elementos relacionados con autenticacion y autorizacion.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -8,8 +6,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Security;
 
+// Componente de seguridad usado por autenticacion/autorizacion dentro de la API.
 public sealed class JwtTokenService
 {
+    // El contenido de este tipo se mantiene agrupado alrededor de una unica responsabilidad.
     private readonly IConfiguration _configuration;
 
     public JwtTokenService(IConfiguration configuration)

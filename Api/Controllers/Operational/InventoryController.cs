@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con Inventory. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Application.Abstractions.OperationalWorkflow;
 using Application.DTOs;
 using Domain.Entities;
@@ -12,8 +10,10 @@ namespace Api.Controllers.Operational;
 
 [Route("api/inventory")]
 [Authorize(Roles = "InventoryManager,Admin")]
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con Inventory.
 public sealed class InventoryController : OperationalControllerBase
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     private readonly IOperationalWorkflowService _workflow;
     private readonly AppDbContext _context;
 
@@ -305,6 +305,7 @@ public sealed class InventoryController : OperationalControllerBase
     }
 }
 
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con InventoryPartRequest.
 public sealed record InventoryPartRequest(
     int PartCategoryId,
     int? PartBrandId,
@@ -314,6 +315,8 @@ public sealed record InventoryPartRequest(
     decimal UnitPrice,
     bool IsActive);
 
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con CatalogNameRequest.
 public sealed record CatalogNameRequest(string Name);
 
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con InventorySupplierRequest.
 public sealed record InventorySupplierRequest(string Name, string? TaxId, string? Phone, string? Email, bool Status);

@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetVehicles. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;
@@ -8,8 +6,10 @@ using MediatR;
 
 namespace Application.UseCase.Vehicles;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetVehicleById.
 public sealed record GetVehicleById(int Id) : IRequest<VehicleDto>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetVehiclesPaged.
 public sealed record GetVehiclesPaged(
     int Page = 1,
     int PageSize = 10,
@@ -17,8 +17,10 @@ public sealed record GetVehiclesPaged(
     string? Vin = null,
     int? ClientPersonId = null) : IRequest<PagedResult<VehicleDto>>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetVehicleById.
 public sealed class GetVehicleByIdHandler : IRequestHandler<GetVehicleById, VehicleDto>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IVehicleRepository _repository;
 
     public GetVehicleByIdHandler(IVehicleRepository repository) => _repository = repository;
@@ -30,8 +32,10 @@ public sealed class GetVehicleByIdHandler : IRequestHandler<GetVehicleById, Vehi
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetVehiclesPaged.
 public sealed class GetVehiclesPagedHandler : IRequestHandler<GetVehiclesPaged, PagedResult<VehicleDto>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IVehicleRepository _repository;
 
     public GetVehiclesPagedHandler(IVehicleRepository repository) => _repository = repository;

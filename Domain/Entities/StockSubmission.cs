@@ -1,12 +1,12 @@
-// Responsabilidad: Entidad de dominio StockSubmission; representa datos y relaciones principales del taller dentro del modelo de negocio.
-// Nota de mantenimiento: Cambios aqui pueden requerir revisar configuraciones EF Core, migraciones y seeders.
 using Domain.Common;
 using Domain.Enums;
 
 namespace Domain.Entities;
 
+// Entidad de dominio que representa StockSubmission dentro del modelo principal del taller.
 public class StockSubmission : BaseEntity
 {
+    // Las propiedades describen el estado persistido; las colecciones representan relaciones navegables del dominio.
     public int WarehouseChiefPersonId { get; set; }
     public int? InventoryManagerPersonId { get; set; }
     public string ProductName { get; set; } = string.Empty;

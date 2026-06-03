@@ -1,5 +1,3 @@
-// Responsabilidad: Seeder de datos iniciales/desarrollo; prepara catalogos, usuarios y escenarios necesarios para probar la API localmente.
-// Nota de mantenimiento: Debe ser idempotente para poder ejecutarse varias veces en desarrollo sin duplicar informacion.
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Enums.OrderStatus;
@@ -10,8 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Seeders;
 
+// Seeder encargado de preparar datos iniciales o escenarios de desarrollo.
 public static class DevelopmentDataSeeder
 {
+    // Las operaciones de seeding deben ser idempotentes para ejecutarse varias veces sin duplicar datos.
     private const string DefaultPassword = "DevPass123!";
 
     public static async Task SeedDevelopmentDataAsync(this IServiceProvider serviceProvider, IConfiguration configuration)
@@ -2182,6 +2182,7 @@ public static class DevelopmentDataSeeder
         return (parts[0], parts[1]);
     }
 
+    // Seeder encargado de preparar datos iniciales o escenarios de desarrollo.
     private sealed record SeedUser(
         string RoleName,
         string Email,
@@ -2191,6 +2192,7 @@ public static class DevelopmentDataSeeder
         string LastName,
         IReadOnlyList<string>? Specialties = null);
 
+    // Seeder encargado de preparar datos iniciales o escenarios de desarrollo.
     private sealed record SeedPart(
         string Code,
         string Description,
@@ -2200,6 +2202,7 @@ public static class DevelopmentDataSeeder
         int MinimumStock,
         decimal UnitPrice);
 
+    // Seeder encargado de preparar datos iniciales o escenarios de desarrollo.
     private sealed record SeedCustomer(
         string Email,
         string Password,
@@ -2213,5 +2216,6 @@ public static class DevelopmentDataSeeder
         DateOnly BirthDate,
         string AddressText);
 
+    // Seeder encargado de preparar datos iniciales o escenarios de desarrollo.
     private sealed record SeedPersonResult(int PersonId, int UserId);
 }

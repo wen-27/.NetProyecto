@@ -1,7 +1,6 @@
-// Responsabilidad: Contrato de datos usado por la API para recibir o responder informacion de InvoiceDetailDtos. Mantiene separada la forma publica del endpoint frente al modelo interno.
-// Nota de mantenimiento: Cambios aqui impactan el contrato consumido por frontend, Swagger y clientes externos.
 namespace Api.DTOs.InvoiceDetails;
 
+// DTO usado para transportar datos de CreateInvoiceDetailRequest entre la API y sus consumidores.
 public sealed record CreateInvoiceDetailRequest(
     int InvoiceId,
     int? SourcePartId,
@@ -11,6 +10,7 @@ public sealed record CreateInvoiceDetailRequest(
     decimal Subtotal,
     string LineType);
 
+// DTO usado para transportar datos de UpdateInvoiceDetailRequest entre la API y sus consumidores.
 public sealed record UpdateInvoiceDetailRequest(
     int? SourcePartId,
     string Concept,
@@ -19,6 +19,7 @@ public sealed record UpdateInvoiceDetailRequest(
     decimal Subtotal,
     string LineType);
 
+// DTO usado para transportar datos de InvoiceDetailResponse entre la API y sus consumidores.
 public sealed record InvoiceDetailResponse(
     int Id,
     int InvoiceId,

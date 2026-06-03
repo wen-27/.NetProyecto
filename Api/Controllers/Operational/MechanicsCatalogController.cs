@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con MechanicsCatalog. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Infrastructure.Context;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,8 +8,10 @@ namespace Api.Controllers.Operational;
 [ApiController]
 [Route("api/mechanics-catalog")]
 [Authorize(Roles = "Admin,WorkshopChief,Mechanic")]
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con MechanicsCatalog.
 public sealed class MechanicsCatalogController : ControllerBase
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     private readonly AppDbContext _dbContext;
 
     public MechanicsCatalogController(AppDbContext dbContext)
@@ -78,7 +78,9 @@ public sealed class MechanicsCatalogController : ControllerBase
         return Ok(mechanics);
     }
 
+    // Controlador encargado de exponer por HTTP las operaciones relacionadas con MechanicSpecialtyCatalogDto.
     private sealed record MechanicSpecialtyCatalogDto(int Id, string Name);
 
+    // Controlador encargado de exponer por HTTP las operaciones relacionadas con MechanicCatalogDto.
     private sealed record MechanicCatalogDto(int PersonId, string FullName, int SpecialtyId, string SpecialtyName);
 }

@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con CreateAuditActionTypeHandler. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Domain.Entities;
 using Domain.ValueObjects.AuditActionType;
@@ -7,8 +5,10 @@ using MediatR;
 
 namespace Application.UseCase.AuditActionTypes;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con CreateAuditActionType.
 public sealed class CreateAuditActionTypeHandler : IRequestHandler<CreateAuditActionType, int>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IAuditActionTypeRepository _auditActionTypes;
     private readonly IUnitOfWork _unitOfWork;
 

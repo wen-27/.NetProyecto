@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con AssignUserRoleHandler. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Domain.Entities;
 using Domain.ValueObjects.UserRole;
@@ -7,8 +5,10 @@ using MediatR;
 
 namespace Application.UseCase.UserRoles;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con AssignUserRole.
 public sealed class AssignUserRoleHandler : IRequestHandler<AssignUserRole>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IUserRoleRepository _userRoles;
     private readonly IUnitOfWork _unitOfWork;
 

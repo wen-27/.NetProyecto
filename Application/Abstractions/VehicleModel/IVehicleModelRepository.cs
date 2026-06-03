@@ -1,12 +1,12 @@
-// Responsabilidad: Contrato de Application que define lo que la capa de negocio necesita de servicios externos o persistencia para IVehicleModelRepository.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Domain.Entities;
 using Domain.ValueObjects.VehicleModel;
 
 namespace Application.Abstractions;
 
+// Contrato que Application usa para depender de una capacidad sin conocer su implementacion.
 public interface IVehicleModelRepository
 {
+    // Las firmas declaradas aqui permiten intercambiar implementaciones sin cambiar los casos de uso que las consumen.
     Task<VehicleModel?> GetByIdAsync(int id, CancellationToken ct = default);
     Task<VehicleModel?> GetByBrandAndNameAsync(VehicleModelBrandId brandId, VehicleModelName name, CancellationToken ct = default);
     Task<IReadOnlyList<VehicleModel>> GetByBrandIdAsync(VehicleModelBrandId brandId, CancellationToken ct = default);

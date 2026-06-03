@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetPersons. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;
@@ -8,12 +6,16 @@ using MediatR;
 
 namespace Application.UseCase.Persons;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetPersonById.
 public sealed record GetPersonById(int Id) : IRequest<PersonDto>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetPersonsPaged.
 public sealed record GetPersonsPaged(int Page = 1, int PageSize = 10, string? Search = null) : IRequest<PagedResult<PersonDto>>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetPersonById.
 public sealed class GetPersonByIdHandler : IRequestHandler<GetPersonById, PersonDto>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IPersonRepository _repository;
 
     public GetPersonByIdHandler(IPersonRepository repository) => _repository = repository;
@@ -25,8 +27,10 @@ public sealed class GetPersonByIdHandler : IRequestHandler<GetPersonById, Person
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetPersonsPaged.
 public sealed class GetPersonsPagedHandler : IRequestHandler<GetPersonsPaged, PagedResult<PersonDto>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IPersonRepository _repository;
 
     public GetPersonsPagedHandler(IPersonRepository repository) => _repository = repository;

@@ -1,5 +1,3 @@
-// Responsabilidad: Archivo de backend DependencyInjection; forma parte de la capa Infrastructure y participa en la estructura general de la aplicacion.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Application.Abstractions;
 using Application.Abstractions.OperationalWorkflow;
 using Infrastructure.Context;
@@ -14,8 +12,10 @@ using System.Reflection;
 
 namespace Infrastructure;
 
+// Tipo de backend que concentra una responsabilidad concreta dentro de la solucion.
 public static class DependencyInjection
 {
+    // El contenido de este tipo se mantiene agrupado alrededor de una unica responsabilidad.
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
         IConfiguration configuration)

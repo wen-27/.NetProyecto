@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetInvoices. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;
@@ -8,12 +6,16 @@ using MediatR;
 
 namespace Application.UseCase.Invoices;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetInvoiceById.
 public sealed record GetInvoiceById(int Id) : IRequest<InvoiceDto>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetInvoicesPaged.
 public sealed record GetInvoicesPaged(int Page = 1, int PageSize = 10, string? Search = null) : IRequest<PagedResult<InvoiceDto>>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetInvoiceById.
 public sealed class GetInvoiceByIdHandler : IRequestHandler<GetInvoiceById, InvoiceDto>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IInvoiceRepository _repository;
 
     public GetInvoiceByIdHandler(IInvoiceRepository repository) => _repository = repository;
@@ -25,8 +27,10 @@ public sealed class GetInvoiceByIdHandler : IRequestHandler<GetInvoiceById, Invo
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetInvoicesPaged.
 public sealed class GetInvoicesPagedHandler : IRequestHandler<GetInvoicesPaged, PagedResult<InvoiceDto>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IInvoiceRepository _repository;
 
     public GetInvoicesPagedHandler(IInvoiceRepository repository) => _repository = repository;

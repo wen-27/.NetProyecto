@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con CreateEmailDomainHandler. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Domain.Entities;
 using Domain.ValueObjects.EmailDomain;
@@ -7,8 +5,10 @@ using MediatR;
 
 namespace Application.UseCase.EmailDomains;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con CreateEmailDomain.
 public sealed class CreateEmailDomainHandler : IRequestHandler<CreateEmailDomain, int>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IEmailDomainRepository _emailDomains;
     private readonly IUnitOfWork _unitOfWork;
 

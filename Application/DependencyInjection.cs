@@ -1,5 +1,3 @@
-// Responsabilidad: Archivo de backend DependencyInjection; forma parte de la capa Application y participa en la estructura general de la aplicacion.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Application.Common;
 using Application.Common.Pagination;
 using Application.UseCase.CommonCrud;
@@ -10,8 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Application;
 
+// Tipo de backend que concentra una responsabilidad concreta dentro de la solucion.
 public static class DependencyInjection
 {
+    // El contenido de este tipo se mantiene agrupado alrededor de una unica responsabilidad.
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         var applicationAssembly = typeof(ApplicationAssemblyReference).Assembly;

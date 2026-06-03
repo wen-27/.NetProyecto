@@ -1,7 +1,8 @@
-// Responsabilidad: Contrato de datos usado por la API para recibir o responder informacion de VehicleTypeDtos. Mantiene separada la forma publica del endpoint frente al modelo interno.
-// Nota de mantenimiento: Cambios aqui impactan el contrato consumido por frontend, Swagger y clientes externos.
 namespace Api.DTOs.VehicleTypes;
 
+// DTO usado para transportar datos de CreateVehicleTypeRequest entre la API y sus consumidores.
 public sealed record CreateVehicleTypeRequest(string Name);
+// DTO usado para transportar datos de UpdateVehicleTypeRequest entre la API y sus consumidores.
 public sealed record UpdateVehicleTypeRequest(string Name);
+// DTO usado para transportar datos de VehicleTypeResponse entre la API y sus consumidores.
 public sealed record VehicleTypeResponse(int Id, string Name);

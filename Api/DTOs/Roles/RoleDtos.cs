@@ -1,6 +1,6 @@
-// Responsabilidad: Contrato de datos usado por la API para recibir o responder informacion de RoleDtos. Mantiene separada la forma publica del endpoint frente al modelo interno.
-// Nota de mantenimiento: Cambios aqui impactan el contrato consumido por frontend, Swagger y clientes externos.
 namespace Api.DTOs.Roles;
 
+// DTO usado para transportar datos de CreateRoleRequest entre la API y sus consumidores.
 public sealed record CreateRoleRequest(string RoleName);
+// DTO usado para transportar datos de RoleResponse entre la API y sus consumidores.
 public sealed record RoleResponse(int Id, string RoleName);

@@ -1,12 +1,12 @@
-// Responsabilidad: Contexto de Entity Framework Core o fabrica de diseno; define el acceso principal a la base de datos y sus DbSet.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
 namespace Infrastructure.Context;
 
+// Contexto o fabrica de EF Core que centraliza la conexion con la base de datos.
 public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {
+    // El contenido de este tipo se mantiene agrupado alrededor de una unica responsabilidad.
     public AppDbContext CreateDbContext(string[] args)
     {
         var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__MySql");

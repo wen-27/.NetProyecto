@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetServiceTypes. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;
@@ -8,12 +6,16 @@ using MediatR;
 
 namespace Application.UseCase.ServiceTypes;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetServiceTypeById.
 public sealed record GetServiceTypeById(int Id) : IRequest<ServiceTypeDto>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetServiceTypesPaged.
 public sealed record GetServiceTypesPaged(int Page = 1, int PageSize = 10, string? Search = null) : IRequest<PagedResult<ServiceTypeDto>>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetServiceTypeById.
 public sealed class GetServiceTypeByIdHandler : IRequestHandler<GetServiceTypeById, ServiceTypeDto>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IServiceTypeRepository _repository;
 
     public GetServiceTypeByIdHandler(IServiceTypeRepository repository) => _repository = repository;
@@ -25,8 +27,10 @@ public sealed class GetServiceTypeByIdHandler : IRequestHandler<GetServiceTypeBy
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetServiceTypesPaged.
 public sealed class GetServiceTypesPagedHandler : IRequestHandler<GetServiceTypesPaged, PagedResult<ServiceTypeDto>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IServiceTypeRepository _repository;
 
     public GetServiceTypesPagedHandler(IServiceTypeRepository repository) => _repository = repository;

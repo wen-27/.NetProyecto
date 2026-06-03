@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con CreateServiceTypeHandler. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Domain.Entities;
 using Domain.ValueObjects.ServiceType;
@@ -7,8 +5,10 @@ using MediatR;
 
 namespace Application.UseCase.ServiceTypes;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con CreateServiceType.
 public sealed class CreateServiceTypeHandler : IRequestHandler<CreateServiceType, int>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IServiceTypeRepository _serviceTypes;
     private readonly IUnitOfWork _unitOfWork;
 

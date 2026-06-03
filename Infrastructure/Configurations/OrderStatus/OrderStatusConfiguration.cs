@@ -1,14 +1,15 @@
-// Responsabilidad: Configuracion de Entity Framework Core para mapear OrderStatus a la base de datos: tabla, claves, columnas, relaciones e indices.
-// Nota de mantenimiento: Cambios aqui pueden modificar el modelo relacional y requerir una migracion.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Configurations.OrderStatus;
 
+// Configuracion de EF Core que mapea OrderStatus a tablas, columnas, relaciones e indices.
 public class OrderStatusConfiguration : IEntityTypeConfiguration<Domain.Entities.OrderStatus>
 {
+    // La configuracion define como EF Core traduce la entidad al esquema relacional.
     public void Configure(EntityTypeBuilder<Domain.Entities.OrderStatus> entity)
     {
+        // A partir de aqui se declaran tabla, clave primaria, columnas, restricciones y relaciones de la entidad.
         entity.ToTable("OrderStatuses");
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("OrderStatusId");

@@ -1,13 +1,13 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con UpdatePartHandler. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Domain.ValueObjects.Part;
 using MediatR;
 
 namespace Application.UseCase.Parts;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con UpdatePart.
 public sealed class UpdatePartHandler : IRequestHandler<UpdatePart>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IPartRepository _parts;
     private readonly IUnitOfWork _unitOfWork;
 

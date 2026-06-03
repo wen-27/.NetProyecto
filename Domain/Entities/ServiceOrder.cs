@@ -1,11 +1,11 @@
-// Responsabilidad: Entidad de dominio ServiceOrder; representa datos y relaciones principales del taller dentro del modelo de negocio.
-// Nota de mantenimiento: Cambios aqui pueden requerir revisar configuraciones EF Core, migraciones y seeders.
 using Domain.Common;
 
 namespace Domain.Entities;
 
+// Entidad de dominio que representa ServiceOrder dentro del modelo principal del taller.
 public class ServiceOrder : BaseEntity
 {
+    // Las propiedades describen el estado persistido; las colecciones representan relaciones navegables del dominio.
     public int VehicleId { get; set; }
     public int OrderStatusId { get; set; }
 

@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con WorkshopServices. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Application.Abstractions.OperationalWorkflow;
 using Application.DTOs;
 using Microsoft.AspNetCore.Authorization;
@@ -8,8 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers.Operational;
 
 [Route("api/workshop-services")]
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con WorkshopServices.
 public sealed class WorkshopServicesController : OperationalControllerBase
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     private readonly IOperationalWorkflowService _workflow;
 
     public WorkshopServicesController(IOperationalWorkflowService workflow)

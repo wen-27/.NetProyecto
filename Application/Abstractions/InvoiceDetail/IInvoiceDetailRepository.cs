@@ -1,12 +1,12 @@
-// Responsabilidad: Contrato de Application que define lo que la capa de negocio necesita de servicios externos o persistencia para IInvoiceDetailRepository.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Domain.Entities;
 using Domain.ValueObjects.InvoiceDetail;
 
 namespace Application.Abstractions;
 
+// Contrato que Application usa para depender de una capacidad sin conocer su implementacion.
 public interface IInvoiceDetailRepository
 {
+    // Las firmas declaradas aqui permiten intercambiar implementaciones sin cambiar los casos de uso que las consumen.
     Task<InvoiceDetail?> GetByIdAsync(int id, CancellationToken ct = default);
     Task<IReadOnlyList<InvoiceDetail>> GetByInvoiceIdAsync(InvoiceDetailInvoiceId invoiceId, CancellationToken ct = default);
     Task<IReadOnlyList<InvoiceDetail>> GetAllAsync(CancellationToken ct = default);

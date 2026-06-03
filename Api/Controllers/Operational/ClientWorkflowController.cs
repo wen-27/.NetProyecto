@@ -1,5 +1,3 @@
-// Responsabilidad: Controlador HTTP que expone endpoints REST relacionados con ClientWorkflow. Coordina validacion de entrada, autorizacion y delega la logica a Application/Infrastructure.
-// Nota de mantenimiento: No debe contener reglas de negocio extensas; esas reglas pertenecen a Application o servicios especializados.
 using Application.Abstractions.OperationalWorkflow;
 using Application.DTOs;
 using Microsoft.AspNetCore.Authorization;
@@ -9,8 +7,10 @@ namespace Api.Controllers.Operational;
 
 [Route("api/client")]
 [Authorize(Roles = "Client,Admin")]
+// Controlador encargado de exponer por HTTP las operaciones relacionadas con ClientWorkflow.
 public sealed class ClientWorkflowController : OperationalControllerBase
 {
+    // Las acciones de este controlador deben delegar reglas de negocio a Application o servicios especializados.
     private readonly IOperationalWorkflowService _workflow;
 
     public ClientWorkflowController(IOperationalWorkflowService workflow)

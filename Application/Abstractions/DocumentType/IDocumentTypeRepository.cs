@@ -1,12 +1,12 @@
-// Responsabilidad: Contrato de Application que define lo que la capa de negocio necesita de servicios externos o persistencia para IDocumentTypeRepository.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Domain.Entities;
 using Domain.ValueObjects.DocumentType;
 
 namespace Application.Abstractions;
 
+// Contrato que Application usa para depender de una capacidad sin conocer su implementacion.
 public interface IDocumentTypeRepository
 {
+    // Las firmas declaradas aqui permiten intercambiar implementaciones sin cambiar los casos de uso que las consumen.
     Task<DocumentType?> GetByIdAsync(int id, CancellationToken ct = default);
     Task<DocumentType?> GetByCodeAsync(DocumentTypeCode code, CancellationToken ct = default);
     Task<DocumentType?> GetByNameAsync(DocumentTypeName name, CancellationToken ct = default);

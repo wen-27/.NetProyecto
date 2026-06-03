@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con CreateUserHandler. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Domain.Entities;
 using Domain.ValueObjects.User;
@@ -7,8 +5,10 @@ using MediatR;
 
 namespace Application.UseCase.Users;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con CreateUser.
 public sealed class CreateUserHandler : IRequestHandler<CreateUser, int>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IUserRepository _users;
     private readonly IUnitOfWork _unitOfWork;
 

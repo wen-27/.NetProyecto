@@ -1,9 +1,9 @@
-// Responsabilidad: Enumeracion de dominio que nombra estados o categorias permitidas para AuditActionKind, evitando literales magicos.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 namespace Domain.Enums.AuditActionType;
 
+// Enumeracion que limita los valores permitidos para AuditActionKind.
 public enum AuditActionKind
 {
+    // Cada valor enum representa una opcion valida que otras capas pueden comparar sin usar numeros o textos sueltos.
     Create = 1,
     Update = 2,
     Delete = 3,

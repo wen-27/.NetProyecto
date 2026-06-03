@@ -1,13 +1,13 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con UpdateVehicleModelHandler. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Domain.ValueObjects.VehicleModel;
 using MediatR;
 
 namespace Application.UseCase.VehicleModels;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con UpdateVehicleModel.
 public sealed class UpdateVehicleModelHandler : IRequestHandler<UpdateVehicleModel>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IVehicleModelRepository _vehicleModels;
     private readonly IUnitOfWork _unitOfWork;
 

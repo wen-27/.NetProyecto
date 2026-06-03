@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetAudits. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Exceptions;
 using Application.Common.Pagination;
@@ -8,12 +6,16 @@ using MediatR;
 
 namespace Application.UseCase.Audits;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetAuditById.
 public sealed record GetAuditById(int Id) : IRequest<AuditDto>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetAuditsPaged.
 public sealed record GetAuditsPaged(int Page = 1, int PageSize = 10, string? Search = null) : IRequest<PagedResult<AuditDto>>;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetAuditById.
 public sealed class GetAuditByIdHandler : IRequestHandler<GetAuditById, AuditDto>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IAuditRepository _repository;
 
     public GetAuditByIdHandler(IAuditRepository repository) => _repository = repository;
@@ -25,8 +27,10 @@ public sealed class GetAuditByIdHandler : IRequestHandler<GetAuditById, AuditDto
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetAuditsPaged.
 public sealed class GetAuditsPagedHandler : IRequestHandler<GetAuditsPaged, PagedResult<AuditDto>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IAuditRepository _repository;
 
     public GetAuditsPagedHandler(IAuditRepository repository) => _repository = repository;

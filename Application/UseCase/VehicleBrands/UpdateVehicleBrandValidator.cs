@@ -1,11 +1,11 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con UpdateVehicleBrandValidator. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using FluentValidation;
 
 namespace Application.UseCase.VehicleBrands;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con UpdateVehicleBrand.
 public sealed class UpdateVehicleBrandValidator : AbstractValidator<UpdateVehicleBrand>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     public UpdateVehicleBrandValidator()
     {
         RuleFor(x => x.Id)

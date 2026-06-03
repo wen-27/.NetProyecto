@@ -1,12 +1,12 @@
-// Responsabilidad: Implementacion de Unit of Work para agrupar cambios de repositorios y confirmar transacciones de persistencia.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Application.Abstractions;
 using Infrastructure.Context;
 
 namespace Infrastructure.UnitOfWork;
 
+// Unit of Work que coordina repositorios y confirma cambios como una unidad logica.
 public class EfUnitOfWork : IUnitOfWork
 {
+    // El contenido de este tipo se mantiene agrupado alrededor de una unica responsabilidad.
     private readonly AppDbContext _dbContext;
 
     public EfUnitOfWork(

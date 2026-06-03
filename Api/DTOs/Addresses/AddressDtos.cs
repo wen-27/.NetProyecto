@@ -1,7 +1,6 @@
-// Responsabilidad: Contrato de datos usado por la API para recibir o responder informacion de AddressDtos. Mantiene separada la forma publica del endpoint frente al modelo interno.
-// Nota de mantenimiento: Cambios aqui impactan el contrato consumido por frontend, Swagger y clientes externos.
 namespace Api.DTOs.Addresses;
 
+// DTO usado para transportar datos de CreateAddressRequest entre la API y sus consumidores.
 public sealed record CreateAddressRequest(
     int NeighborhoodId,
     int StreetTypeId,
@@ -10,6 +9,7 @@ public sealed record CreateAddressRequest(
     string? TertiaryNumber,
     string? Complement);
 
+// DTO usado para transportar datos de UpdateAddressRequest entre la API y sus consumidores.
 public sealed record UpdateAddressRequest(
     int NeighborhoodId,
     int StreetTypeId,
@@ -18,6 +18,7 @@ public sealed record UpdateAddressRequest(
     string? TertiaryNumber,
     string? Complement);
 
+// DTO usado para transportar datos de AddressResponse entre la API y sus consumidores.
 public sealed record AddressResponse(
     int Id,
     int NeighborhoodId,

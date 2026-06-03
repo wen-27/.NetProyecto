@@ -1,5 +1,3 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con GetOrderServices. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using Application.Abstractions;
 using Application.Common.Pagination;
 using Application.UseCase.CommonCrud;
@@ -8,8 +6,10 @@ using MediatR;
 
 namespace Application.UseCase.OrderServices;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetOrderServicesPaged.
 public sealed class GetOrderServicesPagedHandler : IRequestHandler<GetEntitiesPaged<OrderService>, PagedResult<OrderService>>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IOrderServiceRepository _repository;
 
     public GetOrderServicesPagedHandler(IOrderServiceRepository repository) => _repository = repository;
@@ -25,8 +25,10 @@ public sealed class GetOrderServicesPagedHandler : IRequestHandler<GetEntitiesPa
     }
 }
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con GetOrderServiceById.
 public sealed class GetOrderServiceByIdHandler : IRequestHandler<GetEntityById<OrderService>, OrderService>
 {
+    // El flujo debe permanecer enfocado en una sola operacion para facilitar pruebas y mantenimiento.
     private readonly IOrderServiceRepository _repository;
 
     public GetOrderServiceByIdHandler(IOrderServiceRepository repository) => _repository = repository;

@@ -1,12 +1,12 @@
-// Responsabilidad: Contrato de Application que define lo que la capa de negocio necesita de servicios externos o persistencia para IPersonEmailRepository.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Domain.Entities;
 using Domain.ValueObjects.PersonEmail;
 
 namespace Application.Abstractions;
 
+// Contrato que Application usa para depender de una capacidad sin conocer su implementacion.
 public interface IPersonEmailRepository
 {
+    // Las firmas declaradas aqui permiten intercambiar implementaciones sin cambiar los casos de uso que las consumen.
     Task<PersonEmail?> GetByIdAsync(int id, CancellationToken ct = default);
     Task<PersonEmail?> GetByEmailAsync(PersonEmailUser emailUser, PersonEmailDomainId emailDomainId, CancellationToken ct = default);
     Task<IReadOnlyList<PersonEmail>> GetByPersonIdAsync(PersonEmailPersonId personId, CancellationToken ct = default);

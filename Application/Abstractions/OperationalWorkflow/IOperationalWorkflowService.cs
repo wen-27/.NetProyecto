@@ -1,11 +1,11 @@
-// Responsabilidad: Contrato de Application que define lo que la capa de negocio necesita de servicios externos o persistencia para IOperationalWorkflowService.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 using Application.DTOs;
 
 namespace Application.Abstractions.OperationalWorkflow;
 
+// Contrato que Application usa para depender de una capacidad sin conocer su implementacion.
 public interface IOperationalWorkflowService
 {
+    // Las firmas declaradas aqui permiten intercambiar implementaciones sin cambiar los casos de uso que las consumen.
     Task<IReadOnlyList<MechanicOrderDetailDto>> GetMechanicOrdersAsync(int mechanicPersonId, CancellationToken ct);
     Task<MechanicOrderDetailDto> GetMechanicOrderAsync(int mechanicPersonId, int orderId, CancellationToken ct);
     Task<IReadOnlyList<AdditionalRequestResponseDto>> GetMechanicRequestsAsync(int mechanicPersonId, CancellationToken ct);

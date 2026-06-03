@@ -1,11 +1,11 @@
-// Responsabilidad: Entidad de dominio Part; representa datos y relaciones principales del taller dentro del modelo de negocio.
-// Nota de mantenimiento: Cambios aqui pueden requerir revisar configuraciones EF Core, migraciones y seeders.
 using Domain.Common;
 
 namespace Domain.Entities;
 
+// Entidad de dominio que representa Part dentro del modelo principal del taller.
 public class Part : BaseEntity
 {
+    // Las propiedades describen el estado persistido; las colecciones representan relaciones navegables del dominio.
     public int PartCategoryId { get; set; }
     public int? PartBrandId { get; set; }
     public string Code { get; set; } = string.Empty;

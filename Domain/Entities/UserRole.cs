@@ -1,11 +1,11 @@
-// Responsabilidad: Entidad de dominio UserRole; representa datos y relaciones principales del taller dentro del modelo de negocio.
-// Nota de mantenimiento: Cambios aqui pueden requerir revisar configuraciones EF Core, migraciones y seeders.
 using Domain.Common;
 
 namespace Domain.Entities;
 
+// Entidad de dominio que representa UserRole dentro del modelo principal del taller.
 public class UserRole
 {
+    // Las propiedades describen el estado persistido; las colecciones representan relaciones navegables del dominio.
     public int UserId { get; set; }
     public int RoleId { get; set; }
 

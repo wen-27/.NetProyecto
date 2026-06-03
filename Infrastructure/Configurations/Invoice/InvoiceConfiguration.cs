@@ -1,14 +1,15 @@
-// Responsabilidad: Configuracion de Entity Framework Core para mapear Invoice a la base de datos: tabla, claves, columnas, relaciones e indices.
-// Nota de mantenimiento: Cambios aqui pueden modificar el modelo relacional y requerir una migracion.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Configurations.Invoice;
 
+// Configuracion de EF Core que mapea Invoice a tablas, columnas, relaciones e indices.
 public class InvoiceConfiguration : IEntityTypeConfiguration<Domain.Entities.Invoice>
 {
+    // La configuracion define como EF Core traduce la entidad al esquema relacional.
     public void Configure(EntityTypeBuilder<Domain.Entities.Invoice> entity)
     {
+        // A partir de aqui se declaran tabla, clave primaria, columnas, restricciones y relaciones de la entidad.
         entity.ToTable("Invoices");
         entity.HasKey(x => x.Id);
         entity.Property(x => x.Id).HasColumnName("InvoiceId");

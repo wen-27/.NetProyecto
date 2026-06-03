@@ -1,7 +1,6 @@
-// Responsabilidad: Caso de uso de Application para ejecutar una operacion de negocio relacionada con CreateVehicleBrand. Recibe comandos/consultas, aplica validaciones y coordina repositorios.
-// Nota de mantenimiento: Debe mantenerse enfocado en una accion concreta para que sea facil de probar y mantener.
 using MediatR;
 
 namespace Application.UseCase.VehicleBrands;
 
+// Caso de uso que modela una accion o consulta de negocio relacionada con CreateVehicleBrand.
 public sealed record CreateVehicleBrand(string BrandName) : IRequest<int>;

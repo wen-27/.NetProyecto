@@ -1,11 +1,11 @@
-// Responsabilidad: Value Object de dominio para validar y encapsular un valor especifico de AuditDescription, evitando datos invalidos en el resto del sistema.
-// Nota de mantenimiento: Debe mantenerse pequeno, inmutable cuando aplique y enfocado en validar una sola idea del dominio.
 using Domain.ValueObjects;
 
 namespace Domain.ValueObjects.Audit;
 
+// Value Object que encapsula y valida un valor especifico de AuditDescription.
 public readonly record struct AuditDescription
 {
+    // La validacion se concentra aqui para impedir que valores invalidos circulen por el dominio.
     public string? Value { get; }
 
     public AuditDescription(string? value)

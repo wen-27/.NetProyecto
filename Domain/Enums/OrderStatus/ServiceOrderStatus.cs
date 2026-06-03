@@ -1,9 +1,9 @@
-// Responsabilidad: Enumeracion de dominio que nombra estados o categorias permitidas para ServiceOrderStatus, evitando literales magicos.
-// Nota de mantenimiento: Mantener este archivo cohesivo ayuda a que el backend sea mas facil de probar y evolucionar.
 namespace Domain.Enums.OrderStatus;
 
+// Enumeracion que limita los valores permitidos para ServiceOrderStatus.
 public enum ServiceOrderStatus
 {
+    // Cada valor enum representa una opcion valida que otras capas pueden comparar sin usar numeros o textos sueltos.
     Created = 1,
     PendingAssignment = 2,
     Assigned = 3,
